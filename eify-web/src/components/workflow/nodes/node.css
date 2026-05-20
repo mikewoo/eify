@@ -1,0 +1,42 @@
+.wf-node {
+  background: #fff;
+  border: 1.5px solid var(--wf-node-color, #6366f1);
+  border-radius: 8px;
+  padding: 5px 10px;
+  min-width: 120px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wf-node.selected {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+}
+
+.wf-node:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+
+.wf-node-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  background: var(--wf-node-color, #6366f1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.wf-node-label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

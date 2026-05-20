@@ -1,0 +1,495 @@
+/**
+ * Eify 设计系统 - 侧边栏组件样式
+ *
+ * 科技感深色侧边栏，与浅色内容区形成对比
+ */
+
+/* ============================================
+   侧边栏容器
+   ============================================ */
+
+.eify-sidebar {
+  width: 200px;
+  min-width: 180px;
+  max-width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, var(--eify-bg-sidebar) 0%, var(--eify-bg-sidebar-deep) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: width var(--eify-duration-base) var(--eify-ease-default);
+}
+
+.eify-sidebar.collapsed {
+  width: var(--eify-sidebar-width-collapsed);
+  min-width: var(--eify-sidebar-width-collapsed);
+}
+
+.eify-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.3) 50%,
+    transparent 100%
+  );
+}
+
+/* ============================================
+   Logo 区域
+   ============================================ */
+
+.eify-sidebar-logo {
+  position: relative;
+  padding: var(--eify-spacing-6) var(--eify-spacing-4);
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg,
+    rgba(99, 102, 241, 0.05) 0%,
+    transparent 100%
+  );
+}
+
+.eify-sidebar-logo-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  background: var(--eify-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--eify-spacing-1);
+  text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+  animation: eify-logo-glow 3s ease-in-out infinite;
+  white-space: nowrap;
+  transition: var(--eify-transition-base);
+}
+
+.eify-sidebar-logo-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--eify-text-quaternary);
+  text-transform: uppercase;
+}
+
+@keyframes eify-logo-glow {
+  0%, 100% {
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+  }
+}
+
+/* ============================================
+   折叠按钮区域（Logo 下方，靠右对齐）
+   ============================================ */
+
+.eify-sidebar-collapse-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--eify-spacing-3) var(--eify-spacing-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.eify-collapse-btn-tech {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: var(--eify-text-quaternary);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--eify-radius-md);
+  cursor: pointer;
+  transition: var(--eify-transition-base);
+  overflow: hidden;
+}
+
+.eify-collapse-btn-tech::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--eify-gradient-primary);
+  opacity: 0;
+  transition: var(--eify-transition-base);
+}
+
+.eify-collapse-btn-tech:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  transform: scale(1.05);
+}
+
+.eify-collapse-btn-tech:hover::before {
+  opacity: 0.2;
+}
+
+.eify-collapse-btn-tech:active {
+  transform: scale(0.95);
+}
+
+.eify-collapse-icon-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eify-collapse-icon {
+  width: 16px;
+  height: 16px;
+  transition: var(--eify-transition-base);
+}
+
+.eify-collapse-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(45, 212, 191, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: var(--eify-transition-base);
+}
+
+.eify-collapse-btn-tech:hover .eify-collapse-glow {
+  opacity: 1;
+}
+
+/* 折叠状态下的折叠按钮样式调整 */
+.eify-sidebar.collapsed .eify-collapse-btn-tech {
+  width: 32px;
+  height: 32px;
+}
+
+/* ============================================
+   菜单区域
+   ============================================ */
+
+.eify-sidebar-menu {
+  flex: 1;
+  padding: var(--eify-spacing-4) var(--eify-spacing-2);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.eify-sidebar-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.eify-sidebar-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eify-sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--eify-radius-full);
+}
+
+.eify-sidebar-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   菜单项
+   ============================================ */
+
+.eify-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-3);
+  padding: var(--eify-padding-sm);
+  margin-bottom: var(--eify-spacing-1);
+  color: var(--eify-text-quaternary);
+  text-decoration: none;
+  border-radius: var(--eify-radius-sm);
+  transition: var(--eify-transition-base);
+  cursor: pointer;
+}
+
+.eify-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--eify-gradient-primary);
+  border-radius: 0 var(--eify-radius-full) var(--eify-radius-full) 0;
+  transition: var(--eify-transition-base);
+}
+
+.eify-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--eify-text-inverse);
+}
+
+.eify-menu-item.active {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--eify-text-inverse);
+}
+
+.eify-menu-item.active::before {
+  height: 24px;
+}
+
+.eify-menu-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 24px;
+  background: var(--eify-gradient-primary);
+  border-radius: 0 var(--eify-radius-full) var(--eify-radius-full) 0;
+  filter: blur(8px);
+  opacity: 0.5;
+}
+
+/* 菜单项图标 */
+.eify-menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: var(--eify-transition-base);
+  position: relative;
+}
+
+.eify-menu-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+  transition: var(--eify-transition-base);
+  filter: drop-shadow(0 0 0px rgba(99, 102, 241, 0));
+}
+
+/* 图标背景（科技感圆角） */
+.eify-menu-icon::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(139, 92, 246, 0.04) 100%
+  );
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 10px;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: var(--eify-transition-base);
+}
+
+/* 图标背景光晕 */
+.eify-menu-icon::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle at center,
+    rgba(99, 102, 241, 0.15) 0%,
+    transparent 70%
+  );
+  border-radius: 10px;
+  opacity: 0;
+  transition: var(--eify-transition-base);
+}
+
+/* 悬停状态 */
+.eify-menu-item:hover .eify-menu-icon svg {
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+  stroke: var(--eify-primary);
+  transform: scale(1.1);
+}
+
+.eify-menu-item:hover .eify-menu-icon::before {
+  opacity: 1;
+  transform: scale(1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.eify-menu-item:hover .eify-menu-icon::after {
+  opacity: 1;
+}
+
+/* 选中状态 */
+.eify-menu-item.active .eify-menu-icon svg {
+  stroke: url(#icon-gradient-active);
+  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6));
+  transform: scale(1.05);
+}
+
+.eify-menu-item.active .eify-menu-icon::before {
+  opacity: 1;
+  background: linear-gradient(135deg,
+    rgba(99, 102, 241, 0.15) 0%,
+    rgba(139, 92, 246, 0.08) 100%
+  );
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15),
+              inset 0 0 20px rgba(99, 102, 241, 0.03);
+}
+
+.eify-menu-item.active .eify-menu-icon::after {
+  opacity: 0.8;
+}
+
+.eify-menu-item:hover .eify-menu-icon {
+  transform: scale(1.1);
+  color: var(--eify-accent);
+}
+
+.eify-menu-item.active .eify-menu-icon {
+  color: var(--eify-accent);
+}
+
+/* 菜单项文字 */
+.eify-menu-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: var(--eify-transition-base);
+}
+
+.eify-sidebar:not(.collapsed) .eify-menu-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ============================================
+   底部区域
+   ============================================ */
+
+.eify-sidebar-footer {
+  padding: var(--eify-spacing-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(0deg,
+    rgba(99, 102, 241, 0.03) 0%,
+    transparent 100%
+  );
+}
+
+/* 版本信息 */
+.eify-version-info {
+  text-align: center;
+  padding: var(--eify-spacing-3);
+  font-size: 11px;
+  color: var(--eify-text-quaternary);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.eify-version-text {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  opacity: 0.7;
+}
+
+.eify-version-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  margin-top: var(--eify-spacing-1);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--eify-accent);
+  background: rgba(45, 212, 191, 0.1);
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  border-radius: var(--eify-radius-full);
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   折叠状态
+   ============================================ */
+
+.eify-sidebar.collapsed .eify-menu-item {
+  justify-content: center;
+  padding: var(--eify-padding-sm);
+}
+
+.eify-sidebar.collapsed .eify-menu-text {
+  display: none;
+}
+
+.eify-sidebar.collapsed .eify-menu-icon::before,
+.eify-sidebar.collapsed .eify-menu-icon::after {
+  width: 36px;
+  height: 36px;
+}
+
+.eify-sidebar.collapsed .eify-sidebar-logo-title {
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.eify-sidebar.collapsed .eify-sidebar-logo {
+  padding: var(--eify-spacing-4) var(--eify-spacing-2);
+}
+
+.eify-sidebar.collapsed .eify-sidebar-logo-subtitle {
+  display: none;
+}
+
+/* ============================================
+   状态指示灯（可选装饰）
+   ============================================ */
+
+.eify-status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: var(--eify-accent);
+  border-radius: var(--eify-radius-full);
+  box-shadow: 0 0 10px var(--eify-accent);
+  animation: eify-status-pulse 2s ease-in-out infinite;
+}
+
+@keyframes eify-status-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 10px var(--eify-accent);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 5px var(--eify-accent);
+  }
+}
+
+/* ============================================
+   网格背景（可选科技感装饰）
+   ============================================ */
+
+.eify-sidebar-grid-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--eify-transition-slow);
+}
+
+.eify-sidebar:hover .eify-sidebar-grid-bg {
+  opacity: 1;
+}

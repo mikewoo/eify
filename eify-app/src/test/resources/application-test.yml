@@ -1,0 +1,96 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: eify
+
+  # 使用 H2 内存数据库进行测试
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-h2.sql
+      data-locations: classpath:data-h2.sql
+
+  # H2 测试环境不需要 Flyway
+  flyway:
+    enabled: false
+
+  # 禁用 Redis（测试时不需要）
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 1s
+      lettuce:
+        pool:
+          max-active: 1
+
+  # 自动配置排除
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+
+# 日志配置
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.eify: debug
+    com.eify.*.mapper: debug
+
+# 应用配置
+app:
+  version: 1.0.0
+
+# Micrometer Tracing 配置
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # 100% 采样（测试时）
+    enabled: true
+    brave:
+      enabled: true
+    propagation:
+      type: b3
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  type-aliases-package: com.eify.*.domain.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: AUTO
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# ========== 认证配置（测试环境） ==========
+auth:
+  jwt:
+    # ⚠️ 测试环境默认密钥，仅用于单元测试
+    # 任何人可从此公开仓库读取此密钥，严禁用于任何生产环境
+    secret: test-eify-jwt-secret
+
+# ========== 加密配置（测试环境） ==========
+crypto:
+  # ⚠️ 测试环境默认 KEK，仅用于单元测试
+  # 任何人可从此公开仓库读取此密钥，严禁用于任何生产环境
+  kek: dGVzdC1rZXktZm9yLXVuaXQtdGVzdHMtbm90LWZvci1wcm9kdWN0aW9uLTI1Ng==
+
+# ========== 聊天配置（测试环境） ==========
+chat:
+  context:
+    # 最大上下文轮数（测试环境默认 5 轮，加快测试）
+    max-rounds: 5
+  # SSE 超时时间（毫秒）
+  sse-timeout: 60000  # 1 分钟

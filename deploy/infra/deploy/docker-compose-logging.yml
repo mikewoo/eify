@@ -1,0 +1,200 @@
+services:
+  # ==================== MySQL (ClickVisual 后端数据库) ====================
+  mysql:
+    image: mysql:8.0
+    container_name: eify-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:}
+      MYSQL_DATABASE: clickvisual
+      MYSQL_USER: clickvisual
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:}
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    networks:
+      - logging-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ==================== ClickHouse ====================
+  # LTS 版本
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.11.1.2988
+    container_name: eify-clickhouse
+    ports:
+      - "8123:8123"  # HTTP 接口
+      - "9000:9000"  # Native 接口
+      - "9004:9004"  # MySQL 协议接口
+      - "9005:9005"  # PostgreSQL 协议接口
+    environment:
+      CLICKHOUSE_DB: logs
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ../clickhouse/data:/var/lib/clickhouse
+      - ../clickhouse/logs:/var/log/clickhouse-server
+      - ../clickhouse/conf.d:/etc/clickhouse-server/config.d
+      - ../clickhouse/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - logging-net
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==================== ClickVisual ====================
+  # 使用 latest 标签，需要 MySQL 后端数据库
+  clickvisual:
+    image: ghcr.io/clickvisual/clickvisual:latest
+    container_name: eify-clickvisual
+    ports:
+      - "19001:19001"  # Web 界面
+    environment:
+      # ClickVisual 配置
+      - CV_LOG_LEVEL=info
+      # 数据库配置（ClickVisual 自己的后端数据库）
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=clickvisual
+      - MYSQL_USER=clickvisual
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:}
+    volumes:
+      - ../clickvisual/data:/data
+      - ../clickvisual/conf:/config
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - logging-net
+    restart: unless-stopped
+
+  # ==================== Vector (日志采集) ====================
+  # 0.43.1-alpine
+  vector:
+    image: timberio/vector:0.43.1-alpine
+    container_name: eify-vector
+    ports:
+      - "8686:8686"  # Vector API 端口
+    environment:
+      CLICKHOUSE_ENDPOINT: http://clickhouse:8123
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    volumes:
+      # 日志目录挂载
+      - /var/lib/eify/logs:/logs:ro
+      # Vector 配置
+      - ../vector/vector.toml:/etc/vector/vector.toml:ro
+    command: ["--config", "etc/vector/vector.toml"]
+    networks:
+      - logging-net
+    restart: unless-stopped
+    depends_on:
+      - clickhouse
+
+  # ==================== Grafana (可视化) ====================
+  # 11.4.0
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: eify-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:}
+      GF_INSTALL_PLUGINS: "clickhouse-grafana"
+    volumes:
+      - ../grafana/data:/var/lib/grafana
+      - ../grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - logging-net
+    restart: unless-stopped
+    depends_on:
+      - clickhouse
+
+  # ==================== Prometheus (监控) ====================
+  # v2.57.0
+  prometheus:
+    image: prom/prometheus:v2.57.0
+    container_name: eify-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    networks:
+      - logging-net
+    restart: unless-stopped
+
+networks:
+  logging-net:
+    driver: bridge
+
+# ==================== 使用说明 ====================
+#
+# 1. 启动所有服务
+#    docker-compose -f docker-compose-logging.yml up -d
+#
+# 2. 查看 ClickHouse 数据
+#    docker exec -it eify-clickhouse clickhouse-client
+#
+# 3. 访问 ClickVisual
+#    http://localhost:19001
+#
+# 4. 访问 Grafana
+#    http://localhost:3000
+#    默认用户名/密码: admin/admin
+#
+# 5. 查看 Vector 日志
+#    docker logs -f eify-vector
+#
+# 6. 停止所有服务
+#    docker-compose -f docker-compose-logging.yml down
+#
+# 7. 清理数据
+#    docker-compose -f docker-compose-logging.yml down -v
+#
+# ==================== 配置说明 ====================
+#
+# ClickHouse 默认配置:
+#   - HTTP 端口: 8123
+#   - Native 端口: 9000
+#   - 数据库: logs
+#   - 用户: default
+#   - 密码: (空)
+#
+# ClickVisual 默认配置:
+#   - Web 端口: 19001
+#   - 首次访问需要配置数据源
+#
+# Vector 配置:
+#   - API 端口: 8686
+#   - 配置文件: ../vector/vector.toml
+#   - 日志目录: /var/lib/eify/logs
+#
+# ==================== 日志采集流程 ====================
+#
+# 应用日志 (JSON 格式)
+#     ↓
+# Vector (采集 + 解析 + 转换)
+#     ↓
+# ClickHouse (存储)
+#     ↓
+# ClickVisual (查询 + 可视化 + 告警)
+#     ↓
+# Grafana (仪表盘 + 监控)

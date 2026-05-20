@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.eify</groupId>
+        <artifactId>eify-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>eify-workflow</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Eify Workflow</name>
+    <description>工作流编排与执行 - JSON 配置，线性 + 条件分支</description>
+
+    <dependencies>
+        <!-- 项目内部依赖 -->
+        <dependency>
+            <groupId>com.eify</groupId>
+            <artifactId>eify-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.eify</groupId>
+            <artifactId>eify-auth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.eify</groupId>
+            <artifactId>eify-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.eify</groupId>
+            <artifactId>eify-mcp</artifactId>
+        </dependency>
+
+        <!-- Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- MyBatis-Plus -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- GraalVM JS 脚本引擎 (JSR 223) — 可选依赖
+             UCL + GPL 链接例外许可证，如有法务顾虑可移除。
+             移除后代码节点回退到仅支持字符串字面量，不影响工作流核心功能。
+             如需 JS 脚本能力，取消下方 <optional>true</optional> 即可。 -->
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>js</artifactId>
+            <type>pom</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,9 @@
+<clickhouse>
+  <users>
+    <default>
+      <settings>
+        <timezone>Asia/Shanghai</timezone>
+      </settings>
+    </default>
+  </users>
+</clickhouse>

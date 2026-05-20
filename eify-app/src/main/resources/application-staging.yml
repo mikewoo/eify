@@ -1,0 +1,118 @@
+# ============================================================
+# Eify - Staging 环境配置（CCE Turbo K8s 预发布环境）
+# ============================================================
+# ⚠️ 安全须知:
+#   - 所有敏感值必须通过 K8s Secret 环境变量注入
+#   - 此文件不包含任何硬编码密钥、密码或 API Key
+#   - 环境变量缺失时 Spring Boot 启动即报错，确保凭据正确注入
+# ============================================================
+
+server:
+  # Staging与 prod 一致，启用压缩
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  datasource:
+    druid:
+      # Staging连接池：介于 dev(30) 和 prod(50) 之间
+      initial-size: 10
+      min-idle: 10
+      max-active: 40
+      max-wait: 30000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: false
+      keep-alive: true
+      # Staging启用 Druid 监控面板（需 basic auth）
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: ${DRUID_PASSWORD:}
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=1000
+
+  flyway:
+    enabled: true
+    # Staging不开 repair-on-migrate，防止误修复生产数据
+
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 300
+          max-idle: 30
+          min-idle: 5
+
+# ========== Staging日志：比 prod 详细，便于排查 ==========
+logging:
+  level:
+    com.eify: INFO
+    com.eify.*.mapper: INFO
+    org.mybatis: INFO
+    com.baomidou.mybatisplus: INFO
+
+# ========== Micrometer Tracing：50% 采样 ==========
+management:
+  tracing:
+    sampling:
+      probability: 0.5
+  opentelemetry:
+    tracing:
+      sampler:
+        probability: 0.5
+
+# ========== 消息队列日志：50% 采样 ==========
+mq:
+  logging:
+    record-payload: true
+    max-payload-length: 2000
+    sampling-rate: 0.5
+    record-full-stack: false
+
+# ========== SQL 日志：50% 采样 + 记录参数 ==========
+sql:
+  logging:
+    enabled: true
+    slow-query-threshold: 1000
+    max-sql-length: 2000
+    sampling-rate: 0.5
+    record-params: true
+    record-full-stack: false
+
+# ========== 请求日志：50% 采样 ==========
+req:
+  logging:
+    record-request: true
+    record-response: true
+    record-success-response: true
+    max-response-length: 2000
+    sampling-rate: 0.5
+
+# ========== 聊天配置 ==========
+chat:
+  context:
+    max-rounds: 25
+  sse-timeout: 300000
+
+# ========== 认证配置（Staging：禁止硬编码密钥） ==========
+auth:
+  jwt:
+    # Staging环境密钥必须通过 K8s Secret 注入
+    secret: ${JWT_SECRET:}
+  min-key-length: 32
+
+# ========== 加密配置（Staging：禁止硬编码密钥） ==========
+crypto:
+  # Staging环境 KEK 必须通过 K8s Secret 注入
+  kek: ${CRYPTO_KEK:}

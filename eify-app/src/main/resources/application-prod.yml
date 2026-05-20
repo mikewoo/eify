@@ -1,0 +1,141 @@
+# ============================================================
+# Eify - Prod 环境配置（CCE Turbo K8s 生产环境）
+# ============================================================
+# ⚠️ 安全须知:
+#   - 所有敏感值必须通过 K8s Secret 环境变量注入
+#   - 此文件不包含任何硬编码密钥、密码或 API Key
+#   - 环境变量缺失时 Spring Boot 启动即报错，确保凭据正确注入
+# ============================================================
+
+server:
+  # Prod 启用 HTTP 压缩
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  datasource:
+    druid:
+      # Prod 连接池：最大化
+      initial-size: 10
+      min-idle: 10
+      max-active: 50
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      # Prod 关闭监控面板
+      stat-view-servlet:
+        enabled: false
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 1000
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=1000
+
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 500
+          max-idle: 50
+          min-idle: 10
+
+# ========== Prod 日志：仅记录关键信息 ==========
+logging:
+  level:
+    com.eify: INFO
+    com.eify.*.mapper: WARN
+    com.eify.common.log.SqlLogInterceptor: WARN
+  file:
+    name: ${LOG_PATH:-./logs}/eify.log
+
+# ========== Micrometer Tracing：10% 采样 ==========
+management:
+  tracing:
+    sampling:
+      probability: 0.1
+    enabled: true
+    brave:
+      enabled: true
+    propagation:
+      type: b3
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name}
+      service.version: ${app.version}
+      deployment.environment: prod
+    tracing:
+      exporter:
+        otlp:
+          endpoint: http://localhost:4317
+          protocol: grpc
+          timeout: 30s
+          max-queue-size: 2048
+          max-export-batch-size: 512
+      sampler:
+        probability: 0.1
+
+# ========== 消息队列日志：10% 采样 ==========
+mq:
+  logging:
+    record-payload: true
+    max-payload-length: 500
+    record-full-stack: false
+    sampling-rate: 0.1
+    slow-message-threshold: 1000
+
+# ========== SQL 日志：仅慢查询 ==========
+sql:
+  logging:
+    enabled: true
+    slow-query-threshold: 2000
+    max-sql-length: 1000
+    sampling-rate: 0.01
+    record-params: false
+    record-full-stack: false
+    max-stack-depth: 10
+
+# ========== 请求日志：最低采样 ==========
+req:
+  logging:
+    record-request: true
+    record-response: false
+    max-response-length: 500
+    record-error-response: true
+    record-success-response: false
+    success-preview-length: 200
+    sampling-rate: 0.01
+    async-logging-enabled: true
+
+# ========== 聊天配置 ==========
+chat:
+  context:
+    max-rounds: 30
+  sse-timeout: 300000
+
+# ========== 认证配置（Prod：禁止硬编码密钥） ==========
+auth:
+  jwt:
+    # Prod 环境密钥必须通过 K8s Secret 注入
+    secret: ${JWT_SECRET:}
+  min-key-length: 32
+
+# ========== 加密配置（Prod：禁止硬编码密钥） ==========
+crypto:
+  # Prod 环境 KEK 必须通过 K8s Secret 注入
+  kek: ${CRYPTO_KEK:}

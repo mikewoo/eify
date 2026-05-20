@@ -1,0 +1,563 @@
+/**
+ * Eify 设计系统 - 页面布局样式
+ *
+ * 包含：页面容器、顶栏、卡片、按钮等通用样式
+ */
+
+/* ============================================
+   页面容器
+   ============================================ */
+
+.eify-page {
+  min-height: 100vh;
+  background-color: var(--eify-bg-secondary);
+}
+
+.eify-page-content {
+  padding: var(--eify-page-padding);
+  max-width: 1680px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   顶栏
+   ============================================ */
+
+.eify-header {
+  height: var(--eify-header-height);
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--eify-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--eify-page-padding);
+  position: sticky;
+  top: 0;
+  z-index: var(--eify-z-sticky);
+}
+
+.eify-header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.eify-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-4);
+}
+
+/* 面包屑导航 */
+.eify-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-2);
+  font-size: 14px;
+  color: var(--eify-text-secondary);
+}
+
+.eify-breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-2);
+}
+
+.eify-breadcrumb-item:last-child {
+  color: var(--eify-text-primary);
+  font-weight: 500;
+}
+
+.eify-breadcrumb-separator {
+  color: var(--eify-text-tertiary);
+}
+
+.eify-breadcrumb-link {
+  color: var(--eify-text-secondary);
+  text-decoration: none;
+  transition: var(--eify-transition-base);
+}
+
+.eify-breadcrumb-link:hover {
+  color: var(--eify-primary);
+}
+
+/* 用户信息区域 */
+.eify-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-3);
+  padding: var(--eify-spacing-2) var(--eify-spacing-3);
+  border-radius: var(--eify-radius-lg);
+  cursor: pointer;
+  transition: var(--eify-transition-base);
+}
+
+.eify-user-info:hover {
+  background-color: var(--eify-bg-surface);
+}
+
+.eify-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--eify-radius-full);
+  background: var(--eify-gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.eify-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--eify-text-primary);
+}
+
+/* ============================================
+   页面标题区域
+   ============================================ */
+
+.eify-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--eify-spacing-6);
+  gap: var(--eify-spacing-4);
+}
+
+.eify-page-header-left {
+  flex: 1;
+}
+
+.eify-page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--eify-text-primary);
+  margin-bottom: var(--eify-spacing-2);
+  letter-spacing: -0.01em;
+}
+
+.eify-page-description {
+  font-size: 13px;
+  color: var(--eify-text-secondary);
+  line-height: 1.5;
+  max-width: 600px;
+  margin-top: var(--eify-spacing-1);
+}
+
+.eify-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-3);
+}
+
+/* ============================================
+   卡片
+   ============================================ */
+
+.eify-card {
+  background-color: #ffffff;
+  border-radius: var(--eify-card-radius);
+  box-shadow: var(--eify-card-shadow);
+  padding: var(--eify-card-padding);
+  transition: var(--eify-transition-base);
+}
+
+.eify-card:hover {
+  box-shadow: var(--eify-shadow-md);
+}
+
+.eify-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--eify-element-gap);
+  padding-bottom: var(--eify-spacing-4);
+  border-bottom: 1px solid var(--eify-border-subtle);
+}
+
+.eify-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--eify-text-primary);
+}
+
+.eify-card-body {
+  flex: 1;
+}
+
+.eify-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--eify-element-gap);
+  padding-top: var(--eify-spacing-4);
+  border-top: 1px solid var(--eify-border-subtle);
+}
+
+/* ============================================
+   按钮系统
+   ============================================ */
+
+.eify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--eify-spacing-2);
+  height: var(--eify-btn-height-md);
+  padding: 0 var(--eify-spacing-4);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--eify-radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--eify-transition-base);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.eify-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 主按钮 - 蓝紫渐变 */
+.eify-btn-primary {
+  background: var(--eify-gradient-primary);
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.eify-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transform: translateY(-1px);
+}
+
+.eify-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* 次要按钮 - 白色边框 */
+.eify-btn-secondary {
+  background-color: #ffffff;
+  color: var(--eify-text-primary);
+  border: 1px solid var(--eify-border-default);
+}
+
+.eify-btn-secondary:hover:not(:disabled) {
+  border-color: var(--eify-primary);
+  color: var(--eify-primary);
+  background-color: var(--eify-primary-50);
+}
+
+/* 危险按钮 - 红色 */
+.eify-btn-danger {
+  background-color: var(--eify-error);
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.eify-btn-danger:hover:not(:disabled) {
+  background-color: var(--eify-error-600);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* 文字按钮 */
+.eify-btn-text {
+  background-color: transparent;
+  color: var(--eify-text-secondary);
+  border: none;
+  padding: 0 var(--eify-spacing-2);
+}
+
+.eify-btn-text:hover:not(:disabled) {
+  color: var(--eify-primary);
+  background-color: var(--eify-primary-50);
+}
+
+/* 按钮尺寸 */
+.eify-btn-sm {
+  height: var(--eify-btn-height-sm);
+  padding: 0 var(--eify-spacing-3);
+  font-size: 13px;
+}
+
+.eify-btn-lg {
+  height: var(--eify-btn-height-lg);
+  padding: 0 var(--eify-spacing-6);
+  font-size: 15px;
+}
+
+/* 按钮组 */
+.eify-btn-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--eify-spacing-2);
+}
+
+/* ============================================
+   间距工具类
+   ============================================ */
+
+.eify-mt-4 { margin-top: var(--eify-spacing-4); }
+.eify-mt-6 { margin-top: var(--eify-spacing-6); }
+.eify-mt-8 { margin-top: var(--eify-spacing-8); }
+
+.eify-mb-4 { margin-bottom: var(--eify-spacing-4); }
+.eify-mb-6 { margin-bottom: var(--eify-spacing-6); }
+.eify-mb-8 { margin-bottom: var(--eify-spacing-8); }
+
+.eify-gap-4 { gap: var(--eify-spacing-4); }
+.eify-gap-6 { gap: var(--eify-spacing-6); }
+
+/* ============================================
+   响应式
+   ============================================ */
+
+/* 大屏幕 (≥1920px) */
+@media (min-width: 1920px) {
+  .eify-page-content {
+    max-width: 1800px;
+  }
+
+  .eify-page-title {
+    font-size: 22px;
+  }
+
+  .eify-page-description {
+    font-size: 14px;
+  }
+}
+
+/* 中等屏幕 (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .eify-page-content {
+    max-width: 1680px;
+  }
+
+  .eify-page-title {
+    font-size: 20px;
+  }
+
+  .eify-page-description {
+    font-size: 13px;
+  }
+}
+
+/* 标准屏幕 (1200px - 1439px) */
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .eify-page-content {
+    max-width: 1400px;
+  }
+
+  .eify-page-title {
+    font-size: 20px;
+  }
+}
+
+/* 小屏幕 (768px - 1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .eify-page-content {
+    max-width: 1100px;
+  }
+
+  .eify-page-title {
+    font-size: 18px;
+  }
+}
+
+/* 平板/小屏幕 (≤768px) */
+@media (max-width: 768px) {
+  .eify-page-content {
+    padding: var(--eify-spacing-4);
+    max-width: 100%;
+  }
+
+  .eify-page-title {
+    font-size: 18px;
+  }
+
+  .eify-page-description {
+    font-size: 13px;
+  }
+
+  .eify-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .eify-page-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .eify-header {
+    padding: 0 var(--eify-spacing-4);
+  }
+
+  .eify-user-name {
+    display: none;
+  }
+
+  .eify-card {
+    border-radius: var(--eify-radius-md);
+  }
+
+  .eify-page-header {
+    margin-bottom: var(--eify-spacing-4);
+  }
+}
+
+/* ============================================
+   分页组件样式
+   ============================================ */
+
+.eify-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--eify-spacing-3);
+  padding: var(--eify-spacing-4) var(--eify-spacing-5);
+  background-color: #ffffff;
+  border-top: 1px solid var(--eify-border-subtle);
+}
+
+.eify-pagination-info {
+  font-size: 13px;
+  color: var(--eify-text-secondary);
+  margin-right: var(--eify-spacing-2);
+}
+
+.eify-pagination-info strong {
+  color: var(--eify-text-primary);
+  font-weight: 600;
+}
+
+/* Element Plus 分页组件样式覆盖 */
+:deep(.el-pagination) {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-2);
+  font-weight: 400;
+}
+
+:deep(.el-pagination .el-pagination__total) {
+  color: var(--eify-text-secondary);
+  font-size: 13px;
+}
+
+:deep(.el-pagination .el-pagination__sizes) {
+  color: var(--eify-text-secondary);
+}
+
+:deep(.el-pagination .el-select .el-input__wrapper) {
+  border-radius: var(--eify-radius-md);
+  border-color: var(--eify-border-default);
+  transition: var(--eify-transition-base);
+}
+
+:deep(.el-pagination .el-select .el-input__wrapper:hover) {
+  border-color: var(--eify-primary);
+}
+
+:deep(.el-pagination .el-select .el-input__wrapper.is-focus) {
+  border-color: var(--eify-primary);
+  box-shadow: var(--eify-shadow-primary);
+}
+
+:deep(.el-pagination.is-background .el-pager li) {
+  border-radius: var(--eify-radius-md);
+  font-weight: 500;
+  transition: var(--eify-transition-base);
+  min-width: 32px;
+  height: 32px;
+  line-height: 32px;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
+  background: var(--eify-gradient-primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+:deep(.el-pagination.is-background .el-pager li:hover) {
+  color: var(--eify-primary);
+  background-color: var(--eify-primary-50);
+}
+
+:deep(.el-pagination.is-background .btn-next),
+:deep(.el-pagination.is-background .btn-prev) {
+  border-radius: var(--eify-radius-md);
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  transition: var(--eify-transition-base);
+}
+
+:deep(.el-pagination.is-background .btn-next:hover),
+:deep(.el-pagination.is-background .btn-prev:hover) {
+  color: var(--eify-primary);
+  background-color: var(--eify-primary-50);
+}
+
+:deep(.el-pagination .el-pagination__jump) {
+  color: var(--eify-text-secondary);
+  font-size: 13px;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-input__wrapper) {
+  border-radius: var(--eify-radius-md);
+  border-color: var(--eify-border-default);
+  transition: var(--eify-transition-base);
+}
+
+:deep(.el-pagination .el-pagination__jump .el-input__wrapper:hover) {
+  border-color: var(--eify-primary);
+}
+
+:deep(.el-pagination .el-pagination__jump .el-input__wrapper.is-focus) {
+  border-color: var(--eify-primary);
+  box-shadow: var(--eify-shadow-primary);
+}
+
+/* 简洁分页样式 */
+.eify-pagination-simple {
+  padding: var(--eify-spacing-4) var(--eify-spacing-5);
+}
+
+.eify-pagination-simple :deep(.el-pagination) {
+  justify-content: center;
+}
+
+.eify-pagination-simple :deep(.el-pagination.is-background .el-pager li) {
+  min-width: 28px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 13px;
+}
+
+/* 分页加载状态 */
+.eify-pagination-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--eify-spacing-2);
+  color: var(--eify-text-secondary);
+  font-size: 13px;
+}
+
+.eify-pagination-loading :deep(.el-icon) {
+  animation: pagination-spin 1s linear infinite;
+}
+
+@keyframes pagination-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+

@@ -1,0 +1,557 @@
+/**
+ * Eify 设计系统 - 基础组件样式
+ *
+ * 基于 design-tokens.css 的组件实现
+ */
+
+/* ============================================
+   按钮
+   ============================================ */
+
+.eify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--eify-spacing-2);
+  padding: var(--eify-padding-md);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--eify-radius-sm);
+  cursor: pointer;
+  transition: var(--eify-transition-base);
+  white-space: nowrap;
+}
+
+.eify-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 主按钮 */
+.eify-btn-primary {
+  background-color: var(--eify-primary);
+  color: #ffffff;
+}
+
+.eify-btn-primary:hover:not(:disabled) {
+  background-color: var(--eify-primary-hover);
+  box-shadow: var(--eify-shadow-md);
+}
+
+.eify-btn-primary:active:not(:disabled) {
+  background-color: var(--eify-primary-active);
+}
+
+/* 次按钮 */
+.eify-btn-secondary {
+  background-color: #ffffff;
+  color: var(--eify-text-primary);
+  border-color: var(--eify-border-default);
+}
+
+.eify-btn-secondary:hover:not(:disabled) {
+  background-color: var(--eify-gray-50);
+  border-color: var(--eify-border-strong);
+}
+
+/* 幽灵按钮 */
+.eify-btn-ghost {
+  background-color: transparent;
+  color: var(--eify-text-primary);
+}
+
+.eify-btn-ghost:hover:not(:disabled) {
+  background-color: var(--eify-primary-light);
+  color: var(--eify-primary);
+}
+
+/* 文字按钮 */
+.eify-btn-text {
+  background-color: transparent;
+  color: var(--eify-primary);
+  padding: var(--eify-padding-sm);
+}
+
+.eify-btn-text:hover:not(:disabled) {
+  background-color: var(--eify-primary-light);
+}
+
+/* 按钮尺寸 */
+.eify-btn-sm {
+  height: var(--eify-btn-height-sm);
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.eify-btn-md {
+  height: var(--eify-btn-height-md);
+}
+
+.eify-btn-lg {
+  height: var(--eify-btn-height-lg);
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+/* ============================================
+   输入框
+   ============================================ */
+
+.eify-input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--eify-padding-sm);
+  font-size: 14px;
+  color: var(--eify-text-primary);
+  background-color: var(--eify-bg-input);
+  border: 1px solid var(--eify-border-default);
+  border-radius: var(--eify-radius-sm);
+  transition: var(--eify-transition-base);
+}
+
+.eify-input::placeholder {
+  color: var(--eify-text-quaternary);
+}
+
+.eify-input:focus {
+  outline: none;
+  border-color: var(--eify-primary);
+  box-shadow: var(--eify-shadow-primary);
+}
+
+.eify-input:disabled {
+  background-color: var(--eify-bg-input-disabled);
+  color: var(--eify-text-quaternary);
+  cursor: not-allowed;
+}
+
+.eify-input-sm {
+  height: var(--eify-input-height-sm);
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.eify-input-md {
+  height: var(--eify-input-height-md);
+}
+
+.eify-input-lg {
+  height: var(--eify-input-height-lg);
+  padding: 0 14px;
+  font-size: 15px;
+}
+
+/* ============================================
+   卡片
+   ============================================ */
+
+.eify-card {
+  background-color: var(--eify-bg-card-1);
+  border: 1px solid var(--eify-border-default);
+  border-radius: var(--eify-radius-md);
+  box-shadow: var(--eify-shadow-sm);
+  transition: var(--eify-transition-base);
+}
+
+.eify-card:hover {
+  box-shadow: var(--eify-shadow-md);
+}
+
+.eify-card-header {
+  padding: var(--eify-padding-md);
+  border-bottom: 1px solid var(--eify-border-default);
+}
+
+.eify-card-body {
+  padding: var(--eify-padding-md);
+}
+
+.eify-card-footer {
+  padding: var(--eify-padding-md);
+  border-top: 1px solid var(--eify-border-default);
+}
+
+/* ============================================
+   表格
+   ============================================ */
+
+.eify-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--eify-bg-card-1);
+  border-radius: var(--eify-radius-md);
+  overflow: hidden;
+}
+
+.eify-table thead {
+  background-color: var(--eify-bg-surface);
+}
+
+.eify-table th {
+  padding: var(--eify-table-cell-padding);
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--eify-text-secondary);
+  border-bottom: 1px solid var(--eify-border-default);
+}
+
+.eify-table td {
+  padding: var(--eify-table-cell-padding);
+  font-size: 14px;
+  color: var(--eify-text-primary);
+  border-bottom: 1px solid var(--eify-divider-default);
+}
+
+.eify-table tbody tr {
+  transition: var(--eify-transition-fast);
+}
+
+.eify-table tbody tr:hover {
+  background-color: var(--eify-primary-light);
+}
+
+.eify-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================
+   标签
+   ============================================ */
+
+.eify-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--eify-radius-full);
+  white-space: nowrap;
+}
+
+.eify-tag-primary {
+  background-color: var(--eify-primary-light);
+  color: var(--eify-primary);
+}
+
+.eify-tag-success {
+  background-color: var(--eify-success-light);
+  color: var(--eify-success);
+}
+
+.eify-tag-warning {
+  background-color: var(--eify-warning-light);
+  color: var(--eify-warning);
+}
+
+.eify-tag-error {
+  background-color: var(--eify-error-light);
+  color: var(--eify-error);
+}
+
+.eify-tag-accent {
+  background-color: var(--eify-accent-light);
+  color: var(--eify-accent);
+}
+
+.eify-tag-gray {
+  background-color: var(--eify-gray-100);
+  color: var(--eify-gray-600);
+}
+
+/* ============================================
+   徽章
+   ============================================ */
+
+.eify-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #ffffff;
+  background-color: var(--eify-error);
+  border-radius: var(--eify-radius-full);
+}
+
+.eify-badge-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--eify-error);
+  border-radius: var(--eify-radius-full);
+}
+
+.eify-badge-dot-success {
+  background-color: var(--eify-success);
+}
+
+.eify-badge-dot-accent {
+  background-color: var(--eify-accent);
+}
+
+.eify-badge-dot-warning {
+  background-color: var(--eify-warning);
+}
+
+/* ============================================
+   分隔线
+   ============================================ */
+
+.eify-divider {
+  height: 1px;
+  background-color: var(--eify-divider-default);
+  border: none;
+}
+
+.eify-divider-vertical {
+  width: 1px;
+  height: 100%;
+  background-color: var(--eify-divider-default);
+}
+
+/* ============================================
+   进度条
+   ============================================ */
+
+.eify-progress {
+  width: 100%;
+  height: 6px;
+  background-color: var(--eify-gray-200);
+  border-radius: var(--eify-radius-full);
+  overflow: hidden;
+}
+
+.eify-progress-bar {
+  height: 100%;
+  background: var(--eify-gradient-primary);
+  border-radius: var(--eify-radius-full);
+  transition: var(--eify-transition-slow);
+}
+
+/* ============================================
+   开关
+   ============================================ */
+
+.eify-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.eify-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.eify-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--eify-gray-300);
+  transition: var(--eify-transition-base);
+  border-radius: var(--eify-radius-full);
+}
+
+.eify-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  transition: var(--eify-transition-base);
+  border-radius: var(--eify-radius-full);
+}
+
+.eify-switch input:checked + .eify-switch-slider {
+  background-color: var(--eify-primary);
+}
+
+.eify-switch input:checked + .eify-switch-slider:before {
+  transform: translateX(18px);
+}
+
+/* ============================================
+   加载状态
+   ============================================ */
+
+.eify-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--eify-border-default);
+  border-top-color: var(--eify-primary);
+  border-radius: var(--eify-radius-full);
+  animation: eify-spin 0.6s linear infinite;
+}
+
+@keyframes eify-spin {
+  to { transform: rotate(360deg); }
+}
+
+.eify-skeleton {
+  width: 100%;
+  height: 16px;
+  background: linear-gradient(
+    90deg,
+    var(--eify-gray-100) 0%,
+    var(--eify-gray-200) 50%,
+    var(--eify-gray-100) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--eify-radius-sm);
+  animation: eify-skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes eify-skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   对话气泡
+   ============================================ */
+
+.eify-chat-bubble {
+  display: inline-block;
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: var(--eify-radius-lg);
+  word-wrap: break-word;
+}
+
+.eify-chat-bubble-user {
+  background: var(--eify-gradient-primary);
+  color: #ffffff;
+  border-bottom-right-radius: var(--eify-radius-xs);
+}
+
+.eify-chat-bubble-assistant {
+  background-color: var(--eify-gray-100);
+  color: var(--eify-text-primary);
+  border-bottom-left-radius: var(--eify-radius-xs);
+}
+
+/* ============================================
+   状态指示器
+   ============================================ */
+
+.eify-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--eify-spacing-2);
+  font-size: 13px;
+}
+
+.eify-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--eify-radius-full);
+}
+
+.eify-status-dot.online {
+  background-color: var(--eify-status-agent-online);
+}
+
+.eify-status-dot.busy {
+  background-color: var(--eify-status-agent-busy);
+}
+
+.eify-status-dot.offline {
+  background-color: var(--eify-status-agent-offline);
+}
+
+.eify-status-dot.error {
+  background-color: var(--eify-status-agent-error);
+}
+
+.eify-status-dot.pulse {
+  animation: eify-pulse 2s ease-in-out infinite;
+}
+
+@keyframes eify-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ============================================
+   工具提示
+   ============================================ */
+
+.eify-tooltip {
+  position: relative;
+}
+
+.eify-tooltip-content {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #ffffff;
+  background-color: var(--eify-gray-800);
+  border-radius: var(--eify-radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--eify-transition-base);
+  z-index: var(--eify-z-tooltip);
+}
+
+.eify-tooltip:hover .eify-tooltip-content {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ============================================
+   警告框
+   ============================================ */
+
+.eify-alert {
+  padding: var(--eify-padding-md);
+  border-radius: var(--eify-radius-md);
+  border: 1px solid;
+}
+
+.eify-alert-info {
+  background-color: var(--eify-info-light);
+  border-color: var(--eify-info-200);
+  color: var(--eify-info-600);
+}
+
+.eify-alert-success {
+  background-color: var(--eify-success-light);
+  border-color: var(--eify-success-200);
+  color: var(--eify-success-600);
+}
+
+.eify-alert-warning {
+  background-color: var(--eify-warning-light);
+  border-color: var(--eify-warning-200);
+  color: var(--eify-warning-600);
+}
+
+.eify-alert-error {
+  background-color: var(--eify-error-light);
+  border-color: var(--eify-error-200);
+  color: var(--eify-error-600);
+}

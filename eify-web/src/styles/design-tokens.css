@@ -1,0 +1,355 @@
+/**
+ * Eify 设计系统 - CSS 变量
+ *
+ * 设计理念：浅底科技风，干净但不无聊
+ * 主色：蓝紫系（科技感）
+ * 辅色：青薄荷系（数据/状态）
+ */
+
+/* ============================================
+   根变量 - 全局设计令牌
+   ============================================ */
+:root {
+  /* ========== 1. 品牌色 ========== */
+
+  /* 主色 - 蓝紫系 */
+  --eify-primary-50: #f0f4ff;
+  --eify-primary-100: #e0e9ff;
+  --eify-primary-200: #c7d5fe;
+  --eify-primary-300: #a5b4fc;
+  --eify-primary-400: #818cf8;
+  --eify-primary-500: #6366f1;  /* 品牌主色 */
+  --eify-primary-600: #4f46e5;
+  --eify-primary-700: #4338ca;
+  --eify-primary-800: #3730a3;
+  --eify-primary-900: #312e81;
+
+  /* 主色快捷引用 */
+  --eify-primary: var(--eify-primary-500);
+  --eify-primary-hover: var(--eify-primary-600);
+  --eify-primary-active: var(--eify-primary-700);
+  --eify-primary-light: var(--eify-primary-100);
+  --eify-primary-lighter: var(--eify-primary-50);
+
+  /* 辅色 - 青薄荷系 */
+  --eify-accent-50: #f0fdfa;
+  --eify-accent-100: #ccfbf1;
+  --eify-accent-200: #99f6e4;
+  --eify-accent-300: #5eead4;
+  --eify-accent-400: #2dd4bf;  /* 辅助主色 */
+  --eify-accent-500: #14b8a6;
+  --eify-accent-600: #0d9488;
+  --eify-accent-700: #0f766e;
+
+  /* 辅色快捷引用 */
+  --eify-accent: var(--eify-accent-400);
+  --eify-accent-hover: var(--eify-accent-500);
+  --eify-accent-light: var(--eify-accent-100);
+
+  /* ========== 2. 功能色 ========== */
+
+  /* 成功 - 青绿 */
+  --eify-success-50: #f0fdf4;
+  --eify-success-100: #dcfce7;
+  --eify-success-200: #bbf7d0;
+  --eify-success-300: #86efac;
+  --eify-success-400: #4ade80;
+  --eify-success-500: #22c55e;
+  --eify-success-600: #16a34a;
+  --eify-success: var(--eify-success-500);
+  --eify-success-light: var(--eify-success-100);
+
+  /* 警告 - 琥珀 */
+  --eify-warning-50: #fffbeb;
+  --eify-warning-100: #fef3c7;
+  --eify-warning-200: #fde68a;
+  --eify-warning-300: #fcd34d;
+  --eify-warning-400: #fbbf24;
+  --eify-warning-500: #f59e0b;
+  --eify-warning-600: #d97706;
+  --eify-warning: var(--eify-warning-500);
+  --eify-warning-light: var(--eify-warning-100);
+
+  /* 错误 - 红 */
+  --eify-error-50: #fef2f2;
+  --eify-error-100: #fee2e2;
+  --eify-error-200: #fecaca;
+  --eify-error-300: #fca5a5;
+  --eify-error-400: #f87171;
+  --eify-error-500: #ef4444;
+  --eify-error-600: #dc2626;
+  --eify-error: var(--eify-error-500);
+  --eify-error-light: var(--eify-error-100);
+
+  /* 信息 - 天蓝 */
+  --eify-info-50: #f0f9ff;
+  --eify-info-100: #e0f2fe;
+  --eify-info-200: #bae6fd;
+  --eify-info-300: #7dd3fc;
+  --eify-info-400: #38bdf8;
+  --eify-info-500: #0ea5e9;
+  --eify-info-600: #0284c7;
+  --eify-info: var(--eify-info-500);
+  --eify-info-light: var(--eify-info-100);
+
+  /* ========== 3. 中性色 ========== */
+
+  --eify-gray-50: #f9fafb;
+  --eify-gray-100: #f3f4f6;
+  --eify-gray-200: #e5e7eb;
+  --eify-gray-300: #d1d5db;
+  --eify-gray-400: #9ca3af;
+  --eify-gray-500: #6b7280;
+  --eify-gray-600: #4b5563;
+  --eify-gray-700: #374151;
+  --eify-gray-800: #1f2937;
+  --eify-gray-900: #111827;
+
+  /* ========== 4. 背景色 ========== */
+
+  /* 页面背景 */
+  --eify-bg-base: #ffffff;
+  --eify-bg-subtle: #fafafa;
+  --eify-bg-surface: #f3f4f6;
+  --eify-bg-surface-raised: #ffffff;
+  --eify-bg-secondary: #f8fafc; /* 浅灰背景，用于内容区 */
+
+  /* 侧边栏背景 - 深蓝紫色（参照 Linear 风格，稍浅带紫调） */
+  --eify-bg-sidebar: #161b2e;
+  --eify-bg-sidebar-hover: #232940;
+  --eify-bg-sidebar-active: #232940;
+  --eify-bg-sidebar-deep: #0d111d; /* 更深的蓝紫 */
+
+  /* 输入框背景 */
+  --eify-bg-input: #ffffff;
+  --eify-bg-input-disabled: #f3f4f6;
+
+  /* 卡片背景层级 */
+  --eify-bg-card-1: #ffffff;
+  --eify-bg-card-2: #fafafa;
+  --eify-bg-card-3: #f3f4f6;
+
+  /* 深色背景（用于侧边栏等深色区域） */
+  --eify-bg-dark: #0a0f1c;
+  --eify-bg-dark-elevated: #111827;
+  --eify-bg-dark-pressed: #050810;
+
+  /* ========== 5. 文字色 ========== */
+
+  --eify-text-primary: #0f172a;
+  --eify-text-secondary: #475569;
+  --eify-text-tertiary: #94a3b8;
+  --eify-text-quaternary: #cbd5e1;
+  --eify-text-inverse: #ffffff;
+
+  /* 链接色 */
+  --eify-text-link: var(--eify-primary);
+  --eify-text-link-hover: var(--eify-primary-hover);
+
+  /* 状态文字 */
+  --eify-text-success: var(--eify-success-600);
+  --eify-text-warning: var(--eify-warning-600);
+  --eify-text-error: var(--eify-error-600);
+  --eify-text-info: var(--eify-info-600);
+
+  /* ========== 6. 边框色 ========== */
+
+  --eify-border-default: #e2e8f0;
+  --eify-border-subtle: #f1f5f9;
+  --eify-border-strong: #cbd5e1;
+  --eify-border-focus: var(--eify-primary);
+
+  /* 分割线 */
+  --eify-divider-default: #e2e8f0;
+  --eify-divider-strong: #cbd5e1;
+
+  /* ========== 7. 圆角 ========== */
+
+  --eify-radius-xs: 4px;
+  --eify-radius-sm: 6px;
+  --eify-radius-md: 8px;
+  --eify-radius-lg: 12px;
+  --eify-radius-xl: 16px;
+  --eify-radius-2xl: 20px;
+  --eify-radius-full: 9999px;
+
+  /* 卡片专用 */
+  --eify-card-radius: 12px; /* 卡片圆角 */
+
+  /* ========== 8. 阴影 ========== */
+
+  --eify-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --eify-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --eify-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --eify-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --eify-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* 卡片专用阴影 */
+  --eify-card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+
+  /* 内阴影 */
+  --eify-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* 状态阴影 - 用于焦点/悬停 */
+  --eify-shadow-primary: 0 0 0 3px rgb(99 102 241 / 0.1);
+  --eify-shadow-accent: 0 0 0 3px rgb(45 212 191 / 0.1);
+  --eify-shadow-error: 0 0 0 3px rgb(239 68 68 / 0.1);
+
+  /* ========== 9. 间距 ========== */
+
+  --eify-spacing-0: 0;
+  --eify-spacing-1: 4px;
+  --eify-spacing-2: 8px;
+  --eify-spacing-3: 12px;
+  --eify-spacing-4: 16px;
+  --eify-spacing-5: 20px;
+  --eify-spacing-6: 24px;
+  --eify-spacing-8: 32px;
+  --eify-spacing-10: 40px;
+  --eify-spacing-12: 48px;
+  --eify-spacing-16: 64px;
+  --eify-spacing-20: 80px;
+
+  /* 页面布局专用间距 */
+  --eify-page-padding: 24px; /* 页面边距 */
+  --eify-card-padding: 20px; /* 卡片内边距 */
+  --eify-element-gap: 16px; /* 元素间距 */
+
+  /* 组件内边距 */
+  --eify-padding-xs: 8px 12px;
+  --eify-padding-sm: 10px 14px;
+  --eify-padding-md: 12px 16px;
+  --eify-padding-lg: 16px 20px;
+  --eify-padding-xl: 20px 24px;
+
+  /* ========== 10. 过渡动效 ========== */
+
+  /* 过渡时长 */
+  --eify-duration-fast: 150ms;
+  --eify-duration-base: 200ms;
+  --eify-duration-slow: 300ms;
+
+  /* 缓动函数 */
+  --eify-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --eify-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --eify-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --eify-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 组合过渡 */
+  --eify-transition-base: all var(--eify-duration-base) var(--eify-ease-default);
+  --eify-transition-fast: all var(--eify-duration-fast) var(--eify-ease-default);
+  --eify-transition-slow: all var(--eify-duration-slow) var(--eify-ease-default);
+
+  /* ========== 11. Z-index 层级 ========== */
+
+  --eify-z-dropdown: 1000;
+  --eify-z-sticky: 1020;
+  --eify-z-fixed: 1030;
+  --eify-z-modal-backdrop: 1040;
+  --eify-z-modal: 1050;
+  --eify-z-popover: 1060;
+  --eify-z-tooltip: 1070;
+  --eify-z-notification: 1080;
+
+  /* ========== 12. 组件尺寸 ========== */
+
+  /* 按钮 */
+  --eify-btn-height-sm: 32px;
+  --eify-btn-height-md: 36px;
+  --eify-btn-height-lg: 40px;
+
+  /* 输入框 */
+  --eify-input-height-sm: 32px;
+  --eify-input-height-md: 36px;
+  --eify-input-height-lg: 40px;
+
+  /* 表格 */
+  --eify-table-row-height: 56px;
+  --eify-table-cell-padding: 12px 16px;
+
+  /* 侧边栏 */
+  --eify-sidebar-width: 240px;
+  --eify-sidebar-width-collapsed: 64px;
+
+  /* 顶栏 */
+  --eify-header-height: 56px; /* 顶栏高度 */
+
+  /* ========== 13. AI 状态色 ========== */
+
+  /* Agent 状态 */
+  --eify-status-agent-online: #2dd4bf;
+  --eify-status-agent-busy: #fbbf24;
+  --eify-status-agent-offline: #94a3b8;
+  --eify-status-agent-error: #ef4444;
+
+  /* 对话状态 */
+  --eify-status-conversation-active: var(--eify-primary);
+  --eify-status-conversation-archived: #94a3b8;
+
+  /* ========== 14. 渐变 ========== */
+
+  /* 主色渐变 */
+  --eify-gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --eify-gradient-accent: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+
+  /* 背景渐变 */
+  --eify-gradient-subtle: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+
+  /* ========== 15. 模糊 ========== */
+
+  --eify-blur-sm: blur(4px);
+  --eify-blur-md: blur(8px);
+  --eify-blur-lg: blur(16px);
+}
+
+/* ============================================
+   暗色模式变量（预留）
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 背景调整 */
+    --eify-bg-base: #0f172a;
+    --eify-bg-surface: #1e293b;
+    --eify-bg-surface-raised: #1e293b;
+    --eify-bg-input: #1e293b;
+
+    /* 文字调整 */
+    --eify-text-primary: #f1f5f9;
+    --eify-text-secondary: #cbd5e1;
+    --eify-text-tertiary: #64748b;
+    --eify-text-quaternary: #475569;
+
+    /* 边框调整 */
+    --eify-border-default: #334155;
+    --eify-border-subtle: #1e293b;
+    --eify-border-strong: #475569;
+
+    /* 侧边栏调整 */
+    --eify-bg-sidebar: #0d111d;
+    --eify-bg-sidebar-hover: #161b2e;
+  }
+}
+
+/* ============================================
+   基础重置
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--eify-bg-subtle);
+  color: var(--eify-text-primary);
+  line-height: 1.5;
+}

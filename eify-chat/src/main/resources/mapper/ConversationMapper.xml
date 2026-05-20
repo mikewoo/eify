@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eify.chat.mapper.ConversationMapper">
+
+    <!-- 基础列：避免 SELECT *，只查必要字段 -->
+    <sql id="baseColumns">
+        id, user_id, agent_id, title, status, created_at, updated_at
+    </sql>
+
+    <!-- 工作空间数据隔离 + 软删除过滤 -->
+    <sql id="workspaceFilter">
+        workspace_id = #{workspaceId} AND deleted = 0
+    </sql>
+
+    <!-- 游标分页条件：按 updated_at DESC, id DESC -->
+    <sql id="cursorCondition">
+        (updated_at &lt; #{lastTimestamp} OR (updated_at = #{lastTimestamp} AND id &lt; #{lastId}))
+    </sql>
+
+    <!-- 排序 -->
+    <sql id="orderBy">
+        ORDER BY updated_at DESC, id DESC
+    </sql>
+
+    <!-- 查询用户对话第一页 -->
+    <select id="selectUserConversationsFirstPage" resultType="com.eify.chat.domain.entity.Conversation">
+        SELECT <include refid="baseColumns"/>
+        FROM ai_chat_session
+        WHERE user_id = #{userId} AND status = #{status}
+          AND <include refid="workspaceFilter"/>
+        <include refid="orderBy"/>
+        LIMIT #{pageSize}
+    </select>
+
+    <!-- 使用游标查询用户对话 -->
+    <select id="selectUserConversationsByCursor" resultType="com.eify.chat.domain.entity.Conversation">
+        SELECT <include refid="baseColumns"/>
+        FROM ai_chat_session
+        WHERE user_id = #{userId} AND status = #{status}
+          AND <include refid="workspaceFilter"/>
+          AND <include refid="cursorCondition"/>
+        <include refid="orderBy"/>
+        LIMIT #{pageSize}
+    </select>
+
+    <!-- 查询 Agent 对话第一页 -->
+    <select id="selectAgentConversationsFirstPage" resultType="com.eify.chat.domain.entity.Conversation">
+        SELECT <include refid="baseColumns"/>
+        FROM ai_chat_session
+        WHERE agent_id = #{agentId}
+          AND <include refid="workspaceFilter"/>
+        <include refid="orderBy"/>
+        LIMIT #{pageSize}
+    </select>
+
+    <!-- 使用游标查询 Agent 对话 -->
+    <select id="selectAgentConversationsByCursor" resultType="com.eify.chat.domain.entity.Conversation">
+        SELECT <include refid="baseColumns"/>
+        FROM ai_chat_session
+        WHERE agent_id = #{agentId}
+          AND <include refid="workspaceFilter"/>
+          AND <include refid="cursorCondition"/>
+        <include refid="orderBy"/>
+        LIMIT #{pageSize}
+    </select>
+
+</mapper>

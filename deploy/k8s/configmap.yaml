@@ -1,0 +1,33 @@
+# 非敏感配置（敏感信息请使用 Secret）
+# 首次部署前，替换 <PLACEHOLDER> 为实际值
+# 或通过 Jenkins 参数化部署自动替换
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eify-config
+  namespace: eify
+  labels:
+    app: eify
+data:
+  # Spring profiles — override via kubectl or Jenkins for test: "test" / staging: "staging" / prod: "prod"
+  # Default: prod (production)
+  SPRING_PROFILES_ACTIVE: "prod"
+
+  # MySQL - 替换为实际数据库地址
+  MYSQL_HOST: "<MYSQL_HOST>"
+  MYSQL_PORT: "3306"
+  MYSQL_DATABASE: "eify"
+
+  # Redis - 替换为实际 Redis 地址
+  REDIS_HOST: "<REDIS_HOST>"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "0"
+
+  # PostgreSQL (pgvector) - 替换为实际地址
+  PGVECTOR_HOST: "<PGVECTOR_HOST>"
+  PGVECTOR_PORT: "5432"
+  PGVECTOR_DATABASE: "eify_vector"
+  PGVECTOR_USERNAME: "postgres"
+
+  # JVM options - 根据集群资源调整
+  JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"

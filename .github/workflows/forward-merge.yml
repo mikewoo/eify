@@ -1,0 +1,50 @@
+name: Forward Merge
+
+on:
+  push:
+    branches: [main, rc, beta]
+
+jobs:
+  forward-merge:
+    runs-on: ubuntu-latest
+    # 防止级联循环：含 [forward-merge] 标记的提交不再触发传播
+    if: ${{ !contains(github.event.head_commit.message, '[forward-merge]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine forward-merge chain
+        id: chain
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          case "$BRANCH" in
+            main) echo "targets=rc beta alpha" >> "$GITHUB_OUTPUT" ;;
+            rc)   echo "targets=beta alpha"   >> "$GITHUB_OUTPUT" ;;
+            beta) echo "targets=alpha"         >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Execute forward merge
+        run: |
+          source="${{ github.ref_name }}"
+          for target in ${{ steps.chain.outputs.targets }}; do
+            echo "::group::Forward merge: $source → $target"
+            git checkout "$target"
+            git merge "$source" --no-edit -m "Forward merge $source → $target [forward-merge]"
+            git push origin "$target"
+            echo "::endgroup::"
+            source="$target"
+          done
+
+      - name: Handle conflicts
+        if: failure()
+        run: |
+          echo "::warning::Forward merge failed due to conflicts."
+          echo "Resolve conflicts manually and re-run the workflow."

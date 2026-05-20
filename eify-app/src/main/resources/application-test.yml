@@ -1,0 +1,124 @@
+# ============================================================
+# Eify - Test 环境配置（CCE Turbo K8s 测试环境）
+# ============================================================
+# ⚠️ 安全须知:
+#   - 所有敏感值必须通过 K8s Secret 环境变量注入
+#   - 此文件不包含任何硬编码密钥、密码或 API Key
+#   - 环境变量缺失时 Spring Boot 启动即报错，确保凭据正确注入
+# ============================================================
+# 定位：自动化测试 / QA 验证环境，介于本地 dev 和预发布 staging 之间
+#   - 全量采样，便于问题排查
+#   - 连接池保持 base 配置
+#   - 可频繁重建，不存储关键业务数据
+# ============================================================
+
+server:
+  # Test 与 staging 一致，启用压缩
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+spring:
+  datasource:
+    druid:
+      # Test 连接池：保持 base 配置（test 流量低）
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      keep-alive: true
+      # Test 启用 Druid 监控面板（需 basic auth）
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: ${DRUID_PASSWORD:}
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 2000
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=1000
+
+  flyway:
+    enabled: true
+    # Test 允许自动修复迁移（测试阶段可能调整迁移文件）
+    repair-on-migrate: true
+
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 200
+          max-idle: 10
+          min-idle: 0
+
+# ========== Test 日志：全量输出，便于自动化测试排查 ==========
+logging:
+  level:
+    com.eify: INFO
+    com.eify.*.mapper: INFO
+    org.mybatis: INFO
+    com.baomidou.mybatisplus: INFO
+
+# ========== Micrometer Tracing：100% 采样 ==========
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      sampler:
+        probability: 1.0
+
+# ========== 消息队列日志：100% 采样 ==========
+mq:
+  logging:
+    record-payload: true
+    max-payload-length: 2000
+    sampling-rate: 1.0
+    record-full-stack: true
+
+# ========== SQL 日志：100% 采样 + 记录参数 ==========
+sql:
+  logging:
+    enabled: true
+    slow-query-threshold: 1000
+    max-sql-length: 2000
+    sampling-rate: 1.0
+    record-params: true
+    record-full-stack: true
+
+# ========== 请求日志：100% 采样 ==========
+req:
+  logging:
+    record-request: true
+    record-response: true
+    record-success-response: true
+    max-response-length: 5000
+    sampling-rate: 1.0
+
+# ========== 聊天配置 ==========
+chat:
+  context:
+    max-rounds: 15
+  sse-timeout: 300000
+
+# ========== 认证配置（Test：禁止硬编码密钥） ==========
+auth:
+  jwt:
+    # Test 环境密钥必须通过 K8s Secret 注入
+    secret: ${JWT_SECRET:}
+  min-key-length: 32
+
+# ========== 加密配置（Test：禁止硬编码密钥） ==========
+crypto:
+  # Test 环境 KEK 必须通过 K8s Secret 注入
+  kek: ${CRYPTO_KEK:}

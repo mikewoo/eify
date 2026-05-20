@@ -1,0 +1,105 @@
+# ============================================================
+# Eify - Dev 环境配置（本地开发环境）
+# ============================================================
+# ⚠️ 此文件仅供本地开发使用，包含默认密钥
+# Test / Staging / Prod 环境请使用对应的 application-test.yml / application-staging.yml / application-prod.yml
+# ============================================================
+
+spring:
+  datasource:
+    druid:
+      # Dev 连接池：适中配置
+      max-active: 30
+      max-wait: 5000
+      time-between-eviction-runs-millis: 30000
+      min-evictable-idle-time-millis: 180000
+      max-evictable-idle-time-millis: 300000
+      test-on-borrow: true
+      keep-alive: true
+      remove-abandoned: true
+      remove-abandoned-timeout-millis: 60000
+      # Dev 启用 Druid 监控面板
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: ${DRUID_PASSWORD:admin}
+
+  flyway:
+    # Dev 环境允许自动修复迁移（开发阶段可能手动调整迁移文件）
+    repair-on-migrate: true
+
+  data:
+    redis:
+      lettuce:
+        pool:
+          # Dev 保持 base 配置即可，此处仅占位
+
+# ========== Dev 日志：全量输出，便于调试 ==========
+logging:
+  level:
+    com.eify: INFO
+    org.mybatis: INFO
+    com.baomidou.mybatisplus: INFO
+    org.springframework: INFO
+    com.alibaba.druid: INFO
+    brave.Tracer: WARN
+    brave: WARN
+
+# ========== Micrometer Tracing：100% 采样 ==========
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      sampler:
+        probability: 1.0
+
+# ========== 消息队列日志：100% 采样 ==========
+mq:
+  logging:
+    record-payload: true
+    max-payload-length: 5000
+    record-full-stack: true
+    sampling-rate: 1.0
+
+# ========== SQL 日志：100% 采样 ==========
+sql:
+  logging:
+    enabled: true
+    slow-query-threshold: 500
+    max-sql-length: 5000
+    sampling-rate: 1.0
+    record-params: true
+    record-full-stack: true
+
+# ========== 请求日志：100% 采样 ==========
+req:
+  logging:
+    record-response: true
+    max-response-length: 10000
+    record-success-response: true
+    sampling-rate: 1.0
+    async-logging-enabled: true
+
+# ========== 认证配置（仅用于本地开发） ==========
+auth:
+  jwt:
+    # ⚠️ Dev 默认密钥，仅用于本地开发
+    # 任何人可从此公开仓库读取此密钥，严禁用于任何非本地环境
+    secret: dev-eify-jwt-secret-not-for-production
+
+# ========== 加密配置（仅用于本地开发） ==========
+crypto:
+  # ⚠️ Dev 默认 KEK（Base64 编码的 256-bit 密钥），仅用于本地开发
+  # 生成方式: openssl rand -base64 32
+  # 任何人可从此公开仓库读取此密钥，严禁用于任何非本地环境
+  kek: 5KltYLCZbeVOhhJ6txe098iIk65PX7dgEGhpITQeWLk=
+
+# ========== 聊天配置 ==========
+chat:
+  context:
+    max-rounds: 20
+  sse-timeout: 300000

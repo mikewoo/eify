@@ -1,0 +1,2 @@
+com.eify.common.log.mq.MsgLogAutoConfiguration
+com.eify.common.log.SqlLogAutoConfiguration

@@ -1,0 +1,62 @@
+# eify-knowledge 模块配置
+# 注意：此模块作为 eify-app 的依赖运行，实际配置以 eify-app 的 application.yml 为准。
+# 以下配置仅用于独立测试时参考。
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: eify-knowledge
+
+  # PostgreSQL 数据源（pgvector）
+  # 实际运行时由 PgVectorConfig 读取 spring.datasource-pgvector.* 配置
+  datasource-pgvector:
+    url: ${PGVECTOR_URL:jdbc:postgresql://localhost:5432/eify_vector?stringtype=unspecified}
+    username: ${PGVECTOR_USERNAME:postgres}
+    password: ${PGVECTOR_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+      enabled: true
+
+  # 缓存配置
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=1h
+
+# 知识库配置
+knowledge:
+  storage:
+    path: ./uploads/documents
+    enabled: true
+
+  # 文档处理配置
+  processing:
+    supported-types: ["txt", "pdf", "doc", "docx", "md"]
+    default-chunk-size: 500
+    default-chunk-overlap: 50
+    max-file-size: 10
+    async-processing: true
+
+  # 检索配置
+  retrieval:
+    default-top-k: 5
+    default-strategy: hybrid
+    default-keyword-weight: 0.3
+    default-vector-weight: 0.7
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.eify: INFO
+    com.eify.knowledge: DEBUG
+
+app:
+  version: 1.0.0-SNAPSHOT

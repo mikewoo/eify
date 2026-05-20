@@ -1,0 +1,250 @@
+# =============================================================================
+# Vector 配置 - Eify 项目日志采集（优化版）
+# =============================================================================
+# 对应 ClickHouse 优化表结构：使用 Nullable 减少存储浪费
+# =============================================================================
+
+[sources.file_logs]
+type = "file"
+include = ["/logs/*.log"]
+
+# =============================================================================
+# 数据转换：解析 JSON 并映射到 ClickHouse 优化表结构
+# =============================================================================
+[transforms.parse_log]
+type = "remap"
+inputs = ["file_logs"]
+source = '''
+  # 解析纯 JSON 格式日志
+  . = parse_json!(.message)
+  del(.source)
+  del(.host)
+
+  # 保留标准字段（所有日志类型）
+  # timestamp, pid, className, lineNumber, level, logType, traceId, spanId
+  # appName, serverIp, appVersion, pod, duration 已在顶层
+
+  # ==================== 处理 message 字段 ====================
+  # 1. 将原始 message JSON 存储为 JSON 字符串
+  if exists(.message) {
+    ._original_message = encode_json(.message)
+  }
+
+  # ==================== 提取专用字段 ====================
+  # 注意：新格式下，REQ/SQL/MSG 专用字段已直接在顶层
+  # 以下逻辑仅用于向后兼容旧格式（字段在 message 中）
+
+  # 兼容旧格式 REQ 日志：从 message 中提取字段到顶层
+  if .logType == "req" {
+    if exists(.message.clientIp) && .clientIp == null {
+      .clientIp = .message.clientIp
+    }
+    if exists(.message.method) && .method == null {
+      .method = .message.method
+    }
+    if exists(.message.path) && .path == null {
+      .path = .message.path
+    }
+    if exists(.message.status) && .status == null {
+      .status = .message.status
+    }
+    if exists(.message.userAgent) && .userAgent == null {
+      .userAgent = .message.userAgent
+    }
+    if exists(.message.requestBody) && .requestBody == null {
+      .requestBody = .message.requestBody
+    }
+    if exists(.message.requestBodySize) && .requestBodySize == null {
+      .requestBodySize = .message.requestBodySize
+    }
+    if exists(.message.responseBody) && .response == null {
+      .response = .message.responseBody
+    }
+    if exists(.message.responseSize) && .responseSize == null {
+      .responseSize = .message.responseSize
+    }
+    if exists(.message.error) && .error == null {
+      .error = .message.error
+    }
+    if exists(.message.asyncRequest) && .asyncRequest == null {
+      .asyncRequest = .message.asyncRequest
+    }
+    if exists(.message.asyncType) && .asyncType == null {
+      .asyncType = .message.asyncType
+    }
+    if exists(.message.asyncCompletionStatus) && .asyncCompletionStatus == null {
+      .asyncCompletionStatus = .message.asyncCompletionStatus
+    }
+  }
+
+  # 兼容旧格式 SQL 日志
+  if .logType == "sql" {
+    if exists(.message.sql) && .sql == null {
+      .sql = .message.sql
+    }
+    if exists(.message.executionTime) && .executionTime == null {
+      .executionTime = .message.executionTime
+    }
+    if exists(.message.isSlowQuery) && .isSlowQuery == null {
+      .isSlowQuery = .message.isSlowQuery
+    }
+    if exists(.message.rowCount) && .rowCount == null {
+      .rowCount = .message.rowCount
+    }
+    if exists(.message.errorStack) && .errorStack == null {
+      .errorStack = .message.errorStack
+    }
+  }
+
+  # 兼容旧格式 MSG 日志
+  if .logType == "msg" {
+    if exists(.message.msgType) && .msgType == null {
+      .msgType = .message.msgType
+    }
+    if exists(.message.operationType) && .operationType == null {
+      .operationType = .message.operationType
+    }
+    if exists(.message.topic) && .topic == null {
+      .topic = .message.topic
+    }
+    if exists(.message.partition) && .partition == null {
+      .partition = .message.partition
+    }
+    if exists(.message.offset) && .offset == null {
+      .offset = .message.offset
+    }
+    if exists(.message.key) && .key == null {
+      .key = .message.key
+    }
+    if exists(.message.consumerGroupId) && .consumerGroupId == null {
+      .consumerGroupId = .message.consumerGroupId
+    }
+    if exists(.message.processResult) && .processResult == null {
+      .processResult = .message.processResult
+    }
+    if exists(.message.error) && .error == null {
+      .error = .message.error
+    }
+    if exists(.message.retryCount) && .retryCount == null {
+      .retryCount = .message.retryCount
+    }
+    if exists(.message.producerTime) && .producerTime == null {
+      .producerTime = .message.producerTime
+    }
+    if exists(.message.consumerTime) && .consumerTime == null {
+      .consumerTime = .message.consumerTime
+    }
+    if exists(.message.payloadSize) && .payloadSize == null {
+      .payloadSize = .message.payloadSize
+    }
+  }
+
+  # ==================== 处理 exception 字段 ====================
+  # 将 exception 对象转换为 JSON 字符串
+  if exists(.exception) {
+    .exception = encode_json(.exception)
+  }
+
+  # ==================== 恢复 message 字段 ====================
+  # 将原始 message JSON 字符串存入 message 列
+  if exists(._original_message) {
+    .message = ._original_message
+    del(._original_message)
+  }
+'''
+
+# =============================================================================
+# ClickHouse Sink（写入优化后的表）
+# =============================================================================
+[sinks.clickhouse]
+type = "clickhouse"
+inputs = ["parse_log"]
+endpoint = "${CLICKHOUSE_ENDPOINT:http://localhost:8123}"
+database = "logs"
+table = "app_logs"
+auth.strategy = "basic"
+auth.user = "default"
+auth.password = "${CLICKHOUSE_PASSWORD:}"
+
+# 批量写入配置
+batch.max_events = 100
+batch.timeout_secs = 5
+
+# 可选：启用压缩
+compression = "gzip"
+
+# =============================================================================
+# Console Sink（调试用）
+# =============================================================================
+[sinks.console]
+type = "console"
+inputs = ["parse_log"]
+encoding.codec = "json"
+
+# =============================================================================
+# API（健康检查和监控）
+# =============================================================================
+[api]
+enabled = true
+address = "127.0.0.1:8686"
+
+# =============================================================================
+# 字段映射说明
+# =============================================================================
+# ClickHouse 表字段 → Vector 字段
+#
+# 标准字段（所有日志类型）：
+# - timestamp → .timestamp
+# - pid → .pid
+# - className → .className
+# - lineNumber → .lineNumber
+# - level → .level
+# - logType → .logType
+# - traceId → .traceId
+# - spanId → .spanId
+# - appName → .appName
+# - serverIp → .serverIp
+# - appVersion → .appVersion
+# - pod → .pod
+# - duration → .duration
+#
+# 通用字段：
+# - message → .message (JSON 字符串)
+# - exception → .exception (JSON 字符串)
+#
+# REQ 日志字段（仅 req 类型）：
+# - clientIp → .clientIp (Nullable String)
+# - method → .method (Nullable String)
+# - path → .path (Nullable String)
+# - status → .status (Nullable UInt32)
+# - userAgent → .userAgent (Nullable String)
+# - error → .error (Nullable String)
+# - requestBody → .requestBody (Nullable String)
+# - requestBodySize → .requestBodySize (Nullable UInt32)
+# - response → .response (Nullable String)
+# - responseSize → .responseSize (Nullable UInt32)
+# - asyncRequest → .asyncRequest (Nullable UInt8)
+# - asyncType → .asyncType (Nullable String)
+# - asyncCompletionStatus → .asyncCompletionStatus (Nullable String)
+#
+# SQL 日志字段（仅 sql 类型）：
+# - sql → .sql (Nullable String)
+# - executionTime → .executionTime (Nullable UInt32)
+# - isSlowQuery → .isSlowQuery (Nullable UInt8)
+# - rowCount → .rowCount (Nullable UInt32)
+# - errorStack → .errorStack (Nullable String)
+#
+# MSG 日志字段（仅 msg 类型）：
+# - msgType → .msgType (Nullable String)
+# - operationType → .operationType (Nullable String)
+# - topic → .topic (Nullable String)
+# - partition → .partition (Nullable UInt32)
+# - offset → .offset (Nullable UInt64)
+# - key → .key (Nullable String)
+# - consumerGroupId → .consumerGroupId (Nullable String)
+# - processResult → .processResult (Nullable String)
+# - error → .error (Nullable String)
+# - retryCount → .retryCount (Nullable UInt32)
+# - producerTime → .producerTime (Nullable DateTime64)
+# - consumerTime → .consumerTime (Nullable DateTime64)
+# - payloadSize → .payloadSize (Nullable UInt32)

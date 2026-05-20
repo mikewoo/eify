@@ -1,0 +1,58 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime data
+*.log
+logs/
+uploads/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Spring Boot
+spring-boot-*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE / Tooling
+.claude/
+.qodo/
+*.swo
+
+# Build artifacts
+*.jar
+*.class
+dist/
+node_modules/
+
+# Local config
+application-local.yml
+application-local.properties
+
+# SQL dumps (keep deploy/ sql files)
+*.sql
+!deploy/**/*.sql
