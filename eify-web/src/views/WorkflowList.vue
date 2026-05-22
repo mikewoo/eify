@@ -120,15 +120,25 @@
       </div>
     </template>
   </EifyListPage>
+
+  <ConfirmDialog
+    :show="showDeleteConfirm"
+    :title="t('common.confirmDeleteTitle')"
+    :message="deleteTarget ? t('workflow.confirmDeleteWithName', { name: deleteTarget.name }) : ''"
+    type="danger"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus, Edit, Delete, Connection } from '@element-plus/icons-vue'
 import EifyListPage from '@/components/EifyListPage.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const { t } = useI18n()
 import type { ListStat } from '@/types/api'
@@ -179,6 +189,10 @@ const searchFieldsConfig = computed(() => [
 
 const listPageRef = ref()
 const router = useRouter()
+
+// 删除确认
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref<{ id: number; name: string } | null>(null)
 
 /* ========== 统计配置 ========== */
 
@@ -286,21 +300,24 @@ const handleEdit = (row: { id: number }) => {
   router.push(`/workflows/${row.id}/edit`)
 }
 
-const handleDelete = async (row: { id: number; name: string }) => {
+const handleDelete = (row: { id: number; name: string }) => {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value) return
   try {
-    await ElMessageBox.confirm(
-      t('workflow.confirmDeleteWithName', { name: row.name }),
-      t('common.confirmDeleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-    await deleteWorkflow(row.id)
-  } catch {
-    // 用户取消
+    await deleteWorkflow(deleteTarget.value.id)
+  } finally {
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
   }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTarget.value = null
 }
 
 </script>

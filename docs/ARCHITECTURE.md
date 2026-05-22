@@ -99,6 +99,9 @@ eify-[module]/
 │   │   ├── entity/        # 数据库实体
 │   │   ├── vo/            # 视图对象（返回前端）
 │   │   └── dto/           # 数据传输对象（接收前端）
+│   ├── route/            # 路由解析（可选，如 eify-knowledge 的 EmbeddingRouteResolver）
+│   ├── strategy/         # 策略模式实现（可选，如嵌入策略、检索策略）
+│   ├── adapter/          # 适配器实现（可选，如 eify-provider 的 ProviderAdapter）
 │   ├── config/           # 模块配置
 │   ├── client/           # 外部服务客户端（可选）
 │   ├── exception/        # 模块异常
@@ -154,13 +157,13 @@ eify-auth/
 |:---|:---|
 | eify-common | MyBatis-Plus、Redis、SLF4J/Logback、Micrometer Tracing、OkHttp |
 | eify-auth | Hutool JWT、Spring Security Crypto (BCrypt)、MyBatis-Plus |
-| eify-provider | Spring WebFlux (WebClient)、MyBatis-Plus |
+| eify-provider | Spring WebFlux (WebClient)、MyBatis-Plus、OkHttp（连接测试 + 模型同步） |
 | eify-agent | MyBatis-Plus、Redis（Agent 配置缓存） |
 | eify-chat | MyBatis-Plus、Redis（对话上下文）、SSE (SseEmitter) |
 | eify-mcp | MCP SDK (`io.modelcontextprotocol.sdk:mcp:1.1.1`) |
-| eify-knowledge | pgvector、PostgreSQL、PDFBox 2.0.27、Apache POI 5.2.3、Caffeine（双存储设计见 [ADR](ADRs/ADR-0004-dual-storage-mysql-pgvector.md)）|
+| eify-knowledge | pgvector、PostgreSQL、PDFBox 2.0.27、Apache POI 5.2.3、OkHttp（嵌入 API 调用）、Caffeine（双存储设计见 [ADR](ADRs/ADR-0004-dual-storage-mysql-pgvector.md)）|
 | eify-workflow | GraalVM Polyglot 24.1.0（JS 引擎）、MyBatis-Plus |
-| eify-app | Spring Boot 4.0.6、JwtAuthFilter、所有 8 个业务模块 |
+| eify-app | Spring Boot 4.0.6、JwtAuthFilter（iss/aud 校验 + HttpOnly Cookie）、Flyway（MySQL + pgvector）、所有 8 个业务模块 |
 
 ---
 
@@ -201,7 +204,7 @@ eify-auth/
 | eify-provider | common, auth | 使用 CurrentContext 做工作空间隔离 |
 | eify-mcp | common, auth | 使用 CurrentContext 做工作空间隔离 |
 | eify-agent | common, auth, provider, mcp | 调用提供商测试 Agent、绑定 MCP 工具 |
-| eify-knowledge | common, auth, provider | 调用嵌入模型做向量化 |
+| eify-knowledge | common, auth, provider | 调用嵌入模型做向量化，EmbeddingRouteResolver 通过 ProviderAdapterFactory 获取嵌入端点 |
 | eify-workflow | common, auth, provider, mcp | 执行节点调用 LLM 和 MCP 工具 |
 | eify-chat | common, auth, agent, provider, knowledge, mcp, workflow | 对话引擎串联全部能力 |
 | eify-app | 全部 8 个模块 | 启动模块，聚合所有依赖 |
@@ -280,7 +283,7 @@ common/api/
 
 ### 异常处理规范
 
-所有错误码统一定义在 `eify-common` 的 `ErrorCode` 枚举中（60+ 错误码），按模块分类：
+所有错误码统一定义在 `eify-common` 的 `ErrorCode` 枚举中（80+ 错误码），按模块分类：
 - **通用**：`SUCCESS(0)`、`BAD_REQUEST(400)`、`UNAUTHORIZED(401)`、`FORBIDDEN(403)`、`NOT_FOUND(404)`、`INTERNAL_ERROR(500)`
 - **Provider**：`PROVIDER_NOT_FOUND(2001)`、`PROVIDER_CIRCUIT_OPEN(2004)` 等
 - **Workflow**：`WORKFLOW_NODE_TIMEOUT(3001)`、`WORKFLOW_EXECUTION_FAILED(3002)` 等
@@ -427,7 +430,7 @@ class AgentServiceImplTest {
 - **P0**：异常路径（资源不存在、跨 workspace 访问、名称重复、参数校验）
 - **P1**：正常流程（CRUD 操作、分页查询、字段绑定）
 
-### 覆盖率（821 个测试，63 个测试文件）
+### 覆盖率（860+ 个测试，67 个测试文件）
 
 | 模块 | 测试数 | 测试文件数 | 主要测试文件 |
 |:---|---:|---:|:---|

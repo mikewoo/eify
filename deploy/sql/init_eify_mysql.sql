@@ -2,7 +2,7 @@
 -- Eify 数据库初始化脚本（统一入口）
 -- 执行方式：mysql -u root -p < deploy/sql/init_eify_mysql.sql
 -- 适用环境：dev / prod
--- 最后更新：2026-05-20
+-- 最后更新：2026-05-22
 -- ============================================================
 --
 -- 表清单（按模块分组）：
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `provider` (
     `creator_id`    BIGINT UNSIGNED NOT NULL DEFAULT 0     COMMENT '创建人ID',
 
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`),
+    UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`),
     KEY `idx_type_enabled` (`type`, `enabled`),
     KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型供应商表';
@@ -145,6 +145,7 @@ CREATE TABLE IF NOT EXISTS `model_config` (
     `provider_id`   BIGINT UNSIGNED NOT NULL               COMMENT '所属供应商ID',
     `name`          VARCHAR(100)    NOT NULL               COMMENT '展示名，如 GPT-4o',
     `model_id`      VARCHAR(100)    NOT NULL               COMMENT '调用时传给 API 的值',
+    `model_category` TINYINT UNSIGNED NOT NULL DEFAULT 0   COMMENT '模型主类别：0=CHAT, 1=EMBEDDING, 2=RERANK, 3=MULTIMODAL',
     `context_size`  INT UNSIGNED    NOT NULL DEFAULT 0     COMMENT '上下文窗口大小（token 数）',
     `extra_params`  JSON            NOT NULL               COMMENT '模型级别扩展参数（JSON）',
     `enabled`       TINYINT         NOT NULL DEFAULT 1     COMMENT '启用状态：0=禁用，1=启用',
@@ -158,6 +159,7 @@ CREATE TABLE IF NOT EXISTS `model_config` (
     PRIMARY KEY (`id`),
     KEY `idx_provider_id` (`provider_id`),
     KEY `idx_model_id` (`model_id`),
+    KEY `idx_model_category` (`model_category`),
     KEY `idx_enabled_deleted` (`enabled`, `deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='模型配置表';
 
@@ -231,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `ai_agent` (
     `creator_id`          BIGINT UNSIGNED DEFAULT NULL           COMMENT '创建人ID',
 
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`),
+    UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`),
     KEY `idx_default_provider_id` (`default_provider_id`),
     KEY `idx_enabled_deleted` (`enabled`, `deleted`),
     KEY `idx_created_at` (`created_at`),
@@ -298,10 +300,11 @@ CREATE TABLE IF NOT EXISTS `knowledge_base` (
     `workspace_id`     BIGINT UNSIGNED NOT NULL DEFAULT 1     COMMENT '工作空间 ID',
     `name`             VARCHAR(100)    NOT NULL               COMMENT '知识库名称',
     `description`      VARCHAR(500)    DEFAULT NULL           COMMENT '描述',
-    `embedding_model`  VARCHAR(100)    NOT NULL DEFAULT 'text-embedding-3-small' COMMENT '嵌入模型名称',
-    `vector_dimension` INT             NOT NULL DEFAULT 1536  COMMENT '向量维度',
-    `chunk_size`       INT             NOT NULL DEFAULT 500   COMMENT '分块大小（字符数）',
-    `chunk_overlap`    INT             NOT NULL DEFAULT 50    COMMENT '分块重叠（字符数）',
+    `embedding_model`    VARCHAR(100)    NOT NULL DEFAULT ''         COMMENT '嵌入模型名称',
+    `embedding_model_id` BIGINT UNSIGNED DEFAULT NULL               COMMENT '嵌入模型 FK -> model_config.id，NULL 时降级到全局配置',
+    `vector_dimension`   INT             NOT NULL DEFAULT 0         COMMENT '向量维度（由所选模型决定）',
+    `chunk_size`       INT             NOT NULL DEFAULT 0     COMMENT '分块大小（字符数）',
+    `chunk_overlap`    INT             NOT NULL DEFAULT 0     COMMENT '分块重叠（字符数）',
     `document_count`   INT             NOT NULL DEFAULT 0     COMMENT '文档数',
     `chunk_count`      INT             NOT NULL DEFAULT 0     COMMENT '分块数',
     `retrieval_count`  INT             NOT NULL DEFAULT 0     COMMENT '检索次数',
@@ -313,10 +316,11 @@ CREATE TABLE IF NOT EXISTS `knowledge_base` (
     `creator_id`       BIGINT UNSIGNED NOT NULL DEFAULT 0     COMMENT '创建人ID',
 
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`),
+    UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`),
     KEY `idx_enabled` (`enabled`),
     KEY `idx_deleted` (`deleted`),
-    KEY `idx_workspace_id` (`workspace_id`)
+    KEY `idx_workspace_id` (`workspace_id`),
+    KEY `idx_embedding_model_id` (`embedding_model_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='知识库表';
 
 -- 文档表
@@ -382,7 +386,7 @@ CREATE TABLE IF NOT EXISTS `mcp_server` (
     `workspace_id`  BIGINT UNSIGNED NOT NULL DEFAULT 1     COMMENT '工作空间 ID',
 
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`),
+    UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`),
     KEY `idx_deleted` (`deleted`),
     KEY `idx_workspace_id` (`workspace_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='MCP 服务器';
@@ -444,7 +448,7 @@ CREATE TABLE IF NOT EXISTS `ai_workflow` (
     `creator_id`    BIGINT UNSIGNED NOT NULL DEFAULT 0     COMMENT '创建人ID',
 
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`),
+    UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`),
     KEY `idx_workspace_id` (`workspace_id`),
     KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工作流主表';

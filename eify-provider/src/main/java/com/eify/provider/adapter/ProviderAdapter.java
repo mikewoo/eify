@@ -48,4 +48,12 @@ public interface ProviderAdapter {
      * @return 响应式流，每个元素是一个内容块
      */
     Flux<ChatStreamChunk> streamChat(Provider provider, ChatRequest request);
+
+    /**
+     * 获取 Embedding API 端点路径（相对路径）。
+     * 默认返回 OpenAI 兼容的 /embeddings，子类可覆盖。
+     */
+    default String getEmbeddingEndpoint() {
+        return "/embeddings";
+    }
 }

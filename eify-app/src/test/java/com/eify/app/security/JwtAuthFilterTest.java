@@ -35,14 +35,20 @@ class JwtAuthFilterTest {
     @BeforeEach
     void setUp() throws Exception {
         filter = new JwtAuthFilter();
-        var field = JwtAuthFilter.class.getDeclaredField("jwtSecret");
-        field.setAccessible(true);
-        field.set(filter, SECRET);
+        setField(filter, "jwtSecret", SECRET);
+        setField(filter, "jwtIssuer", "eify-test");
+        setField(filter, "jwtAudience", "eify-api");
 
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         chain = mock(FilterChain.class);
         responseWriter = new StringWriter();
+    }
+
+    private static void setField(Object target, String name, Object value) throws Exception {
+        var field = JwtAuthFilter.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 
     @AfterEach
@@ -54,9 +60,11 @@ class JwtAuthFilterTest {
         Map<String, Object> payload = new HashMap<>();
         payload.put("sub", userId);
         payload.put("wid", workspaceId);
+        payload.put("iss", "eify-test");
+        payload.put("aud", "eify-api");
         long now = System.currentTimeMillis() / 1000;
         payload.put("iat", now);
-        payload.put("exp", now + 3600); // 1 小时后过期
+        payload.put("exp", now + 3600);
         byte[] key = SECRET.getBytes(StandardCharsets.UTF_8);
         return JWTUtil.createToken(payload, key);
     }

@@ -6,6 +6,7 @@ import tools.jackson.databind.JsonNode;
 import com.eify.common.entity.BaseEntity;
 import com.eify.common.handler.JsonTypeHandler;
 import com.eify.common.workspace.WorkspaceAware;
+import com.eify.provider.constant.ModelCategory;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -41,6 +42,12 @@ public class ModelConfig extends BaseEntity implements WorkspaceAware {
      */
     @TableField("model_id")
     private String modelId;
+
+    /**
+     * 模型主类别：0=CHAT, 1=EMBEDDING, 2=RERANK, 3=MULTIMODAL
+     */
+    @TableField("model_category")
+    private ModelCategory modelCategory;
 
     /**
      * 上下文窗口大小（token 数）

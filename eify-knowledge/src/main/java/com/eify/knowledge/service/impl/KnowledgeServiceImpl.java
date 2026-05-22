@@ -16,6 +16,8 @@ import com.eify.common.result.PageResult;
 import com.eify.common.util.PageHelper;
 import com.eify.common.context.CurrentContext;
 import com.eify.common.workspace.WorkspaceGuard;
+import com.eify.provider.domain.entity.ModelConfig;
+import com.eify.provider.mapper.ModelConfigMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeRepository, Knowl
 
     private final KnowledgeRepository knowledgeRepository;
     private final ChunkRepository chunkRepository;
+    private final ModelConfigMapper modelConfigMapper;
 
     @Override
     @Transactional
@@ -50,6 +53,18 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeRepository, Knowl
         kb.setEnabled(1);
         kb.setDocumentCount(0);
         kb.setChunkCount(0);
+
+        if (request.getEmbeddingModelId() != null) {
+            ModelConfig mc = modelConfigMapper.selectOne(new LambdaQueryWrapper<ModelConfig>()
+                    .eq(ModelConfig::getId, request.getEmbeddingModelId())
+                    .eq(ModelConfig::getWorkspaceId, CurrentContext.getWorkspaceId())
+                    .eq(ModelConfig::getEnabled, 1));
+            if (mc == null) {
+                throw new BusinessException(ErrorCode.EMBEDDING_MODEL_NOT_AVAILABLE);
+            }
+            kb.setEmbeddingModelId(request.getEmbeddingModelId());
+        }
+
         WorkspaceGuard.bind(kb);
 
         save(kb);
@@ -71,6 +86,16 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeRepository, Knowl
         }
         if (request.getDescription() != null) kb.setDescription(request.getDescription());
         if (request.getEmbeddingModel() != null) kb.setEmbeddingModel(request.getEmbeddingModel());
+        if (request.getEmbeddingModelId() != null) {
+            ModelConfig mc = modelConfigMapper.selectOne(new LambdaQueryWrapper<ModelConfig>()
+                    .eq(ModelConfig::getId, request.getEmbeddingModelId())
+                    .eq(ModelConfig::getWorkspaceId, CurrentContext.getWorkspaceId())
+                    .eq(ModelConfig::getEnabled, 1));
+            if (mc == null) {
+                throw new BusinessException(ErrorCode.EMBEDDING_MODEL_NOT_AVAILABLE);
+            }
+            kb.setEmbeddingModelId(request.getEmbeddingModelId());
+        }
         if (request.getVectorDimension() != null) kb.setVectorDimension(request.getVectorDimension());
         if (request.getChunkSize() != null) kb.setChunkSize(request.getChunkSize());
         if (request.getChunkOverlap() != null) kb.setChunkOverlap(request.getChunkOverlap());

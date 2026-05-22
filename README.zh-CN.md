@@ -36,6 +36,71 @@
 | **多租户工作空间** | JWT 认证 + 工作空间级数据隔离，适合团队使用 |
 | **完整日志链路** | Micrometer Tracing + Brave 链路追踪，ClickHouse + Vector 日志采集 |
 
+## 界面截图
+
+### AI 对话
+
+<p align="center">
+  <img src="docs/images/screenshots/02_Chat_mgmt.png" alt="AI 对话" width="80%">
+</p>
+
+### Agent 与模型供应商管理
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/03_Agent_mgmt.png" alt="Agent 管理"></td>
+    <td width="50%"><img src="docs/images/screenshots/04_Model_Providers_mgmt.png" alt="模型供应商"></td>
+  </tr>
+</table>
+
+### 知识库与 RAG 检索
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/05_1_Knowleage_Base_mgmt.png" alt="知识库管理"></td>
+    <td width="50%"><img src="docs/images/screenshots/05_2_Knowleage_Document_mgmt.png" alt="文档管理"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/images/screenshots/05_3_Knowleage_Document_preview.png" alt="文档预览"></td>
+  </tr>
+</table>
+
+### 可视化工作流编辑器
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/06_1_Workflow_mgmt.png" alt="工作流管理"></td>
+    <td width="50%"><img src="docs/images/screenshots/06_2_Workflow_Edit.png" alt="工作流编辑器"></td>
+  </tr>
+</table>
+
+### MCP 工具
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/07_1_MCP_Server_mgmt.png" alt="MCP Server 管理"></td>
+    <td width="50%"><img src="docs/images/screenshots/07_2_MCP_Server_details.png" alt="MCP Server 详情"></td>
+  </tr>
+</table>
+
+### 多租户工作空间
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/09_Create_workspace.png" alt="创建工作空间"></td>
+    <td width="50%"><img src="docs/images/screenshots/08_Personal_profile.png" alt="个人中心"></td>
+  </tr>
+</table>
+
+### 认证登录
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/01_1_Login.png" alt="登录"></td>
+    <td width="50%"><img src="docs/images/screenshots/01_2_Register.png" alt="注册"></td>
+  </tr>
+</table>
+
 ## 快速开始
 
 ### 前置条件

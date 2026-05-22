@@ -5,6 +5,7 @@ import com.eify.common.workspace.WorkspaceGuard;
 import com.eify.provider.adapter.ProviderAdapterFactory;
 import com.eify.provider.adapter.ProviderAdapter;
 import com.eify.provider.domain.dto.ConnectionTestResult;
+import com.eify.provider.constant.ModelCategory;
 import com.eify.provider.domain.entity.ModelConfig;
 import com.eify.provider.domain.entity.Provider;
 import com.eify.provider.mapper.ModelConfigMapper;
@@ -92,6 +93,7 @@ public class ProviderConnectionTestServiceImpl implements ProviderConnectionTest
                 mc.setName(modelId);
                 mc.setModelId(modelId);
                 mc.setContextSize(0);
+                mc.setModelCategory(ModelCategory.fromModelId(modelId));
                 mc.setEnabled(1);
                 mc.setExtraParams(JsonNodeFactory.instance.objectNode());
                 WorkspaceGuard.bind(mc);

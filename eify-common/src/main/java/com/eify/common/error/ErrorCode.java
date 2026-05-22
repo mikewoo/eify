@@ -81,6 +81,7 @@ public enum ErrorCode {
     PASSWORD_INCORRECT(8003, "密码错误"),
     TOKEN_EXPIRED(8004, "登录已过期，请重新登录"),
     TOKEN_INVALID(8005, "令牌无效"),
+    TOKEN_REUSE_DETECTED(8015, "检测到令牌重用，已撤销所有会话，请重新登录"),
     WORKSPACE_NOT_FOUND(8006, "工作空间不存在"),
     NOT_WORKSPACE_MEMBER(8007, "不是该工作空间成员"),
     WORKSPACE_ACCESS_DENIED(8008, "无权访问该工作空间"),
@@ -101,6 +102,7 @@ public enum ErrorCode {
     EMBEDDING_FAILED(7004, "向量化失败"),
     KNOWLEDGE_NAME_DUPLICATE(7005, "知识库名称已存在"),
     DOCUMENT_NOT_FOUND(7006, "文档不存在"),
+    EMBEDDING_MODEL_NOT_AVAILABLE(7007, "选定的嵌入模型不可用，请检查供应商配置"),
     ;
 
     /**

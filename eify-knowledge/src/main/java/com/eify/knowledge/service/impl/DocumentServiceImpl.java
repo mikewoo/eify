@@ -15,6 +15,8 @@ import com.eify.knowledge.domain.entity.KnowledgeBase;
 import com.eify.knowledge.repository.ChunkRepository;
 import com.eify.knowledge.repository.DocumentRepository;
 import com.eify.knowledge.repository.KnowledgeRepository;
+import com.eify.knowledge.route.EmbeddingRoute;
+import com.eify.knowledge.route.EmbeddingRouteResolver;
 import com.eify.knowledge.service.DocumentService;
 import com.eify.knowledge.strategy.EmbeddingStrategy;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +54,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final KnowledgeRepository knowledgeRepository;
     private final ChunkRepository chunkRepository;
     private final EmbeddingStrategy embeddingStrategy;
+    private final EmbeddingRouteResolver routeResolver;
 
     private static final Path UPLOAD_DIR = Paths.get("uploads/documents");
 
@@ -159,9 +162,10 @@ public class DocumentServiceImpl implements DocumentService {
                 return;
             }
 
-            // ④ 向量化：调用 Embedding API
+            // ④ 向量化：按知识库绑定的嵌入模型路由
             log.info("[Document] 向量化 {} 个新分块 (跳过 {} 个已存在)", newTexts.size(), existingSet.size());
-            List<float[]> embeddings = embeddingStrategy.embedBatch(newTexts);
+            EmbeddingRoute route = routeResolver.resolve(kb);
+            List<float[]> embeddings = embeddingStrategy.embedBatch(newTexts, route);
 
             // ⑤ 存储：写入 pgvector
             List<DocumentChunk> chunks = new ArrayList<>();

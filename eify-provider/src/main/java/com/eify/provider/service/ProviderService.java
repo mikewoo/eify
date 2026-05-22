@@ -3,7 +3,9 @@ package com.eify.provider.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.eify.common.result.PageResult;
 import com.eify.provider.constant.ProviderType;
+import com.eify.provider.constant.ModelCategory;
 import com.eify.provider.domain.dto.ConnectionTestResult;
+import com.eify.provider.domain.dto.ModelCreateRequest;
 import com.eify.provider.domain.dto.ProviderCreateRequest;
 import com.eify.provider.domain.dto.ProviderResponse;
 import com.eify.provider.domain.dto.ProviderUpdateRequest;
@@ -92,4 +94,32 @@ public interface ProviderService {
      * @return 模型配置列表
      */
     List<ProviderResponse.ModelConfigInfo> getModels(Long id);
+
+    /**
+     * 获取供应商下的模型列表（按类别过滤）
+     *
+     * @param id 供应商ID
+     * @param category 模型类别，null 表示不过滤
+     * @return 模型配置列表
+     */
+    List<ProviderResponse.ModelConfigInfo> getModels(Long id, ModelCategory category);
+
+    /**
+     * 获取供应商下的模型列表（按类别和启用状态过滤）
+     *
+     * @param id 供应商ID
+     * @param category 模型类别，null 表示不过滤
+     * @param enabled 启用状态，null 表示不过滤
+     * @return 模型配置列表
+     */
+    List<ProviderResponse.ModelConfigInfo> getModels(Long id, ModelCategory category, Integer enabled);
+
+    /**
+     * 手动添加模型配置
+     *
+     * @param providerId 供应商ID
+     * @param request 创建请求
+     * @return 创建后的模型配置
+     */
+    ProviderResponse.ModelConfigInfo createModel(Long providerId, ModelCreateRequest request);
 }

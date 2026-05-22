@@ -12,8 +12,10 @@ import com.eify.common.exception.BusinessException;
 import com.eify.common.result.PageResult;
 import com.eify.common.util.PageHelper;
 import com.eify.common.workspace.WorkspaceGuard;
+import com.eify.provider.constant.ModelCategory;
 import com.eify.provider.constant.ProviderType;
 import com.eify.provider.domain.dto.ConnectionTestResult;
+import com.eify.provider.domain.dto.ModelCreateRequest;
 import com.eify.provider.domain.dto.ProviderCreateRequest;
 import com.eify.provider.domain.dto.ProviderResponse;
 import com.eify.provider.domain.dto.ProviderUpdateRequest;
@@ -145,9 +147,50 @@ public class ProviderServiceImpl implements ProviderService {
 
     @Override
     public List<ProviderResponse.ModelConfigInfo> getModels(Long id) {
+        return getModels(id, null, null);
+    }
+
+    @Override
+    public List<ProviderResponse.ModelConfigInfo> getModels(Long id, ModelCategory category) {
+        return getModels(id, category, null);
+    }
+
+    @Override
+    public List<ProviderResponse.ModelConfigInfo> getModels(Long id, ModelCategory category, Integer enabled) {
         WorkspaceGuard.requireInWorkspace(
                 providerMapper.selectById(id), ErrorCode.NOT_FOUND);
-        return getModelConfigs(id);
+        return getModelConfigs(id, category, enabled);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "provider-cache", key = "#providerId")
+    public ProviderResponse.ModelConfigInfo createModel(Long providerId, ModelCreateRequest request) {
+        Provider provider = WorkspaceGuard.requireInWorkspace(
+                providerMapper.selectById(providerId), ErrorCode.NOT_FOUND);
+        if (provider.getEnabled() == null || provider.getEnabled() != 1) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "供应商已禁用，无法添加模型");
+        }
+
+        ModelConfig mc = new ModelConfig();
+        mc.setProviderId(providerId);
+        mc.setModelId(request.getModelId());
+        mc.setName(request.getDisplayName());
+        mc.setModelCategory(ModelCategory.fromValue(request.getCategory()));
+        mc.setEnabled(request.getEnabled() != null ? request.getEnabled() : 1);
+        mc.setExtraParams(request.getExtraParams() != null
+                ? request.getExtraParams()
+                : new tools.jackson.databind.node.ObjectNode(tools.jackson.databind.node.JsonNodeFactory.instance));
+        if (request.getContextSize() != null) {
+            mc.setContextSize(request.getContextSize());
+        }
+        WorkspaceGuard.bind(mc);
+
+        modelConfigMapper.insert(mc);
+        log.info("手动添加模型成功: providerId={}, modelId={}, category={}",
+                providerId, request.getModelId(), mc.getModelCategory());
+
+        return toModelConfigInfo(mc);
     }
 
     @Override
@@ -297,6 +340,8 @@ public class ProviderServiceImpl implements ProviderService {
         info.setId(config.getId());
         info.setModelName(config.getModelId());
         info.setDisplayName(config.getName());
+        info.setCategory(config.getModelCategory());
+        info.setExtraParams(config.getExtraParams());
         return info;
     }
 
@@ -305,7 +350,7 @@ public class ProviderServiceImpl implements ProviderService {
      */
     private ProviderResponse toFullResponse(Provider provider) {
         // 查询模型配置
-        List<ProviderResponse.ModelConfigInfo> modelConfigs = getModelConfigs(provider.getId());
+        List<ProviderResponse.ModelConfigInfo> modelConfigs = getModelConfigs(provider.getId(), null, null);
 
         // 查询健康状态
         ProviderResponse.ProviderHealthInfo health = getProviderHealth(provider.getId());
@@ -327,9 +372,15 @@ public class ProviderServiceImpl implements ProviderService {
     /**
      * 获取模型配置列表
      */
-    private List<ProviderResponse.ModelConfigInfo> getModelConfigs(Long providerId) {
+    private List<ProviderResponse.ModelConfigInfo> getModelConfigs(Long providerId, ModelCategory category, Integer enabled) {
         LambdaQueryWrapper<ModelConfig> wrapper = new LambdaQueryWrapper<ModelConfig>()
                 .eq(ModelConfig::getProviderId, providerId);
+        if (category != null) {
+            wrapper.eq(ModelConfig::getModelCategory, category);
+        }
+        if (enabled != null) {
+            wrapper.eq(ModelConfig::getEnabled, enabled);
+        }
 
         List<ModelConfig> configs = modelConfigMapper.selectList(wrapper);
         return configs.stream()

@@ -12,6 +12,7 @@
     :card-page-size="8"
     :show-stats="true"
     :stats="statsConfig"
+    :action-width="320"
     @search="handleAdvancedSearch"
   >
     <!-- 操作按钮 -->
@@ -30,7 +31,12 @@
         </div>
         <div class="name-info">
           <div class="name-text">{{ row.name }}</div>
-          <div class="model-text">{{ row.embeddingModel }}</div>
+          <div class="model-text">
+            <span v-if="row.embeddingModelId" class="provider-model-badge">{{ row.embeddingModel }}</span>
+            <el-tooltip v-else :content="t('knowledge.globalConfigFallback')">
+              <span class="global-model-text">{{ row.embeddingModel }} *</span>
+            </el-tooltip>
+          </div>
         </div>
       </div>
     </template>
@@ -81,7 +87,10 @@
           </div>
           <div class="card-title">
             <h3>{{ item.name }}</h3>
-            <el-tag size="small" effect="plain">{{ item.embeddingModel }}</el-tag>
+            <el-tag v-if="item.embeddingModelId" size="small" type="success" effect="plain">{{ item.embeddingModel }}</el-tag>
+            <el-tooltip v-else :content="t('knowledge.globalConfigFallback')">
+              <span class="global-model-tag"><el-tag size="small" type="info" effect="plain">{{ item.embeddingModel }}</el-tag></span>
+            </el-tooltip>
           </div>
           <div class="card-status">
             <span class="status-indicator" :class="{ enabled: item.enabled === 1 }">
@@ -173,32 +182,69 @@
         />
       </el-form-item>
 
-      <el-form-item :label="t('knowledge.embeddingModel')" prop="embeddingModel">
+      <el-form-item :label="t('knowledge.embeddingProvider')" prop="providerId">
         <el-select
-          v-model="data.embeddingModel"
+          v-model="data.providerId"
+          :placeholder="t('knowledge.embeddingProviderPlaceholder')"
+          style="width: 100%"
+          @change="(val: number) => onEmbeddingProviderChange(val, data)"
+        >
+          <el-option
+            v-for="p in embeddingProviders"
+            :key="p.id"
+            :label="p.name"
+            :value="p.id"
+          >
+            <span>{{ p.name }}</span>
+            <el-tag size="small" style="margin-left: 8px" effect="plain">{{ p.type }}</el-tag>
+          </el-option>
+        </el-select>
+        <div class="form-hint" v-if="embeddingProviders.length === 0">
+          {{ t('knowledge.noEmbeddingProviderHint') }}
+          <el-link type="primary" @click="router.push('/providers')">
+            {{ t('knowledge.goAddProvider') }}
+          </el-link>
+        </div>
+      </el-form-item>
+
+      <el-form-item :label="t('knowledge.embeddingModel')" prop="embeddingModelId">
+        <el-select
+          v-model="data.embeddingModelId"
           :placeholder="t('knowledge.embeddingModelPlaceholder')"
           style="width: 100%"
+          :disabled="!data.providerId"
+          :loading="embeddingModelsLoading"
+          @change="(val: number) => onEmbeddingModelChange(val, data)"
         >
-          <el-option label="text-embedding-3-small (1536d)" value="text-embedding-3-small" />
-          <el-option label="text-embedding-ada-002 (1536d)" value="text-embedding-ada-002" />
-          <el-option label="text-embedding-3-large (3072d)" value="text-embedding-3-large" />
+          <el-option
+            v-for="m in embeddingModels"
+            :key="m.id"
+            :label="`${m.displayName} (${m.modelName})`"
+            :value="m.id"
+          />
         </el-select>
+        <div class="form-hint" v-if="data.providerId && !embeddingModelsLoading && embeddingModels.length === 0">
+          {{ t('knowledge.noEmbeddingModelHint') }}
+        </div>
       </el-form-item>
 
       <el-form-item :label="t('knowledge.vectorDimension')" prop="vectorDimension">
         <el-input-number
           v-model="data.vectorDimension"
-          :min="1"
-          :max="4096"
+          :min="0"
+          :max="8192"
           :step="1"
           style="width: 100%"
         />
+        <div class="form-hint" v-if="selectedModelDimension">
+          {{ t('knowledge.vectorDimensionAutoHint', { dim: selectedModelDimension }) }}
+        </div>
       </el-form-item>
 
       <el-form-item :label="t('knowledge.chunkSize')" prop="chunkSize">
         <el-input-number
           v-model="data.chunkSize"
-          :min="100"
+          :min="0"
           :max="5000"
           :step="50"
           style="width: 100%"
@@ -218,13 +264,22 @@
       </el-form-item>
     </template>
   </EifyFormDialog>
+
+  <ConfirmDialog
+    :show="showDeleteConfirm"
+    :title="t('common.confirmDeleteTitle')"
+    :message="deleteTarget ? t('knowledge.confirmDelete', { name: deleteTarget.name }) : ''"
+    type="danger"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   Plus,
   Edit,
@@ -234,11 +289,13 @@ import {
 } from '@element-plus/icons-vue'
 import EifyListPage from '@/components/EifyListPage.vue'
 import EifyFormDialog from '@/components/EifyFormDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import {
   knowledgeApi,
   type KnowledgeBaseResponse,
   type KnowledgeCreateRequest
 } from '@/api/knowledge'
+import { providerApi, type ProviderResponse, type ModelConfigInfo } from '@/api/provider'
 import type { TableColumn } from '@/components/EifyTable.vue'
 import type { SearchCondition } from '@/components/EifySearch.vue'
 import type { ListStat } from '@/types/api'
@@ -253,6 +310,8 @@ interface KnowledgeFormData {
   name: string
   description: string
   embeddingModel: string
+  embeddingModelId?: number
+  providerId?: number
   vectorDimension: number
   chunkSize: number
   chunkOverlap: number
@@ -299,6 +358,14 @@ const dialogVisible = ref(false)
 const searchConditions = ref<SearchCondition[]>([])
 const allKnowledge = ref<KnowledgeBaseResponse[]>([])
 
+const embeddingProviders = ref<ProviderResponse[]>([])
+const embeddingModels = ref<ModelConfigInfo[]>([])
+const embeddingModelsLoading = ref(false)
+const selectedModelDimension = ref<number | null>(null)
+
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref<{ id: number; name: string } | null>(null)
+
 /* ========== 统计配置 ========== */
 
 const statsData = ref({ total: 0, enabled: 0, documents: 0 })
@@ -313,10 +380,12 @@ const statsConfig = computed<ListStat[]>(() => [
 const defaultFormData: KnowledgeFormData = {
   name: '',
   description: '',
-  embeddingModel: 'text-embedding-3-small',
-  vectorDimension: 1536,
-  chunkSize: 500,
-  chunkOverlap: 50
+  embeddingModel: '',
+  embeddingModelId: undefined,
+  providerId: undefined,
+  vectorDimension: 0,
+  chunkSize: 0,
+  chunkOverlap: 0
 }
 
 /* ========== 表单验证规则 ========== */
@@ -327,7 +396,7 @@ const formRules = {
     { min: 2, max: 100, message: () => t('knowledge.form.nameLength'), trigger: 'blur' }
   ],
   embeddingModel: [
-    { required: true, message: () => t('knowledge.form.embeddingModelRequired'), trigger: 'change' }
+    { required: false, message: () => t('knowledge.form.embeddingModelRequired'), trigger: 'change' }
   ],
   vectorDimension: [
     { required: true, message: () => t('knowledge.form.vectorDimensionRequired'), trigger: 'blur' }
@@ -381,42 +450,118 @@ const updateStats = (list: KnowledgeBaseResponse[]) => {
   }
 }
 
+/* ========== 嵌入模型供应商/模型加载 ========== */
+
+const loadEmbeddingProviders = async () => {
+  try {
+    const result = await providerApi.getProviderList({ enabled: 1, pageSize: 100 })
+    const allProviders = (result as any).list || result.records || []
+    embeddingProviders.value = allProviders as ProviderResponse[]
+  } catch {
+    embeddingProviders.value = []
+  }
+}
+
+const onEmbeddingProviderChange = async (providerId: number, formData: KnowledgeFormData) => {
+  embeddingModels.value = []
+  selectedModelDimension.value = null
+  formData.embeddingModelId = undefined
+  formData.embeddingModel = ''
+
+  if (!providerId) return
+
+  embeddingModelsLoading.value = true
+  try {
+    const models = await providerApi.getProviderModels(providerId, { category: 1, enabled: 1 })
+    embeddingModels.value = models
+    if (models.length === 1) {
+      onEmbeddingModelChange(models[0].id, formData)
+    }
+  } catch {
+    embeddingModels.value = []
+  } finally {
+    embeddingModelsLoading.value = false
+  }
+}
+
+const onEmbeddingModelChange = (modelId: number, formData: KnowledgeFormData) => {
+  const model = embeddingModels.value.find(m => m.id === modelId)
+  if (model?.extraParams?.dimension) {
+    selectedModelDimension.value = model.extraParams.dimension
+    formData.vectorDimension = model.extraParams.dimension
+  } else {
+    selectedModelDimension.value = null
+  }
+  if (model) {
+    formData.embeddingModelId = modelId
+    formData.embeddingModel = model.modelName
+  }
+}
+
 /* ========== 事件处理 ========== */
 
 const handleAdd = () => {
+  loadEmbeddingProviders()
+  embeddingModels.value = []
+  selectedModelDimension.value = null
   dialogRef.value?.open()
 }
 
-const handleEdit = (row: Record<string, any>) => {
+const handleEdit = async (row: Record<string, any>) => {
+  await loadEmbeddingProviders()
+
+  const hasModel = !!row.embeddingModelId
+
   const formData: KnowledgeFormData = {
     id: row.id,
     name: row.name,
     description: row.description || '',
     embeddingModel: row.embeddingModel,
-    vectorDimension: row.vectorDimension,
-    chunkSize: row.chunkSize,
-    chunkOverlap: row.chunkOverlap
+    embeddingModelId: row.embeddingModelId || undefined,
+    providerId: undefined,
+    vectorDimension: hasModel ? row.vectorDimension : 0,
+    chunkSize: hasModel ? row.chunkSize : 0,
+    chunkOverlap: hasModel ? row.chunkOverlap : 0
   }
+
+  if (hasModel) {
+    try {
+      for (const p of embeddingProviders.value) {
+        const models = await providerApi.getProviderModels(p.id, { category: 1 })
+        const found = models.find(m => m.id === row.embeddingModelId)
+        if (found) {
+          formData.providerId = p.id
+          embeddingModels.value = models
+          selectedModelDimension.value = found.extraParams?.dimension ?? null
+          break
+        }
+      }
+    } catch { /* 回填失败不影响编辑 */ }
+  }
+
   dialogRef.value?.open(formData)
 }
 
-const handleDelete = async (row: { id: number; name: string }) => {
+const handleDelete = (row: { id: number; name: string }) => {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value) return
   try {
-    await ElMessageBox.confirm(
-      t('knowledge.confirmDelete', { name: row.name }),
-      t('common.confirmDeleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-    await knowledgeApi.deleteKnowledge(row.id)
+    await knowledgeApi.deleteKnowledge(deleteTarget.value.id)
     ElMessage.success(t('common.deleteSuccess'))
     listPageRef.value?.refresh()
-  } catch {
-    // 用户取消
+  } finally {
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
   }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTarget.value = null
 }
 
 const handleViewDocuments = (row: KnowledgeBaseResponse) => {
@@ -434,7 +579,8 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
       const requestData: KnowledgeCreateRequest = {
         name: data.name,
         description: data.description || undefined,
-        embeddingModel: data.embeddingModel,
+        embeddingModel: data.embeddingModel || undefined,
+        embeddingModelId: data.embeddingModelId || undefined,
         vectorDimension: data.vectorDimension,
         chunkSize: data.chunkSize,
         chunkOverlap: data.chunkOverlap
@@ -445,7 +591,8 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
       await knowledgeApi.updateKnowledge(data.id!, {
         name: data.name,
         description: data.description || undefined,
-        embeddingModel: data.embeddingModel,
+        embeddingModel: data.embeddingModel || undefined,
+        embeddingModelId: data.embeddingModelId || undefined,
         vectorDimension: data.vectorDimension,
         chunkSize: data.chunkSize,
         chunkOverlap: data.chunkOverlap
@@ -526,6 +673,19 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
 .model-text {
   font-size: 12px;
   color: var(--eify-text-tertiary);
+}
+
+.provider-model-badge {
+  color: var(--eify-success);
+}
+
+.global-model-text {
+  color: var(--eify-text-tertiary);
+  cursor: help;
+}
+
+.global-model-tag {
+  cursor: help;
 }
 
 .status-cell {

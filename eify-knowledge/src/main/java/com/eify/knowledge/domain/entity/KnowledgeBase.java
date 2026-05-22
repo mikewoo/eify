@@ -26,6 +26,12 @@ public class KnowledgeBase extends BaseEntity implements WorkspaceAware {
     private String embeddingModel;
 
     /**
+     * 嵌入模型配置 ID，关联 ModelConfig 表
+     */
+    @TableField("embedding_model_id")
+    private Long embeddingModelId;
+
+    /**
      * 向量维度，与 embedding_model 一致
      */
     @TableField("vector_dimension")

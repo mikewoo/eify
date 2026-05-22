@@ -10,7 +10,6 @@ const { t } = i18n.global
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string>(localStorage.getItem('accessToken') || '')
-  const refreshToken = ref<string>(localStorage.getItem('refreshToken') || '')
   const user = ref<AuthResponse['user'] | null>(null)
   const workspace = ref<AuthResponse['workspace'] | null>(null)
   const workspaces = ref<AuthResponse['workspace'][]>([])
@@ -23,29 +22,24 @@ export const useAuthStore = defineStore('auth', () => {
 
   function saveAuth(resp: AuthResponse) {
     accessToken.value = resp.accessToken
-    refreshToken.value = resp.refreshToken
     user.value = resp.user
     workspace.value = resp.workspace
     localStorage.setItem('accessToken', resp.accessToken)
-    localStorage.setItem('refreshToken', resp.refreshToken)
     hydrated.value = true
   }
 
   function clearAuth() {
     accessToken.value = ''
-    refreshToken.value = ''
     user.value = null
     workspace.value = null
     workspaces.value = []
     hydrated.value = false
     localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
   }
 
   async function hydrate() {
     if (hydrated.value || !accessToken.value) return
     try {
-      // 主动检查 access token 是否即将过期，避免无谓的 401
       if (isTokenExpired(accessToken.value)) {
         const refreshed = await tryRefreshToken()
         if (!refreshed) {
@@ -57,9 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = resp.user
       workspace.value = resp.workspace
       hydrated.value = true
-      // 同步 localStorage 中的 token（拦截器刷新后可能已更新）
       accessToken.value = localStorage.getItem('accessToken') || ''
-      refreshToken.value = localStorage.getItem('refreshToken') || ''
       fetchWorkspaces()
     } catch {
       clearAuth()
@@ -108,9 +100,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function tryRefreshToken(): Promise<boolean> {
-    if (!refreshToken.value) return false
     try {
-      const resp = await authApi.refresh(refreshToken.value)
+      const resp = await authApi.refresh()
       saveAuth(resp)
       return true
     } catch {
@@ -131,7 +122,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     accessToken,
-    refreshToken,
     user,
     workspace,
     workspaces,

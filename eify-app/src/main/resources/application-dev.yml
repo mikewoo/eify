@@ -26,10 +26,6 @@ spring:
         login-username: admin
         login-password: ${DRUID_PASSWORD:admin}
 
-  flyway:
-    # Dev 环境允许自动修复迁移（开发阶段可能手动调整迁移文件）
-    repair-on-migrate: true
-
   data:
     redis:
       lettuce:
@@ -90,6 +86,15 @@ auth:
     # ⚠️ Dev 默认密钥，仅用于本地开发
     # 任何人可从此公开仓库读取此密钥，严禁用于任何非本地环境
     secret: dev-eify-jwt-secret-not-for-production
+    # JWT iss/aud 声明，防止跨环境 token 混用
+    issuer: eify-dev
+    audience: eify-api
+    # Access Token 有效期（秒），默认 30 分钟（OWASP 建议 15-30min）
+    access-expire-seconds: 1800
+    # Refresh Token 绝对超时（秒），默认 24 小时，从首次签发算起不滚动
+    refresh-absolute-ttl-seconds: 86400
+    # Refresh Token Cookie：dev 环境 HTTP，secure=false
+    cookie-secure: false
 
 # ========== 加密配置（仅用于本地开发） ==========
 crypto:
@@ -103,3 +108,9 @@ chat:
   context:
     max-rounds: 20
   sse-timeout: 300000
+
+# ========== Flyway 迁移配置 ==========
+eify:
+  flyway:
+    mysql:
+      repair-on-migrate: true

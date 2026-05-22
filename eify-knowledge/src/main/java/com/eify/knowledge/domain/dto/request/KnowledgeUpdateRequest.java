@@ -14,6 +14,8 @@ public class KnowledgeUpdateRequest {
 
     private String embeddingModel;
 
+    private Long embeddingModelId;
+
     private Integer vectorDimension;
 
     private Integer chunkSize;

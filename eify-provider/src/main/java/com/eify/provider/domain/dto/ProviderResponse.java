@@ -2,6 +2,7 @@ package com.eify.provider.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import tools.jackson.databind.JsonNode;
+import com.eify.provider.constant.ModelCategory;
 import com.eify.provider.constant.ProviderType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -71,6 +72,12 @@ public class ProviderResponse {
 
         @Schema(description = "显示名称")
         private String displayName;
+
+        @Schema(description = "模型主类别", example = "EMBEDDING")
+        private ModelCategory category;
+
+        @Schema(description = "扩展参数")
+        private JsonNode extraParams;
     }
 
     /**

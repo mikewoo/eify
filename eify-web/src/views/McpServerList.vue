@@ -382,15 +382,25 @@
       </el-tabs>
     </div>
   </el-dialog>
+
+  <ConfirmDialog
+    :show="showDeleteConfirm"
+    :title="t('common.confirmDeleteTitle')"
+    :message="deleteTarget ? t('mcp.confirmDelete', { name: deleteTarget.name }) : ''"
+    type="danger"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus, Connection, Edit, Delete, View, CaretRight } from '@element-plus/icons-vue'
 import EifyListPage from '@/components/EifyListPage.vue'
 import EifyFormDialog from '@/components/EifyFormDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import {
   mcpApi,
   type McpServerResponse,
@@ -465,6 +475,10 @@ const detailServer = ref<McpServerResponse | null>(null)
 const detailActiveTab = ref('tools')
 const testingId = ref<number | null>(null)
 const searchConditions = ref<SearchCondition[]>([])
+
+// 删除确认
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref<{ id: number; name: string } | null>(null)
 
 // 调试面板状态
 const selectedTool = ref<McpToolResponse | null>(null)
@@ -732,21 +746,24 @@ const handleView = async (row: { id: number }) => {
   }
 }
 
-const handleDelete = async (row: { id: number; name: string }) => {
+const handleDelete = (row: { id: number; name: string }) => {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value) return
   try {
-    await ElMessageBox.confirm(
-      t('mcp.confirmDelete', { name: row.name }),
-      t('common.confirmDeleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-    await deleteServer(row.id)
-  } catch {
-    // 用户取消删除
+    await deleteServer(deleteTarget.value.id)
+  } finally {
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
   }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTarget.value = null
 }
 
 const handleTestConnection = async (row: { id: number }) => {

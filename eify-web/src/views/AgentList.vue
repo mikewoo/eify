@@ -609,13 +609,22 @@
       </div>
     </div>
   </el-dialog>
+
+  <ConfirmDialog
+    :show="showDeleteConfirm"
+    :title="t('common.confirmDeleteTitle')"
+    :message="deleteTarget ? t('common.confirmDelete', { name: deleteTarget.name }) : ''"
+    type="danger"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import i18n from '@/i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   Plus,
   User,
@@ -627,6 +636,7 @@ import {
 import { useLocaleStore } from '@/store/locale'
 import EifyListPage from '@/components/EifyListPage.vue'
 import EifyFormDialog from '@/components/EifyFormDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import {
   agentApi,
   type AgentResponse,
@@ -742,6 +752,10 @@ const testChatVisible = ref(false)
 const testingId = ref<number | null>(null)
 const searchConditions = ref<SearchCondition[]>([])
 const activeTab = ref('basic')
+
+// 删除确认
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref<{ id: number; name: string } | null>(null)
 const providers = ref<ProviderResponse[]>([])
 const providerModelsMap = ref<Map<number, ModelConfigInfo[]>>(new Map())
 const knowledgeList = ref<KnowledgeBaseResponse[]>([])
@@ -1107,21 +1121,24 @@ const handleEdit = (row: Record<string, any>) => {
   dialogRef.value?.open(formData)
 }
 
-const handleDelete = async (row: { id: number; name: string }) => {
+const handleDelete = (row: { id: number; name: string }) => {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value) return
   try {
-    await ElMessageBox.confirm(
-      t('common.confirmDelete', { name: row.name }),
-      t('common.confirmTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-    await deleteAgent(row.id)
-  } catch {
-    // 用户取消删除
+    await deleteAgent(deleteTarget.value.id)
+  } finally {
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
   }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTarget.value = null
 }
 
 const handleProviderChange = (providerId: number) => {

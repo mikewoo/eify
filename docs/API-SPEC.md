@@ -177,6 +177,13 @@ SSE 流式接口直接返回 `text/event-stream`，不包装 `Result<T>`。
 | 8006 | 工作空间不存在 | 404 |
 | 8007 | 不是该工作空间成员 | 403 |
 | 8008 | 无权访问该工作空间 | 403 |
+| 8009 | 邀请码无效或已过期 | 400 |
+| 8010 | 邀请码已达最大使用次数 | 400 |
+| 8011 | 不能移除自己 | 400 |
+| 8012 | 不能移除工作空间拥有者 | 400 |
+| 8013 | 工作空间至少需要一个拥有者 | 400 |
+| 8014 | 已经是工作空间成员 | 409 |
+| 8015 | 检测到令牌重用，已撤销所有会话 | 401 |
 
 ### 通用错误码 (1000-1999)
 
@@ -202,6 +209,11 @@ SSE 流式接口直接返回 `text/event-stream`，不包装 `Result<T>`。
 | 2004 | LLM 熔断器打开 | 503 |
 | 2005 | API Key 无效 | 401 |
 | 2006 | 不支持的模型 | 400 |
+| 2007 | Provider 名称已存在 | 409 |
+| 2008 | Provider 连接失败 | 502 |
+| 2009 | 模型不存在 | 404 |
+| 2010 | 模型名称已存在 | 409 |
+| 2011 | 模型类别无效 | 400 |
 
 ### Agent 错误码 (3000-3999)
 
@@ -257,6 +269,10 @@ SSE 流式接口直接返回 `text/event-stream`，不包装 `Result<T>`。
 | 7003 | 文档解析失败 | 500 |
 | 7004 | 向量化失败 | 500 |
 | 7005 | 知识库名称已存在 | 409 |
+| 7006 | 未找到知识库的嵌入模型配置 | 400 |
+| 7007 | 嵌入模型不可用（已禁用或不存在） | 400 |
+| 7008 | 知识库名称和嵌入模型配置不能为空 | 400 |
+| 7009 | 知识库 ID 和嵌入模型配置不能为空 | 400 |
 
 ## Auth API 接口
 
@@ -266,9 +282,9 @@ SSE 流式接口直接返回 `text/event-stream`，不包装 `Result<T>`。
 |:---|:---|:---|:---|
 | POST | `/api/v1/auth/register` | 用户注册（自动创建默认工作空间） | 否 |
 | POST | `/api/v1/auth/login` | 用户登录 | 否 |
-| POST | `/api/v1/auth/refresh` | 刷新 Token | 否 |
+| POST | `/api/v1/auth/refresh` | 刷新 Token（优先从 HttpOnly Cookie 读取 refresh token） | 否 |
 | GET | `/api/v1/auth/me` | 获取当前用户信息 | 是 |
-| POST | `/api/v1/auth/logout` | 退出登录 | 是 |
+| POST | `/api/v1/auth/logout` | 退出登录（从 Cookie 提取 token，服务端撤销 family） | 是 |
 | GET | `/api/v1/auth/workspaces` | 获取用户的工作空间列表 | 是 |
 | POST | `/api/v1/auth/switch-workspace` | 切换工作空间 | 是 |
 
@@ -285,13 +301,14 @@ POST /api/v1/auth/login
   "message": "success",
   "data": {
     "accessToken": "eyJ...",
-    "refreshToken": "eyJ...",
-    "expiresIn": 7200,
+    "expiresIn": 1800,
     "user": { "id": 3, "username": "demo", "email": "demo@eify.dev", "displayName": "demo" },
     "workspace": { "id": 3, "name": "demo 的工作空间", "role": "owner" }
   }
 }
 ```
+
+> **注意**：Refresh Token 不再在响应 body 中返回，而是通过 `Set-Cookie` header 设置为 HttpOnly Cookie（`refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`）。前端通过 `credentials: 'include'` 自动携带 cookie。
 
 **JWT 载荷结构**：
 ```json
@@ -299,8 +316,10 @@ POST /api/v1/auth/login
   "sub": 3,          // 用户 ID
   "wid": 4,          // 当前工作空间 ID
   "role": "admin",   // 当前工作空间角色
+  "iss": "eify-dev", // 签发者（每环境不同，防止跨环境 token 混用）
+  "aud": "eify-api", // 受众
   "iat": 1778596609, // 签发时间（秒）
-  "exp": 1778603809  // 过期时间（2 小时）
+  "exp": 1778603809  // 过期时间（Access Token 30 分钟，Refresh Token 24 小时）
 }
 ```
 
@@ -316,9 +335,9 @@ POST /api/v1/auth/switch-workspace
 
 ## 完整 API 接口参考
 
-共 89 个接口（16 个 Controller），其中 76 个业务接口 + 12 个测试接口 + 1 个健康检查。
+共 93 个接口（16 个 Controller），其中 80 个业务接口 + 12 个测试接口 + 1 个健康检查。
 
-### Provider API（6 个）
+### Provider API（8 个）
 
 | 方法 | 路径 | 说明 |
 |:---|:---|:---|
@@ -327,7 +346,9 @@ POST /api/v1/auth/switch-workspace
 | POST | `/api/v1/providers` | 创建提供商 |
 | PUT | `/api/v1/providers/{id}` | 更新提供商 |
 | DELETE | `/api/v1/providers/{id}` | 删除提供商（逻辑删除） |
-| POST | `/api/v1/providers/{id}/test-connection` | 测试 API 连通性 |
+| POST | `/api/v1/providers/{id}/test-connection` | 测试 API 连通性（自动同步模型） |
+| GET | `/api/v1/providers/{id}/models` | 查询模型列表（支持 `?category=` 过滤） |
+| POST | `/api/v1/providers/{id}/models` | 手动添加模型（适用于无公开模型 API 的供应商） |
 
 ### Agent API（7 个）
 

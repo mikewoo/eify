@@ -39,6 +39,10 @@ export interface ModelConfigInfo {
   id: number
   modelName: string
   displayName: string
+  /** 0=CHAT, 1=EMBEDDING, 2=RERANK, 3=MULTIMODAL */
+  category: number
+  /** 扩展参数（含 dimension、supports_streaming 等） */
+  extraParams?: Record<string, any>
 }
 
 /**
@@ -142,9 +146,16 @@ export const providerApi = {
   },
 
   /**
-   * 获取供应商下的模型列表
+   * 获取供应商下的模型列表，支持按 category 过滤
    */
-  getProviderModels: (id: number): Promise<ModelConfigInfo[]> => {
-    return get<ModelConfigInfo[]>(`/api/v1/providers/${id}/models`)
+  getProviderModels: (id: number, params?: { category?: number; enabled?: number }): Promise<ModelConfigInfo[]> => {
+    return get<ModelConfigInfo[]>(`/api/v1/providers/${id}/models`, { params })
+  },
+
+  /**
+   * 手动添加模型配置
+   */
+  createProviderModel: (id: number, data: Record<string, any>): Promise<ModelConfigInfo> => {
+    return post<ModelConfigInfo>(`/api/v1/providers/${id}/models`, data)
   }
 }

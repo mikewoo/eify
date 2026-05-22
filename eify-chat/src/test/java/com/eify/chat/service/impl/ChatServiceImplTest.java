@@ -10,7 +10,9 @@ import com.eify.chat.service.MessageService;
 import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
 import com.eify.knowledge.repository.ChunkRepository;
+import com.eify.knowledge.route.EmbeddingRouteResolver;
 import com.eify.knowledge.service.ChunkService;
+import com.eify.knowledge.service.KnowledgeService;
 import com.eify.knowledge.strategy.EmbeddingStrategy;
 import com.eify.mcp.mapper.McpToolMapper;
 import com.eify.mcp.service.McpClientService;
@@ -45,6 +47,8 @@ class ChatServiceImplTest {
     @Mock ProviderAdapterFactory adapterFactory;
     @Mock ChunkService chunkService;
     @Mock EmbeddingStrategy embeddingStrategy;
+    @Mock EmbeddingRouteResolver routeResolver;
+    @Mock KnowledgeService knowledgeService;
     @Mock WorkflowEngine workflowEngine;
     @Mock WorkflowNodeMapper workflowNodeMapper;
     @Mock McpClientService mcpClientService;
@@ -60,6 +64,7 @@ class ChatServiceImplTest {
         chatService = new ChatServiceImpl(
                 conversationService, messageService, agentService, providerService,
                 adapterFactory, objectMapper, chunkService, embeddingStrategy,
+                routeResolver, knowledgeService,
                 workflowEngine, workflowNodeMapper, mcpClientService, mcpToolMapper,
                 sseExecutor);
     }

@@ -36,6 +36,12 @@ public class JwtAuthFilter implements Filter {
     @Value("${auth.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${auth.jwt.issuer:eify}")
+    private String jwtIssuer;
+
+    @Value("${auth.jwt.audience:eify-api}")
+    private String jwtAudience;
+
     @Override
     public void doFilter(jakarta.servlet.ServletRequest request,
                          jakarta.servlet.ServletResponse response,
@@ -69,6 +75,15 @@ public class JwtAuthFilter implements Filter {
                     resp.setStatus(401);
                     resp.setContentType("application/json;charset=UTF-8");
                     resp.getWriter().write("{\"success\":false,\"errorCode\":\"TOKEN_EXPIRED\",\"error\":\"登录已过期，请重新登录\"}");
+                    return;
+                }
+
+                // 校验 iss / aud 防止跨环境 token 混用（如 dev token 误用于 prod）
+                if (!jwtIssuer.equals(toString(jwt.getPayload("iss")))
+                        || !jwtAudience.equals(toString(jwt.getPayload("aud")))) {
+                    resp.setStatus(401);
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\":false,\"error\":\"令牌无效\"}");
                     return;
                 }
 
@@ -112,5 +127,9 @@ public class JwtAuthFilter implements Filter {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private static String toString(Object value) {
+        return value != null ? value.toString() : null;
     }
 }

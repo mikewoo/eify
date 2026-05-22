@@ -2,7 +2,8 @@ import { post, get } from '@/utils/request'
 
 export interface AuthResponse {
   accessToken: string
-  refreshToken: string
+  /** @deprecated refresh token 现在通过 HttpOnly Cookie 传输，JSON 响应中不再包含 */
+  refreshToken?: string
   expiresIn: number
   user: {
     id: number
@@ -37,8 +38,8 @@ export const authApi = {
   register(data: RegisterRequest): Promise<AuthResponse> {
     return post('/api/v1/auth/register', data)
   },
-  refresh(refreshToken: string): Promise<AuthResponse> {
-    return post('/api/v1/auth/refresh', { refreshToken })
+  refresh(): Promise<AuthResponse> {
+    return post('/api/v1/auth/refresh')
   },
   logout(): Promise<any> {
     return post('/api/v1/auth/logout')

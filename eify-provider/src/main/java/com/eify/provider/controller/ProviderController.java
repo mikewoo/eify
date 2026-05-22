@@ -2,8 +2,10 @@ package com.eify.provider.controller;
 
 import com.eify.common.result.PageResult;
 import com.eify.common.result.Result;
+import com.eify.provider.constant.ModelCategory;
 import com.eify.provider.constant.ProviderType;
 import com.eify.provider.domain.dto.ConnectionTestResult;
+import com.eify.provider.domain.dto.ModelCreateRequest;
 import com.eify.provider.domain.dto.ProviderCreateRequest;
 import com.eify.provider.domain.dto.ProviderResponse;
 import com.eify.provider.domain.dto.ProviderUpdateRequest;
@@ -102,10 +104,25 @@ public class ProviderController {
     /**
      * 获取供应商下的模型列表
      */
-    @Operation(summary = "获取供应商模型列表", description = "返回该供应商下所有已同步的模型配置")
+    @Operation(summary = "获取供应商模型列表", description = "返回该供应商下所有已同步的模型配置，支持按 category 和 enabled 过滤")
     @GetMapping("/{id}/models")
-    public Result<List<ProviderResponse.ModelConfigInfo>> getModels(@PathVariable Long id) {
-        return Result.success(providerService.getModels(id));
+    public Result<List<ProviderResponse.ModelConfigInfo>> getModels(
+            @PathVariable Long id,
+            @RequestParam(required = false) Integer category,
+            @RequestParam(required = false) Integer enabled) {
+        ModelCategory modelCategory = category != null ? ModelCategory.fromValue(category) : null;
+        return Result.success(providerService.getModels(id, modelCategory, enabled));
+    }
+
+    /**
+     * 手动添加模型
+     */
+    @Operation(summary = "手动添加模型", description = "为供应商手动添加模型配置，适用于不公开模型列表 API 的供应商")
+    @PostMapping("/{id}/models")
+    public Result<ProviderResponse.ModelConfigInfo> createModel(
+            @PathVariable Long id,
+            @Valid @RequestBody ModelCreateRequest request) {
+        return Result.success(providerService.createModel(id, request));
     }
 
     /**

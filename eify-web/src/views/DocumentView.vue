@@ -177,13 +177,22 @@
       :file-type="previewDocumentFileType"
     />
   </div>
+
+  <ConfirmDialog
+    :show="showDeleteConfirm"
+    :title="t('common.confirmDeleteTitle')"
+    :message="deleteTarget ? t('common.confirmDelete') : ''"
+    type="danger"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   ArrowLeft,
   Upload,
@@ -199,6 +208,7 @@ import {
   type DocumentResponse
 } from '@/api/knowledge'
 import DocumentPreview from '@/components/DocumentPreview.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import type { UploadFile, UploadFiles } from 'element-plus'
 
 const router = useRouter()
@@ -217,6 +227,9 @@ const uploading = ref(false)
 
 // 操作状态
 const reprocessingId = ref<number | null>(null)
+
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref<DocumentResponse | null>(null)
 
 // 预览相关
 const showPreview = ref(false)
@@ -348,23 +361,26 @@ const handleReprocess = async (row: DocumentResponse) => {
   }
 }
 
-const handleDelete = async (row: DocumentResponse) => {
+const handleDelete = (row: DocumentResponse) => {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value) return
   try {
-    await ElMessageBox.confirm(
-      t('common.confirmDelete'),
-      t('common.confirmDeleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-    await knowledgeApi.deleteDocument(row.id)
+    await knowledgeApi.deleteDocument(deleteTarget.value.id)
     ElMessage.success(t('common.deleteSuccess'))
     loadDocuments()
-  } catch {
-    // 用户取消
+  } finally {
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
   }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTarget.value = null
 }
 
 /* ========== 初始化 ========== */

@@ -1,5 +1,7 @@
 package com.eify.knowledge.strategy;
 
+import com.eify.knowledge.route.EmbeddingRoute;
+
 import java.util.List;
 
 /**
@@ -55,6 +57,24 @@ public interface EmbeddingStrategy {
      * @return 是否健康
      */
     boolean isHealthy();
+
+    /**
+     * 文本嵌入（按知识库路由）
+     *
+     * @param text 输入文本
+     * @param route 嵌入模型路由，empty 时降级到全局配置
+     * @return 向量数组
+     */
+    float[] embed(String text, EmbeddingRoute route);
+
+    /**
+     * 批量文本嵌入（按知识库路由）
+     *
+     * @param texts 输入文本列表
+     * @param route 嵌入模型路由，empty 时降级到全局配置
+     * @return 向量数组列表
+     */
+    List<float[]> embedBatch(List<String> texts, EmbeddingRoute route);
 
     /**
      * 支持的最大批大小

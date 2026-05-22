@@ -3,6 +3,7 @@
 -- 用途：document_chunk 表（向量数据）
 -- 注意：表结构由 Flyway 自动管理，此文件仅供手动导入备用
 -- 迁移文件：eify-app/src/main/resources/db/migration-pg/V1__init_pgvector.sql
+--          eify-app/src/main/resources/db/migration-pg/V2__flexible_vector_dimension.sql
 -- ============================================
 
 -- 启用 pgvector 扩展
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS document_chunk (
     document_id     BIGINT  NOT NULL,
     chunk_index     INT     NOT NULL,
     content         TEXT    NOT NULL,
-    embedding       VECTOR(1024),
+    embedding       VECTOR,
     chunk_hash      CHAR(64) NOT NULL,
     enabled         SMALLINT NOT NULL DEFAULT 1,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()

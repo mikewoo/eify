@@ -4,6 +4,7 @@ import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
 import com.eify.common.http.LlmHttpClient;
 import com.eify.knowledge.config.EmbeddingConfig;
+import com.eify.knowledge.route.EmbeddingRoute;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -34,28 +35,43 @@ public class EmbeddingStrategyImpl implements EmbeddingStrategy {
     private final ObjectMapper objectMapper;
     private final Executor embeddingExecutor;
 
-    private Map<String, String> createHeaders() {
+    private Map<String, String> createHeaders(EmbeddingRoute route) {
         Map<String, String> headers = new HashMap<>();
-        if (config.getApiKey() != null && !config.getApiKey().isEmpty()) {
-            headers.put("Authorization", "Bearer " + config.getApiKey());
+        String apiKey = route.isPresent() && route.getApiKey() != null
+                ? route.getApiKey()
+                : config.getApiKey();
+        if (apiKey != null && !apiKey.isEmpty()) {
+            headers.put("Authorization", "Bearer " + apiKey);
         }
         return headers;
     }
 
+    private String getEffectiveApiUrl(EmbeddingRoute route) {
+        return route.isPresent() ? route.getApiUrl() : config.getApiUrl();
+    }
+
+    private String getEffectiveModel(EmbeddingRoute route) {
+        return route.isPresent() ? route.getModelId() : config.getModel();
+    }
+
     @Override
     public float[] embed(String text) {
+        return embed(text, EmbeddingRoute.empty());
+    }
+
+    @Override
+    public float[] embed(String text, EmbeddingRoute route) {
         try {
-            // 构建请求
+            String apiUrl = getEffectiveApiUrl(route);
+            String model = getEffectiveModel(route);
             JsonNode request = objectMapper.createObjectNode()
                 .put("input", text)
-                .put("model", config.getModel());
+                .put("model", model);
 
-            // 调用嵌入 API
             String body = objectMapper.writeValueAsString(request);
-            String responseStr = httpClient.post(config.getApiUrl(), createHeaders(), body);
+            String responseStr = httpClient.post(apiUrl, createHeaders(route), body);
             JsonNode response = objectMapper.readTree(responseStr);
 
-            // 解析响应
             JsonNode embeddings = response.get("data");
             if (embeddings != null && embeddings.isArray() && embeddings.size() > 0) {
                 JsonNode embedding = embeddings.get(0).get("embedding");
@@ -71,32 +87,38 @@ public class EmbeddingStrategyImpl implements EmbeddingStrategy {
 
     @Override
     public List<float[]> embedBatch(List<String> texts) {
+        return embedBatch(texts, EmbeddingRoute.empty());
+    }
+
+    @Override
+    public List<float[]> embedBatch(List<String> texts, EmbeddingRoute route) {
         int batchSize = Math.min(config.getMaxBatchSize(), 10);
         if (texts.size() <= batchSize) {
-            return embedBatchInternal(texts);
+            return embedBatchInternal(texts, route);
         }
 
-        // 分批处理
         List<List<String>> batches = partition(texts, batchSize);
         log.info("[Embedding] 分批处理: {} 个文本, {} 批, 每批 {}", texts.size(), batches.size(), batchSize);
 
         List<float[]> results = new ArrayList<>();
         for (List<String> batch : batches) {
-            results.addAll(embedBatchInternal(batch));
+            results.addAll(embedBatchInternal(batch, route));
         }
         return results;
     }
 
-    private List<float[]> embedBatchInternal(List<String> texts) {
+    private List<float[]> embedBatchInternal(List<String> texts, EmbeddingRoute route) {
         try {
+            String apiUrl = getEffectiveApiUrl(route);
+            String model = getEffectiveModel(route);
             CompletableFuture<List<float[]>> future = CompletableFuture.supplyAsync(() -> {
                 try {
                     JsonNode request = objectMapper.createObjectNode()
-                        .put("model", config.getModel())
+                        .put("model", model)
                         .set("input", objectMapper.valueToTree(texts));
 
                     String body = objectMapper.writeValueAsString(request);
-                    String responseStr = httpClient.post(config.getApiUrl(), createHeaders(), body);
+                    String responseStr = httpClient.post(apiUrl, createHeaders(route), body);
                     JsonNode response = objectMapper.readTree(responseStr);
 
                     List<float[]> embeddings = new ArrayList<>();

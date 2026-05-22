@@ -13,8 +13,12 @@ import com.eify.chat.service.ConversationService;
 import com.eify.chat.service.MessageService;
 import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
+import com.eify.knowledge.domain.entity.KnowledgeBase;
 import com.eify.knowledge.repository.ChunkRepository;
+import com.eify.knowledge.route.EmbeddingRoute;
+import com.eify.knowledge.route.EmbeddingRouteResolver;
 import com.eify.knowledge.service.ChunkService;
+import com.eify.knowledge.service.KnowledgeService;
 import com.eify.knowledge.strategy.EmbeddingStrategy;
 import com.eify.mcp.domain.entity.McpTool;
 import com.eify.mcp.mapper.McpToolMapper;
@@ -89,6 +93,8 @@ public class ChatServiceImpl implements ChatService {
     private final ObjectMapper sseObjectMapper;
     private final ChunkService chunkService;
     private final EmbeddingStrategy embeddingStrategy;
+    private final EmbeddingRouteResolver routeResolver;
+    private final KnowledgeService knowledgeService;
     private final WorkflowEngine workflowEngine;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final McpClientService mcpClientService;
@@ -110,6 +116,8 @@ public class ChatServiceImpl implements ChatService {
             ObjectMapper objectMapper,
             ChunkService chunkService,
             EmbeddingStrategy embeddingStrategy,
+            EmbeddingRouteResolver routeResolver,
+            KnowledgeService knowledgeService,
             WorkflowEngine workflowEngine,
             WorkflowNodeMapper workflowNodeMapper,
             McpClientService mcpClientService,
@@ -126,6 +134,8 @@ public class ChatServiceImpl implements ChatService {
                 .build();
         this.chunkService = chunkService;
         this.embeddingStrategy = embeddingStrategy;
+        this.routeResolver = routeResolver;
+        this.knowledgeService = knowledgeService;
         this.workflowEngine = workflowEngine;
         this.workflowNodeMapper = workflowNodeMapper;
         this.mcpClientService = mcpClientService;
@@ -472,14 +482,16 @@ public class ChatServiceImpl implements ChatService {
         if (knowledgeIds != null && !knowledgeIds.isEmpty()
                 && Integer.valueOf(1).equals(agent.getRagEnabled())) {
             try {
-                float[] queryVector = embeddingStrategy.embed(currentUserMessage);
                 int topK = agent.getRagTopK() != null ? agent.getRagTopK() : 5;
 
-                // 按各知识库配额分别检索
+                // 按各知识库配额分别检索，每个知识库使用自己绑定的嵌入模型
                 int perKbTopK = Math.max(topK / knowledgeIds.size(), 1);
                 List<ChunkRepository.ChunkSearchResult> allChunks = new ArrayList<>();
                 for (Long kbId : knowledgeIds) {
                     try {
+                        KnowledgeBase kb = knowledgeService.getKnowledge(kbId);
+                        EmbeddingRoute route = routeResolver.resolve(kb);
+                        float[] queryVector = embeddingStrategy.embed(currentUserMessage, route);
                         List<ChunkRepository.ChunkSearchResult> kbChunks =
                                 chunkService.search(kbId, queryVector, perKbTopK);
                         allChunks.addAll(kbChunks);

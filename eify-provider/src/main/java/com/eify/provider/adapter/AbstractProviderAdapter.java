@@ -187,14 +187,26 @@ public abstract class AbstractProviderAdapter implements ProviderAdapter {
     }
 
     /**
-     * 构建 /v1/models 端点 URL
+     * 规范化 baseUrl 到 /v1 级别，去除 /v1 之后的路径段（如 /embeddings、/chat/completions 等），
+     * 防止用户将具体 API 端点误填为 baseUrl 时出现重复路径。
      */
-    protected String buildModelsUrl(String baseUrl) {
+    protected String normalizeV1BaseUrl(String baseUrl) {
         baseUrl = normalizeBaseUrl(baseUrl);
+        int v1SlashIndex = baseUrl.indexOf("/v1/");
+        if (v1SlashIndex >= 0) {
+            return baseUrl.substring(0, v1SlashIndex + 3);
+        }
         if (!baseUrl.endsWith("/v1")) {
             baseUrl += "/v1";
         }
-        return baseUrl + "/models";
+        return baseUrl;
+    }
+
+    /**
+     * 构建 /v1/models 端点 URL
+     */
+    protected String buildModelsUrl(String baseUrl) {
+        return normalizeV1BaseUrl(baseUrl) + "/models";
     }
 
     // ========== 对话方法 ==========

@@ -13,9 +13,12 @@
 ```
 # MySQL
 eify-app/src/main/resources/db/migration/V1__init.sql
+eify-app/src/main/resources/db/migration/V4__model_category_and_embedding_model_id.sql
+eify-app/src/main/resources/db/migration/V5__name_workspace_deleted_unique.sql
 
 # PostgreSQL（pgvector 向量存储）
 eify-app/src/main/resources/db/migration-pg/V1__init_pgvector.sql
+eify-app/src/main/resources/db/migration-pg/V2__flexible_vector_dimension.sql
 ```
 
 - **本地开发**：启动应用时自动执行迁移
@@ -56,7 +59,7 @@ pgvector 表结构由 Flyway 独立实例管理：
 ### 表结构
 
 - **`document_chunk`**：文档分块向量表
-  - `embedding VECTOR(1024)` — 向量嵌入字段
+  - `embedding VECTOR` — 向量嵌入字段（灵活维度，由知识库模型决定）
   - `chunk_hash CHAR(64)` — 内容 SHA-256 哈希，用于去重和增量更新
   - 索引：HNSW 向量索引（余弦距离）+ 业务索引（workspace_id / knowledge_id / document_id / chunk_hash）
 
@@ -82,6 +85,7 @@ pgvector:
    - `ai_user` - 用户表
    - `ai_workspace` - 工作空间表
    - `ai_workspace_member` - 工作空间成员表
+   - `ai_workspace_invite` - 工作空间邀请码表
    - `ai_user_session` - 用户会话表
 
 2. **Provider 模块**

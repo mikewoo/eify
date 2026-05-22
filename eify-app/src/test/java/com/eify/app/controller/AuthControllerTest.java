@@ -8,6 +8,7 @@ import com.eify.auth.service.AuthService;
 import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
 import com.eify.common.result.Result;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.*;
 class AuthControllerTest {
 
     @Mock AuthService authService;
+    @Mock HttpServletResponse response;
 
     AuthController controller;
 
@@ -55,10 +57,10 @@ class AuthControllerTest {
             RegisterRequest req = new RegisterRequest();
             req.setUsername("testuser");
             req.setPassword("pass123");
-            AuthResponse resp = AuthResponse.builder().accessToken("token").build();
+            AuthResponse resp = AuthResponse.builder().accessToken("token").refreshToken("rt").build();
             when(authService.register(req)).thenReturn(resp);
 
-            Result<AuthResponse> result = controller.register(req);
+            Result<AuthResponse> result = controller.register(req, response);
 
             assertThat(result.getCode()).isEqualTo(200);
             assertThat(result.getData()).isSameAs(resp);
@@ -77,10 +79,10 @@ class AuthControllerTest {
             LoginRequest req = new LoginRequest();
             req.setUsername("testuser");
             req.setPassword("pass123");
-            AuthResponse resp = AuthResponse.builder().accessToken("token").build();
+            AuthResponse resp = AuthResponse.builder().accessToken("token").refreshToken("rt").build();
             when(authService.login(req)).thenReturn(resp);
 
-            Result<AuthResponse> result = controller.login(req);
+            Result<AuthResponse> result = controller.login(req, response);
 
             assertThat(result.getCode()).isEqualTo(200);
             assertThat(result.getData()).isSameAs(resp);
@@ -94,27 +96,39 @@ class AuthControllerTest {
     class Refresh {
 
         @Test
-        @DisplayName("refreshToken 为空时抛异常")
+        @DisplayName("cookie 和 body 都为空时抛异常")
         void shouldThrowWhenRefreshTokenNull() {
-            assertThatThrownBy(() -> controller.refresh(Map.of()))
+            assertThatThrownBy(() -> controller.refresh(null, Map.of(), response))
                     .isInstanceOf(BusinessException.class)
                     .hasMessageContaining("refreshToken 不能为空");
         }
 
         @Test
-        @DisplayName("refreshToken 为 blank 时抛异常")
+        @DisplayName("cookie 为 null body 里是 blank 时抛异常")
         void shouldThrowWhenRefreshTokenBlank() {
-            assertThatThrownBy(() -> controller.refresh(Map.of("refreshToken", "   ")))
+            assertThatThrownBy(() -> controller.refresh(null, Map.of("refreshToken", "   "), response))
                     .isInstanceOf(BusinessException.class);
         }
 
         @Test
-        @DisplayName("刷新成功返回新 token")
-        void shouldRefreshSuccessfully() {
-            AuthResponse resp = AuthResponse.builder().accessToken("new-token").build();
+        @DisplayName("通过 body 传入 refreshToken 刷新成功")
+        void shouldRefreshSuccessfullyFromBody() {
+            AuthResponse resp = AuthResponse.builder().accessToken("new-token").refreshToken("new-rt").build();
             when(authService.refresh("old-token")).thenReturn(resp);
 
-            Result<AuthResponse> result = controller.refresh(Map.of("refreshToken", "old-token"));
+            Result<AuthResponse> result = controller.refresh(null, Map.of("refreshToken", "old-token"), response);
+
+            assertThat(result.getCode()).isEqualTo(200);
+            assertThat(result.getData()).isSameAs(resp);
+        }
+
+        @Test
+        @DisplayName("通过 cookie 传入 refreshToken 刷新成功")
+        void shouldRefreshSuccessfullyFromCookie() {
+            AuthResponse resp = AuthResponse.builder().accessToken("new-token").refreshToken("new-rt").build();
+            when(authService.refresh("cookie-token")).thenReturn(resp);
+
+            Result<AuthResponse> result = controller.refresh("cookie-token", null, response);
 
             assertThat(result.getCode()).isEqualTo(200);
             assertThat(result.getData()).isSameAs(resp);
@@ -149,10 +163,19 @@ class AuthControllerTest {
         @Test
         @DisplayName("登出成功")
         void shouldLogoutSuccessfully() {
-            Result<Void> result = controller.logout();
+            Result<Void> result = controller.logout("some-refresh-token", response);
 
             assertThat(result.getCode()).isEqualTo(200);
-            verify(authService).logout(100L);
+            verify(authService).logout("some-refresh-token");
+        }
+
+        @Test
+        @DisplayName("cookie 中无 token 时也能登出")
+        void shouldLogoutWithoutToken() {
+            Result<Void> result = controller.logout(null, response);
+
+            assertThat(result.getCode()).isEqualTo(200);
+            verify(authService).logout(null);
         }
     }
 
@@ -185,7 +208,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("workspaceId 为空时抛异常")
         void shouldThrowWhenWorkspaceIdNull() {
-            assertThatThrownBy(() -> controller.switchWorkspace(Map.of()))
+            assertThatThrownBy(() -> controller.switchWorkspace(Map.of(), response))
                     .isInstanceOf(BusinessException.class)
                     .hasMessageContaining("workspaceId 不能为空");
         }
@@ -193,10 +216,10 @@ class AuthControllerTest {
         @Test
         @DisplayName("切换成功返回新 token")
         void shouldSwitchWorkspaceSuccessfully() {
-            AuthResponse resp = AuthResponse.builder().accessToken("switched-token").build();
+            AuthResponse resp = AuthResponse.builder().accessToken("switched-token").refreshToken("new-rt").build();
             when(authService.switchWorkspace(20L)).thenReturn(resp);
 
-            Result<AuthResponse> result = controller.switchWorkspace(Map.of("workspaceId", 20L));
+            Result<AuthResponse> result = controller.switchWorkspace(Map.of("workspaceId", 20L), response);
 
             assertThat(result.getCode()).isEqualTo(200);
             assertThat(result.getData()).isSameAs(resp);

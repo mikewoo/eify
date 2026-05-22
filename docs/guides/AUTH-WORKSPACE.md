@@ -46,12 +46,13 @@ Eify 采用**无状态 JWT 认证 + 工作空间多租户**架构：
 
 | 组件 | 技术 | 说明 |
 |:---|:---|:---|
-| 认证方式 | JWT（Hutool JWT） | 无状态，token 中包含 userId + workspaceId |
+| 认证方式 | JWT（Hutool JWT） | Access Token（30min）+ Refresh Token（24h 绝对超时，Family+Count 轮转） |
 | 密码加密 | BCrypt（Spring Security） | 单向哈希 |
 | 上下文传递 | ThreadLocal（CurrentContext） | 请求级 userId/workspaceId 传递 |
-| 过滤器 | Servlet Filter（JwtAuthFilter） | 解析 JWT，设置上下文 |
-| 前端状态 | Pinia Store（authStore） | 响应式管理 token、用户、工作空间状态 |
-| 前端持久化 | localStorage | 存储 accessToken、refreshToken |
+| 过滤器 | Servlet Filter（JwtAuthFilter） | 解析 JWT，验证 iss/aud/exp，设置上下文 |
+| Token 撤销 | Redis | Refresh Token Family + Count 机制，登出/重用检测时 DEL family |
+| 前端状态 | Pinia Store（authStore） | 响应式管理 accessToken、用户、工作空间状态 |
+| 前端持久化 | localStorage + HttpOnly Cookie | accessToken 存 localStorage，refreshToken 存 HttpOnly Cookie（JavaScript 不可读） |
 
 ---
 
@@ -115,13 +116,31 @@ User (1) ──── (N) WorkspaceMember (N) ──── (1) Workspace
 
 ### JWT 载荷结构
 
+**Access Token**：
 ```json
 {
-  "sub": 3,         // 用户 ID (userId)
-  "wid": 4,         // 当前工作空间 ID (workspaceId)
-  "role": "admin",  // 当前工作空间角色
-  "iat": 1778596609, // 签发时间（秒）
-  "exp": 1778603809  // 过期时间（秒，默认 2 小时）
+  "sub": 3,           // 用户 ID (userId)
+  "wid": 4,           // 当前工作空间 ID (workspaceId)
+  "role": "admin",    // 当前工作空间角色
+  "iss": "eify-dev",  // 签发者（每环境不同，防止跨环境 token 混用）
+  "aud": "eify-api",  // 受众
+  "iat": 1778596609,  // 签发时间（秒）
+  "exp": 1778598409   // 过期时间（签发时间 + 30 分钟，可配置）
+}
+```
+
+**Refresh Token**（额外包含 family + count）：
+```json
+{
+  "sub": 3,
+  "wid": 4,
+  "role": "admin",
+  "iss": "eify-dev",
+  "aud": "eify-api",
+  "iat": 1778596609,
+  "exp": 1778683009,  // 绝对过期时间（签发时间 + 24 小时，不滚动）
+  "family": "a1b2c3d4-...",  // 令牌族 ID（UUID）
+  "count": 3                 // 当前使用次数（每次刷新 +1）
 }
 ```
 
@@ -139,51 +158,82 @@ User (1) ──── (N) WorkspaceMember (N) ──── (1) Workspace
 │          │                              │ 1. 验证用户名/密码   │
 │          │                              │ 2. 查询用户第一个     │
 │          │                              │    工作空间         │
-│          │                              │ 3. 签发 JWT        │
-│          │ ◀─────────────────────────   │    (sub + wid)    │
-│          │    AuthResponse {            │              │
+│          │                              │ 3. 生成 family UUID │
+│          │                              │ 4. Redis SET       │
+│          │                              │    refresh_family:  │
+│          │                              │    {family} 1 EX   │
+│          │                              │    86400           │
+│          │                              │ 5. 签发 JWT        │
+│          │ ◀─────────────────────────   │    (sub+wid+iss+   │
+│          │    Set-Cookie: refresh_token │     aud+family+    │
+│          │    AuthResponse {            │     count)         │
 │          │      accessToken,            │              │
-│          │      refreshToken,           │              │
 │          │      user,                   │              │
 │          │      workspace               │              │
 │          │    }                         │              │
 └──────────┘                              └─────────────┘
 ```
 
+> **注意**：Refresh Token 不再通过响应 body 返回，而是通过 `Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth` header 设置。前端通过 `credentials: 'include'` 自动携带。
+
 ### 请求认证流程（JwtAuthFilter）
 
 ```
 请求到达
   │
-  ├─ 公开接口？(/api/auth/login, /register, /refresh)
+  ├─ 公开接口？(/api/auth/login, /register, /refresh, /doc.html, /v3/)
   │    └─ 是 → 直接放行（无认证）
   │
   ├─ 携带 Authorization: Bearer <JWT>？
   │    ├─ 是 → 解析 JWT
   │    │       ├─ 验证签名
+  │    │       ├─ 验证 exp（过期 → 401）
+  │    │       ├─ 验证 iss（签发者不匹配 → 401 "令牌签发者无效"）
+  │    │       ├─ 验证 aud（受众不匹配 → 401 "令牌受众无效"）
   │    │       ├─ 提取 sub → userId
   │    │       ├─ 提取 wid → workspaceId
   │    │       └─ CurrentContext.set(userId, workspaceId)
   │    │
-  │    └─ 否 → 携带 X-User-Id？（兼容旧模式）
-  │             ├─ 是 → CurrentContext.set(userId, 1L)
-  │             └─ 否 → 无上下文（Service 层决定是否拒绝）
+  │    └─ 否 → 401 "请先登录"
   │
   └─ chain.doFilter() → Controller → Service
        └─ finally: CurrentContext.clear()
 ```
 
-### Token 刷新流程
+### Token 刷新流程（Family + Count 轮转）
 
 ```
-AccessToken 过期（2 小时）
+AccessToken 过期（30 分钟）
   │
-  └─ POST /api/auth/refresh { refreshToken }
+  └─ POST /api/auth/refresh（cookie 自动携带 refresh_token）
        │
-       ├─ 验证 refreshToken（有效期 30 天）
-       ├─ 签发新 accessToken + refreshToken
-       └─ 返回 AuthResponse
+       ├─ 从 Cookie 读取 refreshToken（优先）或 body（兼容过渡期）
+       ├─ 解析 family + count
+       ├─ Redis: GET refresh_family:{family}
+       │   ├─ key 不存在 → 拒绝（过期或已撤销）
+       │   └─ stored_count == count → INCR（原子操作）
+       │       ├─ newCount == count + 1 → 签发新 token 对
+       │       └─ newCount != count + 1 → 重用检测！
+       │           └─ DEL refresh_family:{family}（撤销整个族）
+       │           └─ 返回 TOKEN_REUSE_DETECTED(8015)
+       │
+       ├─ 签发新 accessToken（30min）+ 新 refreshToken（同 family, count+1, 同绝对过期时间）
+       └─ Set-Cookie 更新 refresh_token
 ```
+
+### 登出流程
+
+```
+POST /api/auth/logout（cookie 自动携带 refresh_token）
+  │
+  ├─ 从 Cookie 提取 refreshToken
+  ├─ 解析 family
+  ├─ Redis: DEL refresh_family:{family}（立即撤销整个族）
+  ├─ Set-Cookie: refresh_token=; Max-Age=0（清除浏览器 cookie）
+  └─ 返回成功
+```
+
+> **注意**：已签发的 Access Token 在 30 分钟内仍然有效（JWT 无状态，无法撤销），符合 OWASP 接受范围。
 
 ### 注册流程
 
@@ -248,19 +298,19 @@ WorkspaceGuard.checkNameUnique(mapper,
 数据库唯一键必须是 workspace 作用域内的唯一：
 
 ```sql
--- ✅ 正确：workspace 内唯一
-UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`)
+-- ✅ 正确：workspace 内唯一（含 deleted 支持软删除）
+UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`)
 
 -- ❌ 错误：全局唯一（不同 workspace 不能同名）
 UNIQUE KEY `uk_name` (`name`)
 ```
 
 影响的表：
-- `provider.uk_name_workspace`
-- `ai_provider.uk_code_workspace`
-- `ai_agent.uk_name_workspace`
-- `ai_workflow.uk_name_workspace`
-- `knowledge_base.uk_name_workspace`
+- `provider.uk_name_workspace_deleted`
+- `ai_agent.uk_name_workspace_deleted`
+- `ai_workflow.uk_name_workspace_deleted`
+- `knowledge_base.uk_name_workspace_deleted`
+- `mcp_server.uk_name_workspace_deleted`
 
 #### 默认值处理
 
@@ -280,15 +330,17 @@ public static Long getWorkspaceId() {
 ```
 authStore (Pinia)
 ├── accessToken       ← localStorage
-├── refreshToken      ← localStorage
+├── refreshToken      ← 不再存储（HttpOnly Cookie，JS 不可读）
 ├── user              ← API 响应
 ├── workspace         ← 当前工作空间（API 响应）
 ├── workspaces        ← 用户所有工作空间列表
 ├── refreshKey        ← 工作空间切换计数器（触发页面刷新）
 │
-├── hydrate()         → 从 token 恢复用户/工作空间信息
+├── hydrate()         → 从 accessToken 恢复用户/工作空间信息
 ├── login()           → 登录 → saveAuth()
+├── tryRefreshToken() → POST /api/v1/auth/refresh（cookie 自动携带，credentials: 'include'）
 ├── switchWorkspace() → 切换工作空间 → saveAuth() → window.location.reload()
+├── logout()          → POST /api/v1/auth/logout（cookie 自动携带，服务端清除 cookie）
 └── fetchWorkspaces() → 获取用户的工作空间列表
 ```
 
@@ -305,8 +357,8 @@ authStore (Pinia)
   │    │
   │    ├─ saveAuth(resp)
   │    │    ├─ workspace.value = resp.workspace
-  │    │    ├─ localStorage.setItem('accessToken', resp.accessToken)
-  │    │    └─ localStorage.setItem('refreshToken', resp.refreshToken)
+  │    │    └─ localStorage.setItem('accessToken', resp.accessToken)
+  │    │    （refreshToken 由服务端通过 Set-Cookie 更新）
   │    │
   │    ├─ refreshKey.value++（触发组件更新）
   │    └─ setTimeout → window.location.reload()
@@ -445,8 +497,7 @@ POST /api/auth/login
   "message": "success",
   "data": {
     "accessToken": "eyJ...",
-    "refreshToken": "eyJ...",
-    "expiresIn": 7200,
+    "expiresIn": 1800,
     "user": {
       "id": 3,
       "username": "demo",
@@ -462,6 +513,8 @@ POST /api/auth/login
   }
 }
 ```
+
+> **Refresh Token** 通过 `Set-Cookie` header 设置（`refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=86400`），不再出现在响应 body 中。前端无需手动管理 refreshToken。
 
 **切换工作空间请求**：
 ```json
@@ -496,6 +549,7 @@ POST /api/auth/switch-workspace
 | 8006 | 工作空间不存在 | 404 |
 | 8007 | 不是该工作空间成员 | 403 |
 | 8008 | 无权访问该工作空间 | 403 |
+| 8015 | 检测到令牌重用，已撤销所有会话 | 401 |
 
 ---
 

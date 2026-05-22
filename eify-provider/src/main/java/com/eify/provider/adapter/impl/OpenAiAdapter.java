@@ -391,11 +391,7 @@ public class OpenAiAdapter extends AbstractProviderAdapter {
      * 构建请求 URL
      */
     private String buildChatUrl(Provider provider) {
-        String baseUrl = normalizeBaseUrl(provider.getBaseUrl());
-        if (!baseUrl.endsWith("/v1")) {
-            baseUrl += "/v1";
-        }
-        return baseUrl + "/chat/completions";
+        return normalizeV1BaseUrl(provider.getBaseUrl()) + "/chat/completions";
     }
 
     /**

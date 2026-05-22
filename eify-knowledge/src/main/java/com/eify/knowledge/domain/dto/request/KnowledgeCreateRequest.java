@@ -15,9 +15,14 @@ public class KnowledgeCreateRequest {
     private String description;
 
     /**
-     * 嵌入模型名称，默认 text-embedding-3-small
+     * 嵌入模型名称，默认 text-embedding-3-small（保留兼容）
      */
     private String embeddingModel = "text-embedding-3-small";
+
+    /**
+     * 嵌入模型 ID（来自 model_config 表），优先于 embeddingModel
+     */
+    private Long embeddingModelId;
 
     /**
      * 向量维度，默认 1536

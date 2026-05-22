@@ -55,20 +55,17 @@ instance.interceptors.response.use(
       const { status } = response
       switch (status) {
         case 401: {
-          const refreshToken = localStorage.getItem('refreshToken')
-          if (refreshToken && !error.config._retry) {
+          if (!error.config._retry) {
             error.config._retry = true
             try {
               const resp = await fetch('/api/v1/auth/refresh', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refreshToken })
+                credentials: 'include'
               })
               if (resp.ok) {
                 const data = await resp.json()
                 if (data.data?.accessToken) {
                   localStorage.setItem('accessToken', data.data.accessToken)
-                  localStorage.setItem('refreshToken', data.data.refreshToken)
                   error.config.headers.Authorization = `Bearer ${data.data.accessToken}`
                   return instance(error.config)
                 }
@@ -79,7 +76,6 @@ instance.interceptors.response.use(
           }
           ElMessage.error(t('auth.sessionExpired'))
           localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
           window.location.href = '/login'
           break
         }

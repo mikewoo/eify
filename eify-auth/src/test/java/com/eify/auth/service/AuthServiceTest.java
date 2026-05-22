@@ -61,11 +61,27 @@ class AuthServiceTest {
     void setUp() {
         CurrentContext.set(1L, 1L);
         ReflectionTestUtils.setField(authService, "jwtSecret", JWT_SECRET);
+        ReflectionTestUtils.setField(authService, "jwtIssuer", "eify-test");
+        ReflectionTestUtils.setField(authService, "jwtAudience", "eify-api");
+        ReflectionTestUtils.setField(authService, "accessExpireSeconds", 1800L);
+        ReflectionTestUtils.setField(authService, "refreshAbsoluteTtlSeconds", 86400L);
     }
 
     @AfterEach
     void tearDown() {
         CurrentContext.clear();
+        @SuppressWarnings("unchecked")
+        var store = (java.util.concurrent.ConcurrentHashMap<String, Long>)
+                ReflectionTestUtils.getField(authService, "familyStoreFallback");
+        if (store != null) store.clear();
+    }
+
+    /** 预填充 family 状态（测试用，绕过 buildAuthResponse 的持久化） */
+    @SuppressWarnings("unchecked")
+    private void storeFamily(String family, long count) {
+        var store = (java.util.concurrent.ConcurrentHashMap<String, Long>)
+                ReflectionTestUtils.getField(authService, "familyStoreFallback");
+        if (store != null) store.put("refresh_family:" + family, count);
     }
 
     // ========== 辅助方法 ==========
@@ -187,7 +203,7 @@ class AuthServiceTest {
             // 验证返回结果
             assertNotNull(response.getAccessToken());
             assertNotNull(response.getRefreshToken());
-            assertEquals(7200L, response.getExpiresIn());
+            assertEquals(1800L, response.getExpiresIn());
             assertEquals(100L, response.getUser().getId());
             assertEquals("newuser", response.getUser().getUsername());
             assertEquals("new@test.com", response.getUser().getEmail());
@@ -407,7 +423,7 @@ class AuthServiceTest {
             // then
             assertNotNull(response.getAccessToken());
             assertNotNull(response.getRefreshToken());
-            assertEquals(7200L, response.getExpiresIn());
+            assertEquals(1800L, response.getExpiresIn());
             assertEquals(1L, response.getUser().getId());
             assertEquals("testuser", response.getUser().getUsername());
             assertEquals("test@test.com", response.getUser().getEmail());
@@ -463,15 +479,22 @@ class AuthServiceTest {
         @DisplayName("P0 - 用户不存在应抛 USER_NOT_FOUND")
         void shouldThrowWhenUserNotFound() {
             // given - 生成有效 token 但用户不存在
+            long now = System.currentTimeMillis() / 1000;
             Map<String, Object> payload = new HashMap<>();
             payload.put("sub", 999L);
             payload.put("wid", 1L);
             payload.put("role", "owner");
-            payload.put("iat", System.currentTimeMillis() / 1000);
-            payload.put("exp", System.currentTimeMillis() / 1000 + 3600);
+            payload.put("iss", "eify-test");
+            payload.put("aud", "eify-api");
+            payload.put("iat", now);
+            payload.put("exp", now + 3600);
+            payload.put("family", "test-family-1");
+            payload.put("count", 1L);
             String token = JWTUtil.createToken(payload, JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
             when(userMapper.selectById(999L)).thenReturn(null);
+
+            storeFamily("test-family-1", 1);
 
             // when & then
             BusinessException ex = assertThrows(BusinessException.class,
@@ -483,16 +506,23 @@ class AuthServiceTest {
         @DisplayName("P0 - 用户被禁用应抛 USER_NOT_FOUND")
         void shouldThrowWhenUserDisabled() {
             // given
+            long now = System.currentTimeMillis() / 1000;
             Map<String, Object> payload = new HashMap<>();
             payload.put("sub", 1L);
             payload.put("wid", 1L);
             payload.put("role", "owner");
-            payload.put("iat", System.currentTimeMillis() / 1000);
-            payload.put("exp", System.currentTimeMillis() / 1000 + 3600);
+            payload.put("iss", "eify-test");
+            payload.put("aud", "eify-api");
+            payload.put("iat", now);
+            payload.put("exp", now + 3600);
+            payload.put("family", "test-family-2");
+            payload.put("count", 1L);
             String token = JWTUtil.createToken(payload, JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
             User user = buildUser(1L, "testuser", "test@test.com", 0);
             when(userMapper.selectById(1L)).thenReturn(user);
+
+            storeFamily("test-family-2", 1);
 
             // when & then
             BusinessException ex = assertThrows(BusinessException.class,
@@ -504,17 +534,24 @@ class AuthServiceTest {
         @DisplayName("P0 - 工作空间不存在应抛 WORKSPACE_NOT_FOUND")
         void shouldThrowWhenWorkspaceNotFound() {
             // given
+            long now = System.currentTimeMillis() / 1000;
             Map<String, Object> payload = new HashMap<>();
             payload.put("sub", 1L);
             payload.put("wid", 999L);
             payload.put("role", "owner");
-            payload.put("iat", System.currentTimeMillis() / 1000);
-            payload.put("exp", System.currentTimeMillis() / 1000 + 3600);
+            payload.put("iss", "eify-test");
+            payload.put("aud", "eify-api");
+            payload.put("iat", now);
+            payload.put("exp", now + 3600);
+            payload.put("family", "test-family-3");
+            payload.put("count", 1L);
             String token = JWTUtil.createToken(payload, JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
             User user = buildUser(1L, "testuser", "test@test.com", 1);
             when(userMapper.selectById(1L)).thenReturn(user);
             when(workspaceMapper.selectById(999L)).thenReturn(null);
+
+            storeFamily("test-family-3", 1);
 
             // when & then
             BusinessException ex = assertThrows(BusinessException.class,
@@ -526,12 +563,17 @@ class AuthServiceTest {
         @DisplayName("P1 - 刷新成功应返回新 token")
         void shouldReturnNewTokensOnSuccessfulRefresh() {
             // given
+            long now = System.currentTimeMillis() / 1000;
             Map<String, Object> payload = new HashMap<>();
             payload.put("sub", 1L);
             payload.put("wid", 10L);
             payload.put("role", "admin");
-            payload.put("iat", System.currentTimeMillis() / 1000);
-            payload.put("exp", System.currentTimeMillis() / 1000 + 3600);
+            payload.put("iss", "eify-test");
+            payload.put("aud", "eify-api");
+            payload.put("iat", now);
+            payload.put("exp", now + 3600);
+            payload.put("family", "test-family-4");
+            payload.put("count", 1L);
             String token = JWTUtil.createToken(payload, JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
             User user = buildUser(1L, "testuser", "test@test.com", 1);
@@ -539,13 +581,15 @@ class AuthServiceTest {
             when(userMapper.selectById(1L)).thenReturn(user);
             when(workspaceMapper.selectById(10L)).thenReturn(workspace);
 
+            storeFamily("test-family-4", 1);
+
             // when
             AuthResponse response = authService.refresh(token);
 
             // then
             assertNotNull(response.getAccessToken());
             assertNotNull(response.getRefreshToken());
-            assertEquals(7200L, response.getExpiresIn());
+            assertEquals(1800L, response.getExpiresIn());
             assertEquals(1L, response.getUser().getId());
             assertEquals("testuser", response.getUser().getUsername());
             assertEquals(10L, response.getWorkspace().getId());
@@ -562,7 +606,13 @@ class AuthServiceTest {
         @Test
         @DisplayName("P1 - 登出不应抛异常")
         void shouldNotThrowOnLogout() {
-            assertDoesNotThrow(() -> authService.logout(1L));
+            assertDoesNotThrow(() -> authService.logout("some-refresh-token"));
+        }
+
+        @Test
+        @DisplayName("P1 - null refresh token 登出不应抛异常")
+        void shouldNotThrowOnLogoutWithNullToken() {
+            assertDoesNotThrow(() -> authService.logout(null));
         }
     }
 

@@ -133,6 +133,8 @@ auth:
   jwt:
     # Prod 环境密钥必须通过 K8s Secret 注入
     secret: ${JWT_SECRET:}
+    issuer: eify-prod
+    cookie-secure: true
   min-key-length: 32
 
 # ========== 加密配置（Prod：禁止硬编码密钥） ==========

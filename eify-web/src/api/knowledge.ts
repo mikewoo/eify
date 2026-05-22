@@ -12,6 +12,7 @@ export interface KnowledgeBaseResponse {
   name: string
   description: string | null
   embeddingModel: string
+  embeddingModelId: number | null
   vectorDimension: number
   chunkSize: number
   chunkOverlap: number
@@ -30,6 +31,7 @@ export interface KnowledgeCreateRequest {
   name: string
   description?: string
   embeddingModel?: string
+  embeddingModelId?: number
   vectorDimension?: number
   chunkSize?: number
   chunkOverlap?: number
@@ -42,6 +44,7 @@ export interface KnowledgeUpdateRequest {
   name?: string
   description?: string
   embeddingModel?: string
+  embeddingModelId?: number
   vectorDimension?: number
   chunkSize?: number
   chunkOverlap?: number

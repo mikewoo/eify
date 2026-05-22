@@ -42,6 +42,7 @@ spring-boot-*.log
 .claude/
 .qodo/
 *.swo
+.qoder/
 
 # Build artifacts
 *.jar
@@ -56,3 +57,4 @@ application-local.properties
 # SQL dumps (keep deploy/ sql files)
 *.sql
 !deploy/**/*.sql
+

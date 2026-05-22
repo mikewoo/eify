@@ -225,6 +225,12 @@
             >
               <el-icon class="sync-btn-icon"><Connection /></el-icon>{{ t('provider.syncModels') }}
             </el-button>
+            <el-button
+              type="primary"
+              @click="handleAddModel"
+            >
+              <el-icon class="sync-btn-icon"><Plus /></el-icon>{{ t('provider.addModelTitle') }}
+            </el-button>
             <span class="sync-hint" v-if="!syncResult && existingModelNames.length === 0">{{ t('provider.noModelsHint') }}</span>
             <span class="sync-hint existing" v-else-if="!syncResult && existingModelNames.length > 0">{{ t('provider.existingModels', { count: existingModelNames.length }) }}</span>
           </div>
@@ -277,12 +283,78 @@
       </el-form-item>
     </template>
   </EifyFormDialog>
+
+  <!-- 手动添加模型对话框 -->
+  <EifyFormDialog
+    ref="modelDialogRef"
+    v-model="modelDialogVisible"
+    :rules="modelFormRules"
+    :default-data="defaultModelFormData"
+    :dialog-props="{
+      addTitle: t('provider.addModelTitle'),
+      submitText: t('common.confirm'),
+      width: '480px',
+      labelWidth: '110px'
+    }"
+    @submit="handleModelSubmit"
+  >
+    <template #form="{ data }">
+      <el-form-item :label="t('provider.modelNameLabel')" prop="modelId">
+        <el-input
+          v-model="data.modelId"
+          :placeholder="t('provider.modelNamePlaceholder')"
+          maxlength="200"
+        />
+      </el-form-item>
+
+      <el-form-item :label="t('provider.displayNameLabel')" prop="displayName">
+        <el-input
+          v-model="data.displayName"
+          :placeholder="t('provider.displayNamePlaceholder')"
+          maxlength="200"
+        />
+      </el-form-item>
+
+      <el-form-item :label="t('provider.modelCategoryLabel')" prop="category">
+        <el-select
+          v-model="data.category"
+          :placeholder="t('provider.modelCategoryPlaceholder')"
+          style="width: 100%"
+        >
+          <el-option label="Chat" :value="0" />
+          <el-option label="Embedding" :value="1" />
+          <el-option label="Rerank" :value="2" />
+          <el-option label="Multimodal" :value="3" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item :label="t('provider.modelDimensionLabel')" prop="dimension">
+        <el-input-number
+          v-model="data.dimension"
+          :min="1"
+          :max="8192"
+          :step="1"
+          style="width: 100%"
+        />
+        <div class="form-hint">{{ t('provider.modelDimensionHint') }}</div>
+      </el-form-item>
+    </template>
+  </EifyFormDialog>
+
+  <ConfirmDialog
+    :show="showDeleteConfirm"
+    :title="t('common.confirmDeleteTitle')"
+    :message="deleteTarget ? t('provider.confirmDelete', { name: deleteTarget.name }) : ''"
+    type="danger"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   Plus,
   Connection,
@@ -298,6 +370,7 @@ import {
 } from '@element-plus/icons-vue'
 import EifyListPage from '@/components/EifyListPage.vue'
 import EifyFormDialog from '@/components/EifyFormDialog.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import {
   providerApi,
   type ProviderResponse,
@@ -381,6 +454,10 @@ const existingModelNames = ref<string[]>([])
 const formProviderId = ref<number | null>(null)
 const searchConditions = ref<SearchCondition[]>([])
 
+// 删除确认
+const showDeleteConfirm = ref(false)
+const deleteTarget = ref<{ id: number; name: string } | null>(null)
+
 /* ========== 统计配置 ========== */
 
 const statsData = ref({ total: 0, enabled: 0, disabled: 0 })
@@ -389,6 +466,37 @@ const statsConfig = computed<ListStat[]>(() => [
   { key: 'enabled', label: t('provider.stats.enabled'), value: statsData.value.enabled || '-', class: 'enabled' },
   { key: 'disabled', label: t('provider.stats.disabled'), value: statsData.value.disabled || '-', class: 'disabled' }
 ])
+
+/* ========== 模型表单 ========== */
+
+interface ModelFormData {
+  modelId: string
+  displayName: string
+  category: number
+  dimension: number | undefined
+}
+
+const modelDialogRef = ref()
+const modelDialogVisible = ref(false)
+
+const defaultModelFormData: ModelFormData = {
+  modelId: '',
+  displayName: '',
+  category: 1,
+  dimension: undefined
+}
+
+const modelFormRules = {
+  modelId: [
+    { required: true, message: () => t('provider.form.nameRequired'), trigger: 'blur' }
+  ],
+  displayName: [
+    { required: true, message: () => t('provider.form.nameRequired'), trigger: 'blur' }
+  ],
+  category: [
+    { required: true, message: () => t('provider.form.typeRequired'), trigger: 'change' }
+  ]
+}
 
 /* ========== 表单默认数据 ========== */
 
@@ -608,21 +716,24 @@ const handleEdit = async (row: { id: number; name: string; type: string; baseUrl
   } catch { /* ignore */ }
 }
 
-const handleDelete = async (row: { id: number; name: string }) => {
+const handleDelete = (row: { id: number; name: string }) => {
+  deleteTarget.value = row
+  showDeleteConfirm.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value) return
   try {
-    await ElMessageBox.confirm(
-      t('provider.confirmDelete', { name: row.name }),
-      t('provider.confirmDeleteTitle'),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      }
-    )
-    await deleteProvider(row.id)
-  } catch {
-    // 用户取消删除
+    await deleteProvider(deleteTarget.value.id)
+  } finally {
+    showDeleteConfirm.value = false
+    deleteTarget.value = null
   }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTarget.value = null
 }
 
 const handleTestConnection = async (row: { id: number }) => {
@@ -648,6 +759,39 @@ const handleTestConnection = async (row: { id: number }) => {
     })
   } finally {
     testingId.value = null
+  }
+}
+
+const handleAddModel = () => {
+  modelDialogRef.value?.open()
+}
+
+const handleModelSubmit = async (data: ModelFormData) => {
+  if (!formProviderId.value) return
+
+  const requestData: Record<string, any> = {
+    modelId: data.modelId,
+    displayName: data.displayName,
+    category: data.category
+  }
+
+  if (data.dimension) {
+    requestData.extraParams = { dimension: data.dimension }
+  }
+
+  try {
+    await providerApi.createProviderModel(formProviderId.value, requestData)
+    ElMessage.success(t('provider.addModelSuccess'))
+    modelDialogRef.value?.submitSuccess()
+
+    // 刷新已有模型列表
+    try {
+      const models = await providerApi.getProviderModels(formProviderId.value)
+      existingModelNames.value = models.map(m => m.modelName)
+    } catch { /* ignore */ }
+    listPageRef.value?.refresh()
+  } catch {
+    modelDialogRef.value?.submitFail()
   }
 }
 
@@ -1165,6 +1309,12 @@ const handleSubmit = async (data: any, mode: string) => {
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid var(--eify-border-subtle);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--eify-text-tertiary);
+  margin-top: 4px;
 }
 
 /* ========== URL Tooltip 样式 ========== */

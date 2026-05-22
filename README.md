@@ -35,6 +35,71 @@
 | **Multi-Tenant Workspace** | JWT authentication + workspace-level data isolation, built for teams |
 | **Observability** | Micrometer Tracing + Brave, ClickHouse + Vector log collection |
 
+## Screenshots
+
+### AI Chat
+
+<p align="center">
+  <img src="docs/images/screenshots/02_Chat_mgmt.png" alt="AI Chat" width="80%">
+</p>
+
+### Agent & Provider Management
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/03_Agent_mgmt.png" alt="Agent Management"></td>
+    <td width="50%"><img src="docs/images/screenshots/04_Model_Providers_mgmt.png" alt="Model Providers"></td>
+  </tr>
+</table>
+
+### Knowledge Base & RAG
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/05_1_Knowleage_Base_mgmt.png" alt="Knowledge Base"></td>
+    <td width="50%"><img src="docs/images/screenshots/05_2_Knowleage_Document_mgmt.png" alt="Document Management"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="docs/images/screenshots/05_3_Knowleage_Document_preview.png" alt="Document Preview"></td>
+  </tr>
+</table>
+
+### Visual Workflow Editor
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/06_1_Workflow_mgmt.png" alt="Workflow Management"></td>
+    <td width="50%"><img src="docs/images/screenshots/06_2_Workflow_Edit.png" alt="Workflow Editor"></td>
+  </tr>
+</table>
+
+### MCP Tools
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/07_1_MCP_Server_mgmt.png" alt="MCP Server Management"></td>
+    <td width="50%"><img src="docs/images/screenshots/07_2_MCP_Server_details.png" alt="MCP Server Details"></td>
+  </tr>
+</table>
+
+### Multi-Tenant Workspace
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/09_Create_workspace.png" alt="Create Workspace"></td>
+    <td width="50%"><img src="docs/images/screenshots/08_Personal_profile.png" alt="Personal Profile"></td>
+  </tr>
+</table>
+
+### Authentication
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/screenshots/01_1_Login.png" alt="Login"></td>
+    <td width="50%"><img src="docs/images/screenshots/01_2_Register.png" alt="Register"></td>
+  </tr>
+</table>
+
 ## Quick Start
 
 ### Prerequisites

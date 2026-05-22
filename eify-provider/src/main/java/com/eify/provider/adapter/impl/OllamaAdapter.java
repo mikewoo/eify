@@ -35,6 +35,11 @@ public class OllamaAdapter extends AbstractProviderAdapter {
     }
 
     @Override
+    public String getEmbeddingEndpoint() {
+        return "/api/embeddings";
+    }
+
+    @Override
     protected String doTest(Provider provider) throws Exception {
         String baseUrl = normalizeBaseUrl(provider.getBaseUrl());
 

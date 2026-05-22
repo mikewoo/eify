@@ -26,7 +26,7 @@
 
 ## 核心数据表
 
-> 完整 DDL 见 [`eify-app/src/main/resources/db/migration/V1__init.sql`](../eify-app/src/main/resources/db/migration/V1__init.sql)，由 Flyway 自动执行
+> 完整 DDL 见 Flyway 迁移文件（`V1__init.sql`、`V4__model_category_and_embedding_model_id.sql`、`V5__name_workspace_deleted_unique.sql`），由 Flyway 自动执行
 
 | 表名 | 用途 |
 | :--- | :--- |
@@ -36,7 +36,7 @@
 | `ai_workspace_invite` | 工作空间邀请码表 |
 | `ai_user_session` | 用户会话（refresh token） |
 | `provider` | 模型供应商表 |
-| `model_config` | 模型配置表 |
+| `model_config` | 模型配置表（含 `model_category` 模型分类：CHAT/EMBEDDING/RERANK/MULTIMODAL） |
 | `provider_health` | 供应商健康状态表 |
 | `ai_agent` | Agent 配置表 |
 | `ai_chat_session` | 对话会话表 |
@@ -391,7 +391,7 @@ CREATE TABLE `{table_prefix}_{entity}` (
 
   -- ============ 索引 ============
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_name_workspace` (`name`, `workspace_id`),
+  UNIQUE KEY `uk_name_workspace_deleted` (`name`, `workspace_id`, `deleted`),
   KEY `idx_workspace_id` (`workspace_id`),
   KEY `idx_created_at` (`created_at`),
   KEY `idx_status_deleted` (`status`, `deleted`)
@@ -400,9 +400,9 @@ CREATE TABLE `{table_prefix}_{entity}` (
 
 ## Eify 业务表 DDL
 
-> **完整 DDL**：Flyway 迁移文件 [`eify-app/src/main/resources/db/migration/V1__init.sql`](../eify-app/src/main/resources/db/migration/V1__init.sql) — 包含所有表的 CREATE TABLE 和初始数据。
+> **完整 DDL**：Flyway 迁移文件（`V1__init.sql`、`V4__model_category_and_embedding_model_id.sql`、`V5__name_workspace_deleted_unique.sql`）— 包含所有表的 CREATE TABLE 和增量变更。
 >
-> 以下为各表结构说明，实际执行请使用统一 SQL 文件。
+> 以下为各表结构说明，实际执行请使用 Flyway 自动迁移。
 
 ### 表清单
 
@@ -419,7 +419,7 @@ CREATE TABLE `{table_prefix}_{entity}` (
 | **Agent** | `ai_agent` | Agent 配置表 | Y |
 | **Chat** | `ai_chat_session` | 对话会话表 | Y |
 | **Chat** | `ai_chat_message` | 聊天消息表（大表，游标分页） | Y |
-| **Knowledge** | `knowledge_base` | 知识库表 | Y |
+| **Knowledge** | `knowledge_base` | 知识库表（含 `embedding_model_id` FK → `model_config.id`） | Y |
 | **Knowledge** | `document` | 文档表 | Y |
 | **Knowledge** | `agent_knowledge` | Agent 与知识库关联表 | - |
 | **MCP** | `mcp_server` | MCP 服务器表 | Y |
