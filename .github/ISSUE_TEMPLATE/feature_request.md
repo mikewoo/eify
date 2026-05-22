@@ -1,27 +1,27 @@
 ---
-name: 功能建议
-about: 为这个项目提出一个想法
+name: Feature Request
+about: Suggest an idea for this project
 title: "[Feature] "
 labels: enhancement
 assignees: ''
 ---
 
-## 问题背景
+## Problem Statement
 
-清晰简洁地描述这个功能建议与什么问题相关。
+A clear and concise description of the problem this feature request relates to.
 
-## 解决方案
+## Proposed Solution
 
-描述你希望实现的解决方案。
+Describe the solution you would like to see implemented.
 
-## 替代方案
+## Alternatives Considered
 
-描述你考虑过的任何替代解决方案或功能。
+Describe any alternative solutions or features you have considered.
 
-## 使用场景
+## Use Cases
 
-描述该功能的使用场景和目标用户。
+Describe the use cases and target users for this feature.
 
-## 补充信息
+## Additional Context
 
-添加任何其他关于功能建议的上下文或截图。
+Add any other context or screenshots about the feature request here.

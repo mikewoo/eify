@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
-  - name: 安全问题
+  - name: Security Issue
     url: https://github.com/mikewoo/eify/security/policy
-    about: 报告安全漏洞请查看 SECURITY.md
-  - name: 讨论
+    about: Please review SECURITY.md for vulnerability reporting
+  - name: Discussions
     url: https://github.com/mikewoo/eify/discussions
-    about: 一般性问题请在 Discussions 中讨论
+    about: For general questions, please use Discussions

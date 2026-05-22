@@ -1,34 +1,34 @@
-## 变更类型
+## Change Type
 
-- [ ] Bug 修复（fix）
-- [ ] 新功能（feat）
-- [ ] 文档更新（docs）
-- [ ] 重构（refactor）
-- [ ] 其他
+- [ ] Bug fix (fix)
+- [ ] New feature (feat)
+- [ ] Documentation (docs)
+- [ ] Refactoring (refactor)
+- [ ] Other
 
-## 变更说明
+## Description
 
-简要描述本次变更的内容和动机。
+Briefly describe the changes and motivation.
 
-## 测试
+## Testing
 
-- [ ] 本地 `mvn test` 全部通过
-- [ ] 手动测试核心功能正常
-- [ ] 新增功能已添加测试
+- [ ] `mvn test` passes locally
+- [ ] Core functionality manually verified
+- [ ] New features have test coverage
 
-## 检查清单
+## Checklist
 
-- [ ] 数据库索引：新增查询有索引覆盖
-- [ ] 工作空间隔离：Service 层查询过滤 workspace_id
-- [ ] 异常处理：使用 ErrorCode 枚举
-- [ ] 日志格式：纯 JSON 格式，UTC 时区
-- [ ] 配置安全：无硬编码密码 / API Key
-- [ ] XSS 防护：v-html 使用 DOMPurify.sanitize
+- [ ] Database indexes: new queries have index coverage
+- [ ] Workspace isolation: Service layer queries filter by workspace_id
+- [ ] Error handling: uses ErrorCode enum
+- [ ] Log format: pure JSON format, UTC timezone
+- [ ] Config security: no hardcoded passwords / API keys
+- [ ] XSS protection: v-html uses DOMPurify.sanitize
 
-## 相关 Issue
+## Related Issue
 
 Closes #
 
-## 截图（如适用）
+## Screenshots (if applicable)
 
-<!-- 粘贴 UI 变更的截图 -->
+<!-- Paste screenshots of UI changes -->

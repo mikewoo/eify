@@ -1,45 +1,45 @@
 ---
-name: Bug 报告
-about: 报告一个问题以帮助我们改进
+name: Bug Report
+about: Report a problem to help us improve
 title: "[Bug] "
 labels: bug
 assignees: ''
 ---
 
-## 描述
+## Description
 
-清晰简洁地描述这个 Bug 是什么。
+A clear and concise description of the bug.
 
-## 复现步骤
+## Steps to Reproduce
 
-1. 打开 '...'
-2. 点击 '...'
-3. 滚动到 '...'
-4. 看到错误
+1. Open '...'
+2. Click '...'
+3. Scroll to '...'
+4. See the error
 
-## 期望行为
+## Expected Behavior
 
-清晰简洁地描述你期望发生什么。
+A clear and concise description of what you expected to happen.
 
-## 截图
+## Screenshots
 
-如适用，添加截图帮助解释问题。
+If applicable, add screenshots to help explain the problem.
 
-## 环境信息
+## Environment
 
-| 信息 | 详情 |
+| Info | Detail |
 |:---|:---|
-| **部署方式** | Docker / 本地开发 |
-| **浏览器** | Chrome / Firefox / Edge |
-| **版本** | 3.x |
-| **数据库** | MySQL 8.x |
+| **Deployment** | Docker / Local Dev |
+| **Browser** | Chrome / Firefox / Edge |
+| **Version** | 3.x |
+| **Database** | MySQL 8.x |
 
-## 日志
+## Logs
 
 ```json
-<!-- 粘贴相关日志（JSON 格式），可通过 ./logs/eify.log 查看 -->
+<!-- Paste relevant logs (JSON format), available via ./logs/eify.log -->
 ```
 
-## 补充信息
+## Additional Context
 
-添加任何其他关于问题的上下文。
+Add any other context about the problem here.
