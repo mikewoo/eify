@@ -407,6 +407,8 @@ CREATE TABLE IF NOT EXISTS `mcp_tool` (
 
     PRIMARY KEY (`id`),
     KEY `idx_server_id` (`server_id`),
+    KEY `idx_workspace_id` (`workspace_id`),
+    KEY `idx_name_workspace` (`name`, `workspace_id`),
     KEY `idx_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='MCP 工具';
 
@@ -423,9 +425,10 @@ CREATE TABLE IF NOT EXISTS `agent_mcp_tool` (
     `workspace_id`  BIGINT UNSIGNED NOT NULL DEFAULT 1     COMMENT '工作空间 ID',
 
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_agent_tool` (`agent_id`, `tool_id`),
+    UNIQUE KEY `uk_agent_tool_workspace` (`agent_id`, `tool_id`, `workspace_id`),
     KEY `idx_agent_id` (`agent_id`),
-    KEY `idx_tool_id` (`tool_id`)
+    KEY `idx_tool_id` (`tool_id`),
+    KEY `idx_workspace_id` (`workspace_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Agent 绑定的 MCP 工具';
 
 -- ############################################################
