@@ -155,7 +155,7 @@ public class AgentServiceImpl implements AgentService {
         }
         List<Long> knowledgeIds = agentKnowledgeMapper.selectKnowledgeIdsByAgentId(id);
         agent.setKnowledgeIds(knowledgeIds);
-        List<Long> mcpToolIds = agentMcpToolMapper.selectToolIdsByAgentId(id);
+        List<Long> mcpToolIds = agentMcpToolMapper.selectToolIdsByAgentId(id, CurrentContext.getWorkspaceId());
         agent.setMcpToolIds(mcpToolIds);
         return agent;
     }
@@ -578,7 +578,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setKnowledgeIds(knowledgeIds);
 
         // 加载 MCP 工具 IDs 及简要信息
-        List<Long> mcpToolIds = agentMcpToolMapper.selectToolIdsByAgentId(agent.getId());
+        List<Long> mcpToolIds = agentMcpToolMapper.selectToolIdsByAgentId(agent.getId(), CurrentContext.getWorkspaceId());
         agent.setMcpToolIds(mcpToolIds);
         List<AgentResponse.McpToolBrief> mcpTools = loadMcpToolBriefs(mcpToolIds);
 
@@ -645,7 +645,7 @@ public class AgentServiceImpl implements AgentService {
     private void batchLoadMcpToolIds(List<Agent> agents) {
         if (agents == null || agents.isEmpty()) return;
         List<Long> agentIds = agents.stream().map(Agent::getId).collect(Collectors.toList());
-        List<AgentMcpTool> mappings = agentMcpToolMapper.selectByAgentIds(agentIds);
+        List<AgentMcpTool> mappings = agentMcpToolMapper.selectByAgentIds(agentIds, CurrentContext.getWorkspaceId());
         Map<Long, List<Long>> grouped = mappings.stream()
                 .collect(Collectors.groupingBy(
                         AgentMcpTool::getAgentId,
@@ -671,7 +671,7 @@ public class AgentServiceImpl implements AgentService {
         }
 
         // 全量替换：先删后插
-        agentMcpToolMapper.deleteByAgentId(id);
+        agentMcpToolMapper.deleteByAgentId(id, CurrentContext.getWorkspaceId());
         if (!toolIds.isEmpty()) {
             validateAndInsertMcpTools(id, toolIds);
         }
@@ -689,17 +689,16 @@ public class AgentServiceImpl implements AgentService {
         }
 
         for (Long toolId : toolIds) {
-            McpTool tool = mcpToolMapper.selectById(toolId);
-            if (tool == null) {
-                throw new BusinessException(ErrorCode.MCP_TOOL_NOT_FOUND);
-            }
-            McpServer server = mcpServerMapper.selectById(tool.getServerId());
-            if (server == null || server.getEnabled() == null || server.getEnabled() != 1) {
+            McpTool tool = WorkspaceGuard.requireInWorkspace(
+                    mcpToolMapper.selectById(toolId), ErrorCode.MCP_TOOL_NOT_FOUND);
+            McpServer server = WorkspaceGuard.requireInWorkspace(
+                    mcpServerMapper.selectById(tool.getServerId()), ErrorCode.MCP_SERVER_OFFLINE);
+            if (server.getEnabled() == null || server.getEnabled() != 1) {
                 throw new BusinessException(ErrorCode.MCP_SERVER_OFFLINE);
             }
         }
 
-        agentMcpToolMapper.batchInsert(agentId, toolIds);
+        agentMcpToolMapper.batchInsert(agentId, toolIds, CurrentContext.getWorkspaceId());
     }
 
     /**
