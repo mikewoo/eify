@@ -223,8 +223,8 @@ echo ""
 # ========== 启动后端 ==========
 log_info "启动后端服务..."
 
-# 版本号
-APP_VERSION=$(grep '<eify.version>' pom.xml 2>/dev/null | sed 's/.*<eify.version>\(.*\)<\/eify.version>.*/\1/' || echo "1.0.0")
+# 版本号（直接读 revision 属性，避免 ${revision} 未被 shell 解析）
+APP_VERSION=$(grep '<revision>' pom.xml 2>/dev/null | sed 's/.*<revision>\(.*\)<\/revision>.*/\1/' | head -1 || echo "1.0.0")
 SPRING_OPTS="-Dspring.profiles.active=${ENV} -Dapp.version=${APP_VERSION}"
 
 # JVM 配置（可通过环境变量覆盖）

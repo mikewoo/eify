@@ -74,6 +74,32 @@ npm run test:watch
 
 测试框架：Vitest + Vue Test Utils + jsdom
 
+## 设计系统
+
+项目遵循 [DESIGN.md](../DESIGN.md) 设计规范，所有 UI 代码使用 `--eify-*` CSS 变量和 `.eify-*` 组件类名。
+
+| 文件 | 说明 |
+|:---|:---|
+| `src/styles/design-tokens.css` | 颜色、字体、间距、圆角、阴影等 CSS 变量 |
+| `src/styles/components.css` | 按钮、输入框、卡片、表格、标签等组件样式 |
+| `src/styles/page.css` | 顶栏、页面容器、分页、响应式布局 |
+| `src/styles/sidebar.css` | 深色侧边栏样式（含版本信息） |
+| `src/styles/utilities.css` | 文字、间距、布局、圆角等原子工具类 |
+
+核心规则：
+- 禁止硬编码颜色、字号、间距 — 使用 `var(--eify-*)` 设计令牌
+- 优先使用 `.eify-*` 组件类，不使用内联样式或裸 HTML
+- 布局遵循 Shell 结构：深色侧边栏 + 白色顶栏 + `#f8fafc` 内容区
+
+## 视觉回归测试
+
+```bash
+# 截取所有页面截图（需先启动 dev 环境和后端）
+node screenshot-check.cjs
+```
+
+截图输出到 `../logs/screenshots/`，包含 10 个页面 + 侧边栏 hover 状态共 11 张截图。
+
 ## 代理配置
 
 开发环境 API 请求代理到 `http://localhost:8080`，配置在 `vite.config.ts`。
@@ -82,3 +108,5 @@ npm run test:watch
 
 - [后端项目文档](../docs/README.md)
 - [API 接口规范](../docs/API-SPEC.md)
+- [设计系统规范](../DESIGN.md)
+- [E2E 测试指南](../docs/guides/E2E-TESTING.md)
