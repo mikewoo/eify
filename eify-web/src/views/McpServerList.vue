@@ -846,7 +846,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .tool-count-badge {
-  font-size: 11px;
   padding: 1px 6px;
   border-radius: 10px;
   background: rgba(99, 102, 241, 0.1);
@@ -857,7 +856,6 @@ const handleSubmit = async (data: any, mode: string) => {
 .endpoint-text {
   color: var(--eify-text-secondary);
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-  font-size: 13px;
   cursor: default;
   border-bottom: 1px dashed var(--eify-border-default);
 }
@@ -901,7 +899,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .status-text {
-  font-size: 14px;
 }
 
 .tool-count {
@@ -979,7 +976,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .card-title h3 {
-  font-size: 15px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin: 0 0 4px 0;
@@ -989,7 +985,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .card-endpoint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   overflow: hidden;
@@ -1045,7 +1040,6 @@ const handleSubmit = async (data: any, mode: string) => {
   justify-content: space-between;
   align-items: center;
   padding: 4px 0;
-  font-size: 12px;
 }
 
 .info-label {
@@ -1119,12 +1113,10 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .detail-label {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
 .detail-value {
-  font-size: 14px;
   color: var(--eify-text-primary);
   font-weight: 500;
 }
@@ -1150,14 +1142,12 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .tool-name {
-  font-size: 14px;
   font-weight: 600;
   color: var(--eify-primary);
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
 }
 
 .tool-description {
-  font-size: 13px;
   color: var(--eify-text-secondary);
   margin-bottom: 8px;
   line-height: 1.5;
@@ -1169,7 +1159,6 @@ const handleSubmit = async (data: any, mode: string) => {
 
 .schema-json {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-  font-size: 12px;
   color: var(--eify-text-primary);
   background: var(--eify-bg-base);
   padding: 12px;
@@ -1214,7 +1203,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .debug-tool-list-title {
-  font-size: 12px;
   font-weight: 600;
   color: var(--eify-text-tertiary);
   padding: 12px 12px 8px;
@@ -1225,7 +1213,6 @@ const handleSubmit = async (data: any, mode: string) => {
 .debug-tool-item {
   padding: 8px 12px;
   cursor: pointer;
-  font-size: 13px;
   color: var(--eify-text-secondary);
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   transition: background 0.15s, color 0.15s;
@@ -1260,7 +1247,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .debug-label {
-  font-size: 12px;
   font-weight: 600;
   color: var(--eify-text-tertiary);
   text-transform: uppercase;
@@ -1270,7 +1256,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .debug-tool-desc p {
-  font-size: 13px;
   color: var(--eify-text-secondary);
   line-height: 1.6;
   margin: 4px 0 0;
@@ -1298,14 +1283,12 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .debug-param-hint {
-  font-size: 11px;
   color: var(--eify-text-tertiary);
   margin-top: 2px;
   line-height: 1.4;
 }
 
 .debug-no-params {
-  font-size: 13px;
   color: var(--eify-text-tertiary);
   padding: 8px 0;
   font-style: italic;
@@ -1339,14 +1322,12 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .debug-elapsed {
-  font-size: 12px;
   color: rgba(255, 255, 255, 0.5);
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
 }
 
 .debug-result-content {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-  font-size: 12px;
   line-height: 1.5;
   padding: 12px;
   margin: 0;
@@ -1376,7 +1357,6 @@ const handleSubmit = async (data: any, mode: string) => {
   padding: 6px 10px;
   border-radius: 6px;
   transition: background 0.15s;
-  font-size: 12px;
 }
 
 .recent-call-item:hover {
