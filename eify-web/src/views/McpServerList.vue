@@ -933,7 +933,7 @@ const handleSubmit = async (data: any, mode: string) => {
 
 /* ========== 卡片视图 ========== */
 .mcp-card {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: hidden;
@@ -957,7 +957,7 @@ const handleSubmit = async (data: any, mode: string) => {
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, var(--eify-bg-base) 100%);
   min-height: 64px;
 }
 
@@ -1171,7 +1171,7 @@ const handleSubmit = async (data: any, mode: string) => {
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
   font-size: 12px;
   color: var(--eify-text-primary);
-  background: #ffffff;
+  background: var(--eify-bg-base);
   padding: 12px;
   border-radius: 6px;
   border: 1px solid var(--eify-border-subtle);
@@ -1406,12 +1406,12 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .recent-call-status.error {
-  color: var(--eify-danger);
+  color: var(--eify-error);
 }
 
 /* ========== URL Tooltip 样式 ========== */
 :deep(.eify-url-tooltip) {
-  background: #ffffff !important;
+  background: var(--eify-bg-base) !important;
   border: 1px solid var(--eify-border-default) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
