@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.eify</groupId>
         <artifactId>eify-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>eify-chat</artifactId>
