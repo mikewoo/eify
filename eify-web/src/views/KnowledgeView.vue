@@ -26,12 +26,12 @@
     <!-- 表格列插槽 -->
     <template #table-name="{ row }">
       <div class="name-cell">
-        <div class="kb-icon">
+        <div class="kb-icon text-xl">
           <el-icon><Collection /></el-icon>
         </div>
         <div class="name-info">
           <div class="name-text">{{ row.name }}</div>
-          <div class="model-text">
+          <div class="model-text text-xs">
             <span v-if="row.embeddingModelId" class="provider-model-badge">{{ row.embeddingModel }}</span>
             <el-tooltip v-else :content="t('knowledge.globalConfigFallback')">
               <span class="global-model-text">{{ row.embeddingModel }} *</span>
@@ -44,7 +44,7 @@
     <template #table-enabled="{ row }">
       <div class="status-cell">
         <span class="status-dot" :class="{ enabled: row.enabled === 1 }"></span>
-        <span class="status-text">{{ row.enabled === 1 ? t('common.enabled') : t('common.disabled') }}</span>
+        <span class="status-text text-base">{{ row.enabled === 1 ? t('common.enabled') : t('common.disabled') }}</span>
       </div>
     </template>
 
@@ -58,15 +58,15 @@
 
     <template #table-actions="{ row }">
       <div class="table-action-buttons">
-        <el-button size="small" type="primary" @click="handleViewDocuments(row)">
+        <el-button size="small" type="primary" class="text-xs" @click="handleViewDocuments(row)">
           <el-icon><FolderOpened /></el-icon>
           {{ t('knowledge.viewDocuments') }}
         </el-button>
-        <el-button size="small" @click="handleEdit(row)">
+        <el-button size="small" class="text-xs" @click="handleEdit(row)">
           <el-icon><Edit /></el-icon>
           {{ t('common.edit') }}
         </el-button>
-        <el-button size="small" type="danger" @click="handleDelete(row)">
+        <el-button size="small" type="danger" class="text-xs" @click="handleDelete(row)">
           <el-icon><Delete /></el-icon>
           {{ t('common.delete') }}
         </el-button>
@@ -82,11 +82,11 @@
         :class="{ disabled: item.enabled === 0 }"
       >
         <div class="card-header">
-          <div class="card-avatar-placeholder">
+          <div class="card-avatar-placeholder text-2xl">
             <el-icon><Collection /></el-icon>
           </div>
           <div class="card-title">
-            <h3>{{ item.name }}</h3>
+            <h3 class="text-lg">{{ item.name }}</h3>
             <el-tag v-if="item.embeddingModelId" size="small" type="success" effect="plain">{{ item.embeddingModel }}</el-tag>
             <el-tooltip v-else :content="t('knowledge.globalConfigFallback')">
               <span class="global-model-tag"><el-tag size="small" type="info" effect="plain">{{ item.embeddingModel }}</el-tag></span>
@@ -100,28 +100,28 @@
         </div>
 
         <div class="card-body">
-          <div class="card-info-row">
+          <div class="card-info-row text-xs">
             <span class="info-label">{{ t('common.description') }}</span>
             <el-tooltip :content="item.description" placement="top" :show-after="300" :disabled="!item.description">
               <span class="info-value">{{ item.description || '-' }}</span>
             </el-tooltip>
           </div>
-          <div class="card-info-row">
+          <div class="card-info-row text-xs">
             <span class="info-label">{{ t('knowledge.vectorDimension') }}</span>
             <span class="info-value">{{ item.vectorDimension }}</span>
           </div>
           <div class="card-stats-row">
             <div class="stat-item">
-              <span class="stat-value">{{ item.documentCount || 0 }}</span>
-              <span class="stat-label">{{ t('knowledge.documentLabel') }}</span>
+              <span class="stat-value text-xl">{{ item.documentCount || 0 }}</span>
+              <span class="stat-label text-xs">{{ t('knowledge.documentLabel') }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-value">{{ item.chunkCount || 0 }}</span>
-              <span class="stat-label">{{ t('knowledge.chunkLabel') }}</span>
+              <span class="stat-value text-xl">{{ item.chunkCount || 0 }}</span>
+              <span class="stat-label text-xs">{{ t('knowledge.chunkLabel') }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-value">{{ item.chunkSize }}</span>
-              <span class="stat-label">{{ t('knowledge.chunkSizeLabel') }}</span>
+              <span class="stat-value text-xl">{{ item.chunkSize }}</span>
+              <span class="stat-label text-xs">{{ t('knowledge.chunkSizeLabel') }}</span>
             </div>
           </div>
         </div>
@@ -132,11 +132,11 @@
             {{ t('knowledge.viewDocuments') }}
           </el-button>
           <div class="action-buttons">
-            <el-button size="small" @click="handleEdit(item)">
+            <el-button size="small" class="text-xs" @click="handleEdit(item)">
               <el-icon><Edit /></el-icon>
               {{ t('common.edit') }}
             </el-button>
-            <el-button size="small" type="danger" @click="handleDelete(item)">
+            <el-button size="small" type="danger" class="text-xs" @click="handleDelete(item)">
               <el-icon><Delete /></el-icon>
               {{ t('common.delete') }}
             </el-button>
@@ -199,7 +199,7 @@
             <el-tag size="small" style="margin-left: 8px" effect="plain">{{ p.type }}</el-tag>
           </el-option>
         </el-select>
-        <div class="form-hint" v-if="embeddingProviders.length === 0">
+        <div class="form-hint text-xs" v-if="embeddingProviders.length === 0">
           {{ t('knowledge.noEmbeddingProviderHint') }}
           <el-link type="primary" @click="router.push('/providers')">
             {{ t('knowledge.goAddProvider') }}
@@ -223,7 +223,7 @@
             :value="m.id"
           />
         </el-select>
-        <div class="form-hint" v-if="data.providerId && !embeddingModelsLoading && embeddingModels.length === 0">
+        <div class="form-hint text-xs" v-if="data.providerId && !embeddingModelsLoading && embeddingModels.length === 0">
           {{ t('knowledge.noEmbeddingModelHint') }}
         </div>
       </el-form-item>
@@ -236,7 +236,7 @@
           :step="1"
           style="width: 100%"
         />
-        <div class="form-hint" v-if="selectedModelDimension">
+        <div class="form-hint text-xs" v-if="selectedModelDimension">
           {{ t('knowledge.vectorDimensionAutoHint', { dim: selectedModelDimension }) }}
         </div>
       </el-form-item>
@@ -249,7 +249,7 @@
           :step="50"
           style="width: 100%"
         />
-        <div class="form-hint">{{ t('knowledge.chunkSizeHint') }}</div>
+        <div class="form-hint text-xs">{{ t('knowledge.chunkSizeHint') }}</div>
       </el-form-item>
 
       <el-form-item :label="t('knowledge.chunkOverlap')" prop="chunkOverlap">
@@ -260,7 +260,7 @@
           :step="10"
           style="width: 100%"
         />
-        <div class="form-hint">{{ t('knowledge.chunkOverlapHint') }}</div>
+        <div class="form-hint text-xs">{{ t('knowledge.chunkOverlapHint') }}</div>
       </el-form-item>
     </template>
   </EifyFormDialog>
@@ -629,7 +629,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
 }
 
 .table-action-buttons .el-button {
-  font-size: 12px;
   height: 28px;
   padding: 0 10px;
   flex-shrink: 0;
@@ -656,7 +655,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
   justify-content: center;
   color: var(--eify-primary);
   flex-shrink: 0;
-  font-size: 18px;
 }
 
 .name-info {
@@ -671,7 +669,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
 }
 
 .model-text {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -725,19 +722,14 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
   50% { transform: scale(1.5); opacity: 0; }
 }
 
-.status-text {
-  font-size: 14px;
-}
-
 .form-hint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-top: 4px;
 }
 
 /* 卡片视图 */
 .kb-card {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: hidden;
@@ -761,7 +753,7 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
   gap: var(--eify-spacing-3);
   padding: var(--eify-spacing-4);
   border-bottom: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, var(--eify-bg-base) 100%);
   min-height: 64px;
 }
 
@@ -775,7 +767,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
   justify-content: center;
   color: var(--eify-primary);
   flex-shrink: 0;
-  font-size: 20px;
 }
 
 .card-title {
@@ -783,7 +774,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
 }
 
 .card-title h3 {
-  font-size: 15px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin: 0 0 var(--eify-spacing-1) 0;
@@ -839,7 +829,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
   justify-content: space-between;
   align-items: center;
   padding: var(--eify-spacing-1) 0;
-  font-size: 12px;
 }
 
 .info-label {
@@ -872,13 +861,11 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
 }
 
 .stat-value {
-  font-size: 18px;
   font-weight: 600;
   color: var(--eify-primary);
 }
 
 .stat-label {
-  font-size: 11px;
   color: var(--eify-text-tertiary);
 }
 
@@ -900,7 +887,6 @@ const handleSubmit = async (data: Record<string, any>, mode: string) => {
 .action-buttons .el-button {
   height: 26px;
   padding: 0 10px;
-  font-size: 12px;
 }
 
 .action-buttons .el-button .el-icon {
