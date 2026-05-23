@@ -104,6 +104,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | **docs/** | 按开发者查阅路径组织的规范文档 | `ARCHITECTURE.md`、`API-SPEC.md` |
 | **docs/guides/** | HOW-TO 指南（体量大、持续更新） | `DATABASE.md`、`LOGGING.md` |
 | **docs/ADRs/** | 设计决策记录（ADR，一次性归档） | `ADR-0001-cursor-pagination-improvement.md` |
+| **docs/specs/** | 功能实现规格说明（开发前编写，实施中迭代） | `2026-05-23-mcp-workspace-isolation-fix-design.md` |
 | **scripts/** | 开发/运维工具脚本 | `mock-mcp-server.py` |
 | **deploy/** | 部署配置和脚本 | `Dockerfile`、`nginx.conf`、`k8s/`、`infra/` |
 | **deploy/infra/deploy/** | Docker Compose 和部署脚本 | `docker-compose.yml`、`deploy-local.sh` |
@@ -450,6 +451,13 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 |:---|:---|:---|
 | [LOGGING.md](docs/guides/LOGGING.md) | 日志系统完整指南 | 记录和查看日志、架构设计、MQ 日志、监控、性能分析 |
 | [deploy/infra/deploy/README.md](deploy/infra/deploy/README.md) | Vector + ClickHouse 部署 | 部署日志采集链路 |
+
+### 研发过程文档
+
+| 文档 | 用途 | 何时查看 |
+|:---|:---|:---|
+| [docs/specs/](docs/specs/) | 功能规格说明 | 实现前编写、实施中对照、完成后归档 |
+| [docs/ADRs/](docs/ADRs/) | 架构决策记录 | 理解历史设计取舍 |
 
 ### 专项文档
 
