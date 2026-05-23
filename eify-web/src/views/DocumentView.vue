@@ -8,8 +8,8 @@
           {{ t('common.back') }}
         </el-button>
         <div class="header-title">
-          <h2>{{ knowledgeName }}</h2>
-          <span class="header-desc">{{ t('document.title') }}</span>
+          <h2 class="text-2xl">{{ knowledgeName }}</h2>
+          <span class="header-desc text-sm">{{ t('document.title') }}</span>
         </div>
       </div>
       <div class="header-right">
@@ -23,20 +23,20 @@
     <!-- 统计信息 -->
     <div class="stats-bar">
       <div class="stat-item">
-        <span class="stat-value">{{ stats.total }}</span>
-        <span class="stat-label">{{ t('document.totalDocuments') }}</span>
+        <span class="stat-value text-2xl">{{ stats.total }}</span>
+        <span class="stat-label text-xs">{{ t('document.totalDocuments') }}</span>
       </div>
       <div class="stat-item">
         <span class="stat-value completed">{{ stats.completed }}</span>
-        <span class="stat-label">{{ t('document.completed') }}</span>
+        <span class="stat-label text-xs">{{ t('document.completed') }}</span>
       </div>
       <div class="stat-item">
         <span class="stat-value processing">{{ stats.processing }}</span>
-        <span class="stat-label">{{ t('document.processing') }}</span>
+        <span class="stat-label text-xs">{{ t('document.processing') }}</span>
       </div>
       <div class="stat-item">
         <span class="stat-value failed">{{ stats.failed }}</span>
-        <span class="stat-label">{{ t('document.failed') }}</span>
+        <span class="stat-label text-xs">{{ t('document.failed') }}</span>
       </div>
     </div>
 
@@ -52,12 +52,12 @@
         <el-table-column prop="originalName" :label="t('document.fileName')" min-width="200">
           <template #default="{ row }">
             <div class="file-name-cell">
-              <div class="file-icon" :class="getFileTypeClass(row.fileType)">
+              <div class="file-icon text-xl" :class="getFileTypeClass(row.fileType)">
                 <el-icon><Document /></el-icon>
               </div>
               <div class="file-info">
                 <div class="file-name">{{ row.originalName }}</div>
-                <div class="file-meta">{{ row.fileType }} · {{ formatFileSize(row.fileSize) }}</div>
+                <div class="file-meta text-xs">{{ row.fileType }} · {{ formatFileSize(row.fileSize) }}</div>
               </div>
             </div>
           </template>
@@ -86,7 +86,7 @@
         <el-table-column prop="errorMessage" :label="t('document.errorMessage')" min-width="180">
           <template #default="{ row }">
             <el-tooltip v-if="row.errorMessage" :content="row.errorMessage" placement="top">
-              <span class="error-message">{{ row.errorMessage }}</span>
+              <span class="error-message text-xs">{{ row.errorMessage }}</span>
             </el-tooltip>
             <span v-else class="text-muted">-</span>
           </template>
@@ -100,6 +100,7 @@
               <el-button
                 size="small"
                 type="primary"
+                class="text-xs"
                 @click="handlePreview(row)"
                 :disabled="row.processStatus !== 2"
               >
@@ -109,6 +110,7 @@
               <el-button
                 size="small"
                 type="warning"
+                class="text-xs"
                 @click="handleReprocess(row)"
                 :loading="reprocessingId === row.id"
                 :disabled="row.processStatus === 1"
@@ -116,7 +118,7 @@
                 <el-icon><Refresh /></el-icon>
                 {{ t('document.reprocess') }}
               </el-button>
-              <el-button size="small" type="danger" @click="handleDelete(row)">
+              <el-button size="small" type="danger" class="text-xs" @click="handleDelete(row)">
                 <el-icon><Delete /></el-icon>
                 {{ t('common.delete') }}
               </el-button>
@@ -147,8 +149,8 @@
         >
           <div class="upload-area">
             <el-icon class="upload-icon"><Upload /></el-icon>
-            <div class="upload-text">{{ t('document.uploadDragText') }}<span class="upload-link">{{ t('document.uploadClickText') }}</span></div>
-            <div class="upload-hint">{{ t('document.uploadHint') }}</div>
+            <div class="upload-text text-base">{{ t('document.uploadDragText') }}<span class="upload-link">{{ t('document.uploadClickText') }}</span></div>
+            <div class="upload-hint text-xs">{{ t('document.uploadHint') }}</div>
           </div>
         </el-upload>
       </div>
@@ -441,14 +443,12 @@ onMounted(() => {
 }
 
 .header-title h2 {
-  font-size: 20px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin: 0;
 }
 
 .header-desc {
-  font-size: 13px;
   color: var(--eify-text-tertiary);
 }
 
@@ -483,7 +483,6 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 22px;
   font-weight: 700;
   color: var(--eify-text-primary);
 }
@@ -501,7 +500,6 @@ onMounted(() => {
 }
 
 .stat-label {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -526,23 +524,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   flex-shrink: 0;
 }
 
 .file-icon.file-pdf {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--eify-error);
 }
 
 .file-icon.file-word {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--eify-info-500);
 }
 
 .file-icon.file-text {
   background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  color: var(--eify-success);
 }
 
 .file-icon.file-data {
@@ -570,12 +567,10 @@ onMounted(() => {
 }
 
 .file-meta {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
 .error-message {
-  font-size: 12px;
   color: var(--eify-danger);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -596,7 +591,6 @@ onMounted(() => {
 }
 
 .table-action-buttons .el-button {
-  font-size: 12px;
   height: 28px;
   padding: 0 10px;
 }
@@ -638,7 +632,6 @@ onMounted(() => {
 }
 
 .upload-text {
-  font-size: 14px;
   color: var(--eify-text-secondary);
   margin-bottom: var(--eify-spacing-2);
 }
@@ -650,7 +643,6 @@ onMounted(() => {
 }
 
 .upload-hint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
