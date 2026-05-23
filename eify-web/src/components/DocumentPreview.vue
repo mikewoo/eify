@@ -16,20 +16,20 @@
       <!-- 左侧：原始文档（内部滚动） -->
       <div class="preview-left">
         <div class="panel-header">
-          <span class="panel-title">{{ t('document.rawDocument') }}</span>
-          <span class="panel-subtitle">{{ documentName }}</span>
+          <span class="panel-title text-base">{{ t('document.rawDocument') }}</span>
+          <span class="panel-subtitle text-xs">{{ documentName }}</span>
         </div>
-        <div class="panel-body" ref="documentContentRef">
+        <div class="panel-body text-sm" ref="documentContentRef">
           <!-- 富文本渲染（MD/DOCX） -->
           <div
             v-if="isStyledDoc && renderedHtml"
-            class="rich-content"
+            class="rich-content text-lg"
             v-html="renderedHtml"
           />
           <!-- 富文本渲染失败时回退显示原始文本 -->
           <div
             v-else-if="isStyledDoc && !renderedHtml && documentContent"
-            class="raw-text"
+            class="raw-text text-sm"
           >{{ documentContent }}</div>
           <!-- 纯文本渲染（TXT/PDF） -->
           <template v-else-if="!isStyledDoc">
@@ -49,8 +49,8 @@
       <!-- 右侧：分块列表（分页） -->
       <div class="preview-right">
         <div class="panel-header">
-          <span class="panel-title">{{ t('document.chunkList') }}</span>
-          <span class="panel-subtitle">{{ t('document.chunks', { count: chunks.length }) }}</span>
+          <span class="panel-title text-base">{{ t('document.chunkList') }}</span>
+          <span class="panel-subtitle text-xs">{{ t('document.chunks', { count: chunks.length }) }}</span>
         </div>
         <div class="panel-body">
           <div
@@ -61,10 +61,10 @@
             @click="handleChunkClick(chunk)"
           >
             <div class="chunk-header">
-              <span class="chunk-index">#{{ chunk.chunkIndex }}</span>
-              <span class="chunk-length">{{ t('document.chars', { count: chunk.content.length }) }}</span>
+              <span class="chunk-index text-xs">#{{ chunk.chunkIndex }}</span>
+              <span class="chunk-length text-xs">{{ t('document.chars', { count: chunk.content.length }) }}</span>
             </div>
-            <div class="chunk-text">{{ chunk.content }}</div>
+            <div class="chunk-text text-xs">{{ chunk.content }}</div>
           </div>
           <el-empty v-if="!loading && chunks.length === 0" :description="t('document.noChunks')" />
         </div>
@@ -339,13 +339,11 @@ const handleClose = () => {
 }
 
 .panel-title {
-  font-size: 14px;
   font-weight: 600;
   color: var(--eify-text-primary);
 }
 
 .panel-subtitle {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -369,7 +367,6 @@ const handleClose = () => {
 /* 左侧文档 — 纯文本 */
 .preview-left .panel-body {
   padding: var(--eify-spacing-4) var(--eify-spacing-5);
-  font-size: 13px;
   line-height: 1.8;
   color: var(--eify-text-primary);
   white-space: pre-wrap;
@@ -393,7 +390,6 @@ const handleClose = () => {
    ======================================== */
 
 .rich-content {
-  font-size: 15px;
   line-height: 1.85;
   color: var(--eify-text-primary, #1e293b);
   white-space: normal;
@@ -401,7 +397,6 @@ const handleClose = () => {
 }
 
 .raw-text {
-  font-size: 13px;
   line-height: 1.8;
   color: var(--eify-text-primary);
   white-space: pre-wrap;
@@ -506,14 +501,14 @@ const handleClose = () => {
   padding: 0.15em 0.4em;
   border-radius: 4px;
   background: rgba(99, 102, 241, 0.08);
-  color: #e11d48;
+  color: var(--eify-error);
 }
 
 .rich-content :deep(pre) {
   margin: 0.8em 0;
   padding: 1em 1.2em;
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--eify-bg-secondary);
   border: 1px solid var(--eify-border-subtle, #e2e8f0);
   overflow-x: auto;
 }
@@ -609,18 +604,15 @@ const handleClose = () => {
 }
 
 .chunk-index {
-  font-size: 12px;
   font-weight: 600;
   color: var(--eify-primary);
 }
 
 .chunk-length {
-  font-size: 11px;
   color: var(--eify-text-tertiary);
 }
 
 .chunk-text {
-  font-size: 12px;
   line-height: 1.6;
   color: var(--eify-text-secondary);
   max-height: 96px;
