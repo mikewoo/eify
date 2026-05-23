@@ -917,7 +917,6 @@ const handleSubmit = async (data: any, mode: string) => {
   align-items: center;
   justify-content: center;
   border-radius: var(--eify-radius-sm);
-  font-size: 14px;
 }
 
 .type-icon.type-openai {
@@ -984,12 +983,10 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .status-text {
-  font-size: 14px;
 }
 
 .latency-text {
   margin-left: 4px;
-  font-size: 12px;
   opacity: 0.8;
 }
 
@@ -1043,7 +1040,6 @@ const handleSubmit = async (data: any, mode: string) => {
   align-items: center;
   justify-content: center;
   border-radius: var(--eify-radius-md);
-  font-size: 16px;
   flex-shrink: 0;
 }
 
@@ -1072,7 +1068,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .card-title h3 {
-  font-size: 15px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin: 0 0 var(--eify-spacing-1) 0;
@@ -1134,7 +1129,6 @@ const handleSubmit = async (data: any, mode: string) => {
   justify-content: space-between;
   align-items: center;
   padding: var(--eify-spacing-1) 0;
-  font-size: 12px;
 }
 
 .info-label {
@@ -1211,7 +1205,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .sync-hint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -1253,7 +1246,6 @@ const handleSubmit = async (data: any, mode: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
 }
 
 .success-icon {
@@ -1277,7 +1269,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .sync-result-title {
-  font-size: 13px;
   font-weight: 500;
   color: var(--eify-text-primary);
   margin-bottom: 6px;
@@ -1292,13 +1283,11 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .model-list-label {
-  font-size: 12px;
   color: var(--eify-text-secondary);
   margin-bottom: 6px;
 }
 
 .model-list-text {
-  font-size: 12px;
   font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
   color: var(--eify-text-primary);
   background: var(--eify-bg-base);
@@ -1312,7 +1301,6 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .form-hint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-top: 4px;
 }
