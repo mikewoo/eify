@@ -1,8 +1,8 @@
 <template>
   <div class="node-panel">
     <div class="node-panel-header">
-      <h3>{{ t('workflow.nodeTypesTitle') }}</h3>
-      <span class="node-panel-hint">{{ t('workflow.dragHint') }}</span>
+      <h3 class="text-base">{{ t('workflow.nodeTypesTitle') }}</h3>
+      <span class="node-panel-hint text-xs">{{ t('workflow.dragHint') }}</span>
     </div>
     <div class="node-panel-list">
       <div
@@ -17,7 +17,7 @@
           <component :is="item.icon" :size="18" />
         </div>
         <div class="node-panel-item-info">
-          <span class="node-panel-item-name">{{ t(item.labelKey) }}</span>
+          <span class="node-panel-item-name text-sm">{{ t(item.labelKey) }}</span>
         </div>
       </div>
     </div>
@@ -75,8 +75,8 @@ defineExpose({ getNodeLabel })
 .node-panel {
   width: 220px;
   height: 100%;
-  background: #fff;
-  border-right: 1px solid #e5e7eb;
+  background: var(--eify-bg-base);
+  border-right: 1px solid var(--eify-border-default);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -84,19 +84,17 @@ defineExpose({ getNodeLabel })
 
 .node-panel-header {
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--eify-border-default);
 }
 
 .node-panel-header h3 {
   margin: 0 0 4px;
-  font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--eify-text-primary);
 }
 
 .node-panel-hint {
-  font-size: 11px;
-  color: #94a3b8;
+  color: var(--eify-text-tertiary);
 }
 
 .node-panel-list {
@@ -117,7 +115,7 @@ defineExpose({ getNodeLabel })
 }
 
 .node-panel-item:hover {
-  background: #f1f5f9;
+  background: var(--eify-bg-surface);
 }
 
 .node-panel-item:active {
@@ -128,8 +126,8 @@ defineExpose({ getNodeLabel })
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: var(--item-color, #6366f1);
-  color: #fff;
+  background: var(--item-color, var(--eify-primary));
+  color: var(--eify-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,13 +140,11 @@ defineExpose({ getNodeLabel })
 }
 
 .node-panel-item-name {
-  font-size: 13px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--eify-text-primary);
 }
 
 .node-panel-item-desc {
-  font-size: 11px;
-  color: #94a3b8;
+  color: var(--eify-text-tertiary);
 }
 </style>
