@@ -229,6 +229,7 @@ CREATE TABLE IF NOT EXISTS mcp_server (
     created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted       INT             NOT NULL DEFAULT 0,
+    creator_id    BIGINT          NOT NULL DEFAULT 0,
     workspace_id  BIGINT          NOT NULL DEFAULT 1
 );
 
@@ -242,6 +243,7 @@ CREATE TABLE IF NOT EXISTS mcp_tool (
     created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted       INT             NOT NULL DEFAULT 0,
+    creator_id    BIGINT          NOT NULL DEFAULT 0,
     workspace_id  BIGINT          NOT NULL DEFAULT 1
 );
 
