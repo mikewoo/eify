@@ -1718,7 +1718,7 @@ const quickPrompts = getQuickPrompts()
 
 /* ========== 卡片视图 ========== */
 .agent-card {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: hidden;
@@ -1742,7 +1742,7 @@ const quickPrompts = getQuickPrompts()
   gap: var(--eify-spacing-3);
   padding: var(--eify-spacing-4);
   border-bottom: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, var(--eify-bg-base) 100%);
   min-height: 64px;
 }
 
@@ -1968,12 +1968,12 @@ const quickPrompts = getQuickPrompts()
 
 .user-avatar {
   background: var(--eify-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
 }
 
 .assistant-avatar {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff;
+  background: var(--eify-gradient-primary);
+  color: var(--eify-text-inverse);
 }
 
 .message-bubble {
@@ -1986,7 +1986,7 @@ const quickPrompts = getQuickPrompts()
 
 .user-bubble {
   background: var(--eify-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
   border-bottom-right-radius: 4px;
 }
 
@@ -1996,7 +1996,7 @@ const quickPrompts = getQuickPrompts()
 }
 
 .ai-bubble {
-  background: #fff;
+  background: var(--eify-bg-base);
   color: var(--eify-text-primary);
   border: 1px solid var(--eify-border-default);
   border-bottom-left-radius: 4px;
@@ -2004,12 +2004,12 @@ const quickPrompts = getQuickPrompts()
 }
 
 .error-bubble {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: var(--eify-error-light);
+  border-color: var(--eify-error-200);
 }
 
 .welcome-bubble {
-  background: #f8fafc;
+  background: var(--eify-bg-secondary);
   border-style: dashed;
   font-style: italic;
   color: var(--eify-text-secondary);
@@ -2023,13 +2023,13 @@ const quickPrompts = getQuickPrompts()
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #dc2626;
+  color: var(--eify-error-600);
   font-size: 13px;
 }
 
 .error-icon {
   flex-shrink: 0;
-  color: #dc2626;
+  color: var(--eify-error-600);
 }
 
 /* 消息元信息行（操作按钮 + 时间/统计 同行） */
@@ -2163,7 +2163,7 @@ const quickPrompts = getQuickPrompts()
   font-size: 0.88em;
 }
 .markdown-body :deep(pre) {
-  background: #1e293b;
+  background: var(--eify-gray-800);
   padding: 0.7em 0.9em;
   border-radius: 8px;
   overflow-x: auto;
@@ -2172,7 +2172,7 @@ const quickPrompts = getQuickPrompts()
 .markdown-body :deep(pre code) {
   background: transparent;
   padding: 0;
-  color: #e2e8f0;
+  color: var(--eify-gray-200);
   font-size: 0.85em;
 }
 .markdown-body :deep(a) { color: var(--eify-primary); text-decoration: none; }
@@ -2238,7 +2238,7 @@ const quickPrompts = getQuickPrompts()
 
 .prompt-tag:hover {
   background: var(--eify-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
   border-color: var(--eify-primary);
 }
 
