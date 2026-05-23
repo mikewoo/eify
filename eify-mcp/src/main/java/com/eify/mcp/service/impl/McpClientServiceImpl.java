@@ -2,6 +2,7 @@ package com.eify.mcp.service.impl;
 
 import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
+import com.eify.common.workspace.WorkspaceGuard;
 import com.eify.mcp.domain.entity.McpServer;
 import com.eify.mcp.mapper.McpServerMapper;
 import com.eify.mcp.service.McpClientService;
@@ -285,11 +286,8 @@ public class McpClientServiceImpl implements McpClientService {
     // ---- Helpers ----
 
     private McpServer getServer(Long serverId) {
-        McpServer server = mcpServerMapper.selectById(serverId);
-        if (server == null) {
-            throw new BusinessException(ErrorCode.MCP_SERVER_NOT_FOUND);
-        }
-        return server;
+        return WorkspaceGuard.requireInWorkspace(
+                mcpServerMapper.selectById(serverId), ErrorCode.MCP_SERVER_NOT_FOUND);
     }
 
     /**

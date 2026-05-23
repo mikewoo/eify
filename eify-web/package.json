@@ -1,7 +1,7 @@
 {
   "name": "eify-web",
   "private": true,
-  "version": "1.0.0-Dev",
+  "version": "1.0.1-SNAPSHOT",
   "type": "module",
   "scripts": {
     "dev": "vite",

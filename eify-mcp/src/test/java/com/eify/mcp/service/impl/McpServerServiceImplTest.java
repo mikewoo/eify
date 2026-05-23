@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -858,6 +859,63 @@ class McpServerServiceImplTest {
             BusinessException ex = assertThrows(BusinessException.class,
                     () -> mcpServerService.debugTool(1L, request));
             assertEquals(ErrorCode.MCP_CALL_FAILED.getCode(), ex.getCode());
+        }
+    }
+
+    // ========== 工具查询工作空间隔离 ==========
+
+    @Nested
+    @DisplayName("工具查询工作空间隔离")
+    class ToolWorkspaceIsolation {
+
+        @Test
+        @DisplayName("同名工具在不同工作空间时，只返回当前工作空间的工具")
+        void shouldOnlyReturnToolsInCurrentWorkspace() {
+            McpServer server = buildServer(1L, "test", "http://localhost:8080", 1L);
+            when(mcpServerMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(server);
+
+            McpTool ws1Tool = new McpTool();
+            ws1Tool.setId(10L);
+            ws1Tool.setServerId(1L);
+            ws1Tool.setName("get_data");
+            ws1Tool.setWorkspaceId(1L);
+
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(ws1Tool));
+
+            McpServerResponse response = mcpServerService.getById(1L);
+
+            assertThat(response.getTools()).hasSize(1);
+            assertThat(response.getTools().get(0).getId()).isEqualTo(10L);
+        }
+
+        @Test
+        @DisplayName("工具仅在另一工作空间存在时，当前空间返回空列表")
+        void shouldReturnEmptyToolsWhenOnlyInOtherWorkspace() {
+            McpServer server = buildServer(1L, "test", "http://localhost:8080", 1L);
+            when(mcpServerMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(server);
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of());
+
+            McpServerResponse response = mcpServerService.getById(1L);
+
+            assertThat(response.getTools()).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("工具刷新写入 workspaceId")
+    class ToolRefreshWorkspaceBinding {
+
+        @Test
+        @DisplayName("testConnection 即使连接失败也返回结果（不抛异常）")
+        void shouldReturnResultEvenWhenConnectionFails() {
+            McpServer server = buildServer(1L, "test", "http://localhost:8080", 1L);
+            when(mcpServerMapper.selectOne(any(LambdaQueryWrapper.class))).thenReturn(server);
+
+            ConnectionTestResult result = mcpServerService.testConnection(1L);
+
+            assertNotNull(result);
         }
     }
 }

@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.eify</groupId>
         <artifactId>eify-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>eify-workflow</artifactId>

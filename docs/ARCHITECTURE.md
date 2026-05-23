@@ -86,6 +86,8 @@ eify/
 └── deploy/                  # Docker Compose 配置
 ```
 
+> **版本号管理**：全项目版本号收敛到根 `pom.xml` 的 `<revision>` 属性（Maven CI Friendly Versions），9 个子模块通过 `${revision}` 自动继承。`flatten-maven-plugin` 在构建时将 `${revision}` 解析为实际值写入 `.flattened-pom.xml`（供 CI/CD 使用，不入库）。改版本号只需改一处：`<revision>X.Y.Z-SNAPSHOT</revision>`。
+
 ### 模块内部结构（统一规范）
 
 ```text

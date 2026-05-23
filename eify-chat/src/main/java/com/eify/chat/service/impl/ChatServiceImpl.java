@@ -11,6 +11,7 @@ import com.eify.chat.domain.entity.Message;
 import com.eify.chat.service.ChatService;
 import com.eify.chat.service.ConversationService;
 import com.eify.chat.service.MessageService;
+import com.eify.common.context.CurrentContext;
 import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
 import com.eify.knowledge.domain.entity.KnowledgeBase;
@@ -1027,7 +1028,8 @@ public class ChatServiceImpl implements ChatService {
         try {
             List<McpTool> tools = mcpToolMapper.selectList(
                     new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<McpTool>()
-                            .eq(McpTool::getName, toolName));
+                            .eq(McpTool::getName, toolName)
+                            .eq(McpTool::getWorkspaceId, CurrentContext.getWorkspaceId()));
             if (tools != null && !tools.isEmpty()) {
                 return tools.get(0).getServerId();
             }
