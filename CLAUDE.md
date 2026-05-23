@@ -12,6 +12,7 @@
 - [日志系统快速参考](#日志系统快速参考)
 - [代码提交检查清单](#代码提交检查清单)
 - [常见问题](#常见问题)
+- [设计系统](#设计系统)
 - [项目上下文](#项目上下文)
 - [系统风险清单](#系统风险清单)
 - [文档索引](#文档索引)
@@ -100,7 +101,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 
 | 位置 | 用途 | 示例 |
 |:---|:---|:---|
-| **根目录** | 项目入口 | `CLAUDE.md`、`start.sh`、`stop.sh` |
+| **根目录** | 项目入口 | `CLAUDE.md`、`DESIGN.md`、`start.sh`、`stop.sh` |
 | **docs/** | 按开发者查阅路径组织的规范文档 | `ARCHITECTURE.md`、`API-SPEC.md` |
 | **docs/guides/** | HOW-TO 指南（体量大、持续更新） | `DATABASE.md`、`LOGGING.md` |
 | **docs/ADRs/** | 设计决策记录（ADR，一次性归档） | `ADR-0001-cursor-pagination-improvement.md` |
@@ -110,7 +111,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | **deploy/infra/deploy/** | Docker Compose 和部署脚本 | `docker-compose.yml`、`deploy-local.sh` |
 | **deploy/optional/** | 可选组件（非核心依赖） | `docker-compose-jaeger.yml` |
 
-**禁止**在根目录放置临时脚本、配置文件、JSON 文件、设计文档。
+**禁止**在根目录放置临时脚本、配置文件、JSON 文件、设计文档（`DESIGN.md` 除外）。
 
 ### 文档组织规范
 
@@ -343,6 +344,30 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 
 ---
 
+## 设计系统
+
+> **重要**：生成或修改任何前端 UI 代码时，必须先阅读根目录的 [DESIGN.md](DESIGN.md)，使用已有的 `--eify-*` CSS 变量和 `.eify-*` 组件类名。
+
+| 设计资源 | 路径 | 说明 |
+|:---|:---|:---|
+| 设计令牌 (CSS) | `eify-web/src/styles/design-tokens.css` | 颜色、字体、间距、圆角、阴影等所有 CSS 变量 |
+| 组件样式 (CSS) | `eify-web/src/styles/components.css` | 按钮、输入框、卡片、表格、标签、徽章等组件 |
+| 页面布局 (CSS) | `eify-web/src/styles/page.css` | 顶栏、页面容器、分页、响应式断点 |
+| 侧边栏 (CSS) | `eify-web/src/styles/sidebar.css` | 深色侧边栏完整样式 |
+| 工具类 (CSS) | `eify-web/src/styles/utilities.css` | 文字、间距、布局、圆角、阴影等原子类 |
+| 设计规范 (MD) | `DESIGN.md` | AI 编码助手的视觉参考文档，以上所有 CSS 的 Markdown 描述 |
+
+**核心规则：**
+
+1. **禁止硬编码颜色、字号、间距** — 必须使用 `var(--eify-*)` 引用设计令牌
+2. **优先使用 `.eify-*` 组件类** — 按钮用 `.eify-btn-primary`，卡片用 `.eify-card`，不使用内联样式或裸 HTML
+3. **布局遵循 Shell 结构** — 深色侧边栏 (`#161b2e`) + 白色顶栏 + `#f8fafc` 内容区
+4. **新页面放在 `eify-web/src/views/`** — 命名 `XxxView.vue`，路由在 `router/index.ts` 注册
+
+**设计理念**：浅底科技风，蓝紫主色 (`#6366f1`) + 青薄荷辅色 (`#2dd4bf`)，深色侧边栏 + 浅色内容区，4px 网格节奏。
+
+---
+
 ## 项目上下文
 
 ### 基本信息
@@ -444,6 +469,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | [API-SPEC.md](docs/API-SPEC.md) | 接口规范 | 设计 API 接口 |
 | [DATABASE.md](docs/guides/DATABASE.md) | 数据库规范 | MySQL 建表模板、索引分页、业务表 DDL、ClickHouse 日志库、游标分页优化 |
 | [AUTH-WORKSPACE.md](docs/guides/AUTH-WORKSPACE.md) | 用户认证与工作空间 | 多租户架构、JWT 认证、数据隔离 |
+| [DESIGN.md](DESIGN.md) | 设计系统规范 | 生成前端 UI 时参照，包含颜色、字体、间距、组件、布局等视觉令牌 |
 
 ### 日志文档
 
@@ -491,7 +517,8 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 
 ```
 eify/
-├── CLAUDE.md              # Claude Code 指导（根目录仅此 3 个文件）
+├── CLAUDE.md              # Claude Code 指导（根目录仅此 4 个文件）
+├── DESIGN.md              # 设计系统规范（AI 编码助手的视觉参考）
 ├── start.sh               # 启动脚本
 ├── stop.sh                # 停止脚本
 │
