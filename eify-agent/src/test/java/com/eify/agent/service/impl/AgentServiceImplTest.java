@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -106,6 +107,7 @@ class AgentServiceImplTest {
         t.setId(id);
         t.setName(name);
         t.setServerId(serverId);
+        t.setWorkspaceId(1L);
         return t;
     }
 
@@ -173,7 +175,7 @@ class AgentServiceImplTest {
                     .thenReturn(buildPage(List.of(agent), 1));
             when(agentKnowledgeMapper.selectByAgentIds(anyList()))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectByAgentIds(anyList()))
+            when(agentMcpToolMapper.selectByAgentIds(anyList(), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -257,7 +259,7 @@ class AgentServiceImplTest {
                     .thenReturn(buildPage(List.of(agent), 1));
             when(agentKnowledgeMapper.selectByAgentIds(anyList()))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectByAgentIds(anyList()))
+            when(agentMcpToolMapper.selectByAgentIds(anyList(), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -278,7 +280,7 @@ class AgentServiceImplTest {
                     .thenReturn(buildPage(List.of(agent), 1));
             when(agentKnowledgeMapper.selectByAgentIds(anyList()))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectByAgentIds(anyList()))
+            when(agentMcpToolMapper.selectByAgentIds(anyList(), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -299,7 +301,7 @@ class AgentServiceImplTest {
                     .thenReturn(buildPage(List.of(agent), 1));
             when(agentKnowledgeMapper.selectByAgentIds(anyList()))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectByAgentIds(anyList()))
+            when(agentMcpToolMapper.selectByAgentIds(anyList(), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -386,7 +388,7 @@ class AgentServiceImplTest {
             when(agentKnowledgeMapper.selectKnowledgeIdsByAgentId(1L))
                     .thenReturn(List.of(10L, 20L));
 
-            when(agentMcpToolMapper.selectToolIdsByAgentId(1L))
+            when(agentMcpToolMapper.selectToolIdsByAgentId(eq(1L), eq(1L)))
                     .thenReturn(List.of(30L));
 
             McpTool tool = buildMcpTool(30L, "search", 100L);
@@ -423,7 +425,7 @@ class AgentServiceImplTest {
             when(providerMapper.selectById(999L)).thenReturn(null);
             when(agentKnowledgeMapper.selectKnowledgeIdsByAgentId(1L))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectToolIdsByAgentId(1L))
+            when(agentMcpToolMapper.selectToolIdsByAgentId(eq(1L), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -443,7 +445,7 @@ class AgentServiceImplTest {
             when(providerMapper.selectById(1L)).thenReturn(buildProvider(1L, "OpenAI"));
             when(agentKnowledgeMapper.selectKnowledgeIdsByAgentId(1L))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectToolIdsByAgentId(1L))
+            when(agentMcpToolMapper.selectToolIdsByAgentId(eq(1L), eq(1L)))
                     .thenReturn(List.of(30L));
 
             McpTool tool = buildMcpTool(30L, "search", 100L);
@@ -501,7 +503,7 @@ class AgentServiceImplTest {
                     .thenReturn(agent);
             when(agentKnowledgeMapper.selectKnowledgeIdsByAgentId(1L))
                     .thenReturn(List.of(10L, 20L));
-            when(agentMcpToolMapper.selectToolIdsByAgentId(1L))
+            when(agentMcpToolMapper.selectToolIdsByAgentId(eq(1L), eq(1L)))
                     .thenReturn(List.of(30L, 40L));
 
             // when
@@ -524,7 +526,7 @@ class AgentServiceImplTest {
                     .thenReturn(agent);
             when(agentKnowledgeMapper.selectKnowledgeIdsByAgentId(1L))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectToolIdsByAgentId(1L))
+            when(agentMcpToolMapper.selectToolIdsByAgentId(eq(1L), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -544,7 +546,7 @@ class AgentServiceImplTest {
                     .thenReturn(agent);
             when(agentKnowledgeMapper.selectKnowledgeIdsByAgentId(5L))
                     .thenReturn(Collections.emptyList());
-            when(agentMcpToolMapper.selectToolIdsByAgentId(5L))
+            when(agentMcpToolMapper.selectToolIdsByAgentId(eq(5L), eq(1L)))
                     .thenReturn(Collections.emptyList());
 
             // when
@@ -724,14 +726,14 @@ class AgentServiceImplTest {
             when(mcpToolMapper.selectById(30L)).thenReturn(tool);
             McpServer server = buildMcpServer(100L, "MyServer", 1);
             when(mcpServerMapper.selectById(100L)).thenReturn(server);
-            when(agentMcpToolMapper.batchInsert(eq(100L), anyList())).thenReturn(1);
+            when(agentMcpToolMapper.batchInsert(eq(100L), anyList(), eq(1L))).thenReturn(1);
 
             // when
             Agent result = agentService.create(request);
 
             // then
             verify(agentKnowledgeMapper).upsertKnowledgeIds(100L, List.of(10L, 20L));
-            verify(agentMcpToolMapper).batchInsert(eq(100L), eq(List.of(30L)));
+            verify(agentMcpToolMapper).batchInsert(eq(100L), eq(List.of(30L)), eq(1L));
             assertEquals(List.of(10L, 20L), result.getKnowledgeIds());
             assertEquals(List.of(30L), result.getMcpToolIds());
         }
@@ -788,7 +790,7 @@ class AgentServiceImplTest {
 
             // then
             verify(agentKnowledgeMapper, never()).upsertKnowledgeIds(anyLong(), anyList());
-            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList());
+            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList(), anyLong());
         }
     }
 
@@ -1034,7 +1036,7 @@ class AgentServiceImplTest {
             when(mcpToolMapper.selectById(30L)).thenReturn(tool);
             McpServer server = buildMcpServer(100L, "MyServer", 1);
             when(mcpServerMapper.selectById(100L)).thenReturn(server);
-            when(agentMcpToolMapper.batchInsert(eq(1L), anyList())).thenReturn(1);
+            when(agentMcpToolMapper.batchInsert(eq(1L), anyList(), eq(1L))).thenReturn(1);
 
             AgentUpdateRequest request = new AgentUpdateRequest();
             request.setMcpToolIds(List.of(30L));
@@ -1043,8 +1045,8 @@ class AgentServiceImplTest {
             agentService.update(1L, request);
 
             // then
-            verify(agentMcpToolMapper).deleteByAgentId(1L);
-            verify(agentMcpToolMapper).batchInsert(eq(1L), eq(List.of(30L)));
+            verify(agentMcpToolMapper).deleteByAgentId(eq(1L), eq(1L));
+            verify(agentMcpToolMapper).batchInsert(eq(1L), eq(List.of(30L)), eq(1L));
         }
 
         @Test
@@ -1083,8 +1085,8 @@ class AgentServiceImplTest {
             agentService.update(1L, request);
 
             // then
-            verify(agentMcpToolMapper).deleteByAgentId(1L);
-            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList());
+            verify(agentMcpToolMapper).deleteByAgentId(eq(1L), eq(1L));
+            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList(), anyLong());
         }
 
         @Test
@@ -1106,7 +1108,7 @@ class AgentServiceImplTest {
             verify(agentKnowledgeMapper, never()).upsertKnowledgeIds(anyLong(), anyList());
             verify(agentKnowledgeMapper, never()).softDeleteExcept(anyLong(), anyList());
             verify(agentKnowledgeMapper, never()).softDeleteByAgentId(anyLong());
-            verify(agentMcpToolMapper, never()).deleteByAgentId(anyLong());
+            verify(agentMcpToolMapper, never()).deleteByAgentId(anyLong(), anyLong());
         }
 
         @Test
@@ -1160,6 +1162,89 @@ class AgentServiceImplTest {
             assertEquals(10, result.getRagTopK());
             assertEquals("vector", result.getRagStrategy());
         }
+
+        // ========== Scenario C: cross-workspace tool binding ==========
+
+        @Test
+        @DisplayName("绑定跨工作空间工具时抛出 MCP_TOOL_NOT_FOUND")
+        void shouldRejectCrossWorkspaceToolBinding() {
+            Agent agent = buildAgent(1L, "Test Agent", 1L);
+            when(agentMapper.selectById(1L)).thenReturn(agent);
+
+            McpTool ws2Tool = new McpTool();
+            ws2Tool.setId(30L);
+            ws2Tool.setServerId(5L);
+            ws2Tool.setWorkspaceId(2L);
+            when(mcpToolMapper.selectById(30L)).thenReturn(ws2Tool);
+
+            AgentUpdateRequest request = new AgentUpdateRequest();
+            request.setName("Updated");
+            request.setMcpToolIds(List.of(30L));
+
+            assertThatThrownBy(() -> agentService.update(1L, request))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("MCP 工具不存在");
+
+            // deleteByAgentId is called before validation (全量替换策略),
+            // but batchInsert must not be called since validation fails
+            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList(), anyLong());
+        }
+
+        @Test
+        @DisplayName("工具所属 Server 跨工作空间时拒绝绑定")
+        void shouldRejectToolWithCrossWorkspaceServer() {
+            Agent agent = buildAgent(1L, "Test Agent", 1L);
+            when(agentMapper.selectById(1L)).thenReturn(agent);
+
+            McpTool tool = new McpTool();
+            tool.setId(30L);
+            tool.setServerId(5L);
+            tool.setWorkspaceId(1L);
+            when(mcpToolMapper.selectById(30L)).thenReturn(tool);
+
+            McpServer ws2Server = new McpServer();
+            ws2Server.setId(5L);
+            ws2Server.setWorkspaceId(2L);
+            ws2Server.setEnabled(1);
+            when(mcpServerMapper.selectById(5L)).thenReturn(ws2Server);
+
+            AgentUpdateRequest request = new AgentUpdateRequest();
+            request.setName("Updated");
+            request.setMcpToolIds(List.of(30L));
+
+            assertThatThrownBy(() -> agentService.update(1L, request))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("MCP 服务器离线");
+        }
+
+        // ========== Scenario E: mapper workspace param verification ==========
+
+        @Test
+        @DisplayName("batchInsert 传入当前上下文的 workspaceId")
+        void shouldPassWorkspaceIdToBatchInsert() {
+            Agent agent = buildAgent(1L, "Test Agent", 1L);
+            when(agentMapper.selectById(1L)).thenReturn(agent);
+
+            McpTool tool = new McpTool();
+            tool.setId(30L);
+            tool.setServerId(5L);
+            tool.setWorkspaceId(1L);
+            when(mcpToolMapper.selectById(30L)).thenReturn(tool);
+
+            McpServer server = new McpServer();
+            server.setId(5L);
+            server.setWorkspaceId(1L);
+            server.setEnabled(1);
+            when(mcpServerMapper.selectById(5L)).thenReturn(server);
+
+            AgentUpdateRequest request = new AgentUpdateRequest();
+            request.setName("Updated");
+            request.setMcpToolIds(List.of(30L));
+
+            agentService.update(1L, request);
+
+            verify(agentMcpToolMapper).batchInsert(eq(1L), eq(List.of(30L)), eq(1L));
+        }
     }
 
     // ========== delete() ==========
@@ -1205,7 +1290,7 @@ class AgentServiceImplTest {
             // then
             verify(agentMapper).deleteById(1L);
             verify(agentKnowledgeMapper).softDeleteByAgentId(1L);
-            verify(agentMcpToolMapper).deleteByAgentId(1L);
+            verify(agentMcpToolMapper).deleteByAgentId(eq(1L), eq(1L));
         }
 
         @Test
@@ -1551,7 +1636,7 @@ class AgentServiceImplTest {
             when(mcpToolMapper.selectById(1L)).thenReturn(tool);
             McpServer server = buildMcpServer(100L, "MyServer", 1);
             when(mcpServerMapper.selectById(100L)).thenReturn(server);
-            when(agentMcpToolMapper.batchInsert(eq(1L), anyList())).thenReturn(1);
+            when(agentMcpToolMapper.batchInsert(eq(1L), anyList(), eq(1L))).thenReturn(1);
 
             BindToolsRequest request = new BindToolsRequest();
             request.setToolIds(List.of(1L));
@@ -1560,8 +1645,8 @@ class AgentServiceImplTest {
             assertDoesNotThrow(() -> agentService.bindTools(1L, request));
 
             // then
-            verify(agentMcpToolMapper).deleteByAgentId(1L);
-            verify(agentMcpToolMapper).batchInsert(1L, List.of(1L));
+            verify(agentMcpToolMapper).deleteByAgentId(eq(1L), eq(1L));
+            verify(agentMcpToolMapper).batchInsert(eq(1L), eq(List.of(1L)), eq(1L));
         }
 
         @Test
@@ -1579,8 +1664,8 @@ class AgentServiceImplTest {
             assertDoesNotThrow(() -> agentService.bindTools(1L, request));
 
             // then
-            verify(agentMcpToolMapper).deleteByAgentId(1L);
-            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList());
+            verify(agentMcpToolMapper).deleteByAgentId(eq(1L), eq(1L));
+            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList(), anyLong());
         }
 
         @Test
@@ -1598,8 +1683,8 @@ class AgentServiceImplTest {
             assertDoesNotThrow(() -> agentService.bindTools(1L, request));
 
             // then
-            verify(agentMcpToolMapper).deleteByAgentId(1L);
-            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList());
+            verify(agentMcpToolMapper).deleteByAgentId(eq(1L), eq(1L));
+            verify(agentMcpToolMapper, never()).batchInsert(anyLong(), anyList(), anyLong());
         }
     }
 }
