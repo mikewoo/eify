@@ -2,7 +2,7 @@
   <div class="workflow-create">
     <div class="create-header">
       <el-button :icon="ArrowLeft" @click="handleCancel">{{ t('common.back') }}</el-button>
-      <h2 class="create-title">{{ t('workflow.addWorkflow') }}</h2>
+      <h2 class="create-title text-xl">{{ t('workflow.addWorkflow') }}</h2>
     </div>
 
     <div class="create-body">
@@ -159,16 +159,15 @@ function handleNext() {
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  background: var(--eify-bg-surface, #fff);
-  border-bottom: 1px solid var(--eify-border-subtle, #e5e7eb);
+  background: var(--eify-bg-surface);
+  border-bottom: 1px solid var(--eify-border-subtle);
   flex-shrink: 0;
 }
 
 .create-title {
   margin: 0;
-  font-size: 18px;
   font-weight: 600;
-  color: var(--eify-text-primary, #1f2937);
+  color: var(--eify-text-primary);
 }
 
 .create-body {
@@ -182,7 +181,7 @@ function handleNext() {
 .create-card {
   width: 100%;
   max-width: 720px;
-  background: var(--eify-bg-surface, #fff);
+  background: var(--eify-bg-surface);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   padding: 32px;
@@ -199,7 +198,7 @@ function handleNext() {
   gap: 16px;
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid var(--eify-border-subtle, #e5e7eb);
+  border-top: 1px solid var(--eify-border-subtle);
 }
 
 .kv-table {

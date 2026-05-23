@@ -27,12 +27,12 @@
     <!-- 表格列插槽 -->
     <template #table-name="{ row }">
       <div class="name-cell">
-        <div class="avatar-placeholder workflow-avatar">
+        <div class="avatar-placeholder workflow-avatar text-base">
           <el-icon><Connection /></el-icon>
         </div>
         <div class="name-info">
-          <div class="name-text">{{ row.name }}</div>
-          <div class="model-text">v{{ row.version }}</div>
+          <div class="name-text text-base">{{ row.name }}</div>
+          <div class="model-text text-xs">v{{ row.version }}</div>
         </div>
       </div>
     </template>
@@ -40,7 +40,7 @@
     <template #table-status="{ row }">
       <div class="status-cell">
         <span class="status-dot" :class="statusClass(row.status)"></span>
-        <span class="status-text">{{ statusLabel(row.status) }}</span>
+        <span class="status-text text-sm">{{ statusLabel(row.status) }}</span>
       </div>
     </template>
 
@@ -74,34 +74,34 @@
         :class="{ disabled: item.status === 2 }"
       >
         <div class="card-header">
-          <div class="card-avatar-placeholder workflow-card-avatar">
+          <div class="card-avatar-placeholder workflow-card-avatar text-2xl">
             <el-icon><Connection /></el-icon>
           </div>
           <div class="card-title">
-            <h3>{{ item.name }}</h3>
+            <h3 class="text-lg">{{ item.name }}</h3>
             <el-tag size="small" effect="plain">v{{ item.version }}</el-tag>
-            <span class="card-status-badge" :class="statusClass(item.status)">
+            <span class="card-status-badge text-xs" :class="statusClass(item.status)">
               {{ statusLabel(item.status) }}
             </span>
           </div>
         </div>
 
         <div class="card-body">
-          <div class="card-info-row" v-if="item.description">
+          <div class="card-info-row text-sm" v-if="item.description">
             <span class="info-label">{{ t('common.description') }}</span>
             <el-tooltip :content="item.description" placement="top" :show-after="300">
               <span class="info-value prompt-tooltip">{{ truncateText(item.description, 50) }}</span>
             </el-tooltip>
           </div>
-          <div class="card-info-row">
+          <div class="card-info-row text-sm">
             <span class="info-label">{{ t('workflow.nodeCountLabel') }}</span>
             <el-tag size="small" effect="plain">{{ item.nodeCount }}</el-tag>
           </div>
-          <div class="card-info-row">
+          <div class="card-info-row text-sm">
             <span class="info-label">{{ t('workflow.edgeCountLabel') }}</span>
             <el-tag size="small" effect="plain">{{ item.edgeCount }}</el-tag>
           </div>
-          <div class="card-info-row">
+          <div class="card-info-row text-sm">
             <span class="info-label">{{ t('common.updateTime') }}</span>
             <span class="info-value">{{ formatDate(item.updatedAt) }}</span>
           </div>
@@ -340,7 +340,6 @@ const cancelDelete = () => {
   align-items: center;
   justify-content: center;
   color: var(--eify-primary);
-  font-size: 16px;
   flex-shrink: 0;
 }
 
@@ -352,7 +351,6 @@ const cancelDelete = () => {
 }
 
 .name-text {
-  font-size: 14px;
   font-weight: 500;
   color: var(--eify-text-primary);
   white-space: nowrap;
@@ -361,7 +359,6 @@ const cancelDelete = () => {
 }
 
 .model-text {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -396,7 +393,6 @@ const cancelDelete = () => {
 }
 
 .status-text {
-  font-size: 13px;
   color: var(--eify-text-secondary);
 }
 
@@ -411,7 +407,7 @@ const cancelDelete = () => {
 /* ========== 卡片视图 ========== */
 
 .workflow-card {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border: 1px solid var(--eify-border-subtle);
   border-radius: var(--eify-card-radius);
   padding: var(--eify-spacing-4);
@@ -446,7 +442,6 @@ const cancelDelete = () => {
   align-items: center;
   justify-content: center;
   color: var(--eify-primary);
-  font-size: 20px;
   flex-shrink: 0;
 }
 
@@ -460,7 +455,6 @@ const cancelDelete = () => {
 }
 
 .card-title h3 {
-  font-size: 15px;
   font-weight: 600;
   margin: 0;
   color: var(--eify-text-primary);
@@ -470,7 +464,6 @@ const cancelDelete = () => {
 }
 
 .card-status-badge {
-  font-size: 11px;
   padding: 2px 8px;
   border-radius: var(--eify-radius-full);
   font-weight: 500;
@@ -479,17 +472,17 @@ const cancelDelete = () => {
 
 .card-status-badge.published {
   background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  color: var(--eify-success-600);
 }
 
 .card-status-badge.draft {
   background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
+  color: var(--eify-warning-600);
 }
 
 .card-status-badge.disabled {
   background: rgba(156, 163, 175, 0.1);
-  color: #6b7280;
+  color: var(--eify-text-secondary);
 }
 
 .card-body {
@@ -502,7 +495,6 @@ const cancelDelete = () => {
   align-items: center;
   justify-content: space-between;
   padding: var(--eify-spacing-1) 0;
-  font-size: 13px;
 }
 
 .card-info-row .info-label {

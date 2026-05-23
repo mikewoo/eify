@@ -11,10 +11,8 @@
 - [开发规范](#开发规范)
 - [日志系统快速参考](#日志系统快速参考)
 - [代码提交检查清单](#代码提交检查清单)
-- [常见问题](#常见问题)
 - [设计系统](#设计系统)
 - [项目上下文](#项目上下文)
-- [系统风险清单](#系统风险清单)
 - [文档索引](#文档索引)
 
 ---
@@ -90,6 +88,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | 🔴 **Flyway 迁移幂等** | 所有 DDL 语句必须检查对象是否已存在（ADD COLUMN → INFORMATION_SCHEMA.COLUMNS，ADD INDEX → INFORMATION_SCHEMA.STATISTICS），确保幂等可重入 | 应用启动失败，迁移阻塞 | [DATABASE.md](docs/guides/DATABASE.md) |
 | 🔴 **ADR 命名规范** | 架构决策记录统一放在 `docs/ADRs/`，文件命名 `ADR-{四位递增序号}-{名称}.md`，序号按创建时间递增 | ADR 命名混乱，查找困难 | — |
 | 🔴 **ADR 格式规范** | 所有 ADR 文档必须遵循 `docs/ADRs/ADR-XXXX-Template.md` 模板格式，包含 6 个必填章节：`# Status`、`# Date`、`# Owner`、`# Deciders`、`# Context`、`# Decision`，以及 2 个推荐章节：`## Consequences`、`# Details`。`# Considered Options` 章节列出所有候选方案及其被拒绝原因 | ADR 结构不一致，难以阅读和对比 | `docs/ADRs/ADR-XXXX-Template.md` |
+| 🔴 **安全审查** | 涉及安全敏感代码时，审查前必须阅读 [SECURITY.md](docs/guides/SECURITY.md) 系统风险清单 | 遗漏安全检查 | [SECURITY.md](docs/guides/SECURITY.md) |
 
 ---
 
@@ -105,7 +104,8 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | **docs/** | 按开发者查阅路径组织的规范文档 | `ARCHITECTURE.md`、`API-SPEC.md` |
 | **docs/guides/** | HOW-TO 指南（体量大、持续更新） | `DATABASE.md`、`LOGGING.md` |
 | **docs/ADRs/** | 设计决策记录（ADR，一次性归档） | `ADR-0001-cursor-pagination-improvement.md` |
-| **docs/specs/** | 功能实现规格说明（开发前编写，实施中迭代） | `2026-05-23-mcp-workspace-isolation-fix-design.md` |
+| **docs/specs/** | 功能实现规格说明（开发前编写，实施中迭代）。**所有 spec 必须放此目录，禁止使用 `docs/superpowers/specs/` 等其他路径** | `2026-05-23-mcp-workspace-isolation-fix-design.md` |
+| **docs/plans/** | 实现计划（基于 spec 的任务拆分，逐步骤可执行） | `2026-05-23-design-md-compliance-fix.md` |
 | **scripts/** | 开发/运维工具脚本 | `mock-mcp-server.py` |
 | **deploy/** | 部署配置和脚本 | `Dockerfile`、`nginx.conf`、`k8s/`、`infra/` |
 | **deploy/infra/deploy/** | Docker Compose 和部署脚本 | `docker-compose.yml`、`deploy-local.sh` |
@@ -120,6 +120,8 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 - **规范文档**（docs/）：开发时随时查阅的入口文档，持续更新，与代码同步
 - **HOW-TO 指南**（docs/guides/）：体量较大的操作指南，持续更新
 - **决策记录**（docs/ADRs/）：一次性写入的 ADR，基本不改
+- **规格说明**（docs/specs/）：功能实现前的设计文档，命名 `YYYY-MM-DD-<topic>-design.md`
+- **实现计划**（docs/plans/）：基于 spec 的任务拆分计划，命名 `YYYY-MM-DD-<feature-name>.md`
 - 每个指南对应一个开发场景："我要建表" → guides/DATABASE.md，"我要加日志" → guides/LOGGING.md
 
 ### 环境配置规范
@@ -194,31 +196,7 @@ private LocalDateTime updatedAt;
 - 软删除字段 `deleted` 必须有索引
 - 分页查询优先使用游标分页（针对大表）
 - JSON 字段必须添加注释说明结构
-- Flyway 迁移必须幂等：DDL 通过 INFORMATION_SCHEMA 检查后执行（模板见下方）
-
-**Flyway 幂等迁移模板**：
-
-```sql
--- 加列（幂等）
-SET @sql = IF(
-    (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'table_name' AND COLUMN_NAME = 'col_name') = 0,
-    'ALTER TABLE `table_name` ADD COLUMN `col_name` TYPE COMMENT ''注释'' AFTER `prev_col`',
-    'SELECT ''Column col_name already exists, skipping'' AS info'
-);
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-
--- 加索引/唯一约束（幂等）
-SET @sql = IF(
-    (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
-     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'table_name' AND INDEX_NAME = 'idx_name') = 0,
-    'ALTER TABLE `table_name` ADD INDEX `idx_name` (`col1`, `col2`)',
-    'SELECT ''Index idx_name already exists, skipping'' AS info'
-);
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-```
-
-> **规则**：所有 Flyway 迁移中的 DDL（`ADD COLUMN`, `ADD INDEX`, `ADD UNIQUE KEY`）必须使用上述模板。DML（`UPDATE`, `INSERT`）本身是幂等的，无需包装。
+- Flyway 迁移必须幂等：DDL 通过 INFORMATION_SCHEMA 检查后执行，模板详见 [DATABASE.md](docs/guides/DATABASE.md)
 
 ---
 
@@ -238,14 +216,6 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 | **ClickHouse 类型** | ❌ `Nullable(LowCardinality(String))` → ✅ `Nullable(String)` | [DATABASE.md](docs/guides/DATABASE.md) |
 | **UTC 时区** | 所有日志时间戳使用 UTC 时区 | [LOGGING.md](docs/guides/LOGGING.md) |
 | **MDC Keys** | `traceId`、`spanId`（由 Brave Tracing 设置） | [LOGGING.md](docs/guides/LOGGING.md) |
-
-### 日志文档索引
-
-| 文档 | 用途 |
-|:---|:---|
-| [LOGGING.md](docs/guides/LOGGING.md) | 日志系统完整指南（架构、格式、配置、MQ、监控、性能） |
-| [DATABASE.md](docs/guides/DATABASE.md) | ClickHouse 表结构、索引策略、物化视图 |
-| [deploy/infra/deploy/README.md](deploy/infra/deploy/README.md) | Vector + ClickHouse 部署指南 |
 
 ---
 
@@ -273,11 +243,15 @@ cd eify-web && npx vue-tsc --noEmit && cd ..  # 前端类型检查
 
 - [ ] **测试通过**：`mvn test` 全部通过，新增逻辑有对应测试用例
 - [ ] **无硬编码**：IP、密码、密钥使用 `${ENV_VAR:}` 占位符
-- [ ] **异常规范**：使用 `ErrorCode` 枚举，禁止 `throw new RuntimeException()` 和 `Result.fail("裸字符串")`
+- [ ] **异常规范**：使用 `ErrorCode` 枚举，禁止 `throw new RuntimeException()` 和 `Result.fail("裸字符串")`；禁止空 catch 块或仅 `e.printStackTrace()`
+- [ ] **参数校验**：Controller 请求体使用 `@Valid` / `@Validated` 注解，禁止手动 if-else 校验
+- [ ] **HTTP 状态码**：认证失败 401，权限不足 403，资源不存在 404，参数错误 400，禁止全部返回 200
+- [ ] **构造器注入**：使用 `@RequiredArgsConstructor`，禁止 `@Autowired` 字段注入
 
 ### 涉及数据库时
 
 - [ ] **索引覆盖**：新查询有对应索引，EXPLAIN 确认无全表扫描
+- [ ] **N+1 查询**：禁止循环内逐条查询，使用批量查询或联表查询
 - [ ] **Flyway 幂等**：DDL 使用 `INFORMATION_SCHEMA` 检查模板（ADD COLUMN / ADD INDEX / ADD UNIQUE KEY）
 - [ ] **ClickHouse 类型**：Nullable 不与 LowCardinality 嵌套；按 logType 设置 Nullable 字段
 
@@ -297,50 +271,13 @@ cd eify-web && npx vue-tsc --noEmit && cd ..  # 前端类型检查
 - [ ] **线程池隔离**：使用命名线程池执行，禁止在 Tomcat 线程上同步调用外部服务
 - [ ] **超时设置**：HTTP 调用有 connect/read timeout，SSE 有 `onTimeout` + `onError` 回调
 - [ ] **安全校验**：API 调用经过 SSRF 防护（`ApiNodeExecutor.validateUrl()`）
+- [ ] **定时任务超时**：`@Scheduled` 方法必须有超时控制，禁止无界阻塞任务
 
----
+### 代码质量
 
-## 常见问题
-
-### Q: 日志输出格式是什么？
-
-**A**: 纯 JSON 格式，UTC 时区，标准字段在顶层，业务数据在 `message` 对象中。详细说明：[LOGGING.md](docs/guides/LOGGING.md)
-
-### Q: 如何按 traceId 查询完整调用链？
-
-**A**:
-```sql
--- ClickHouse 查询
-SELECT * FROM app_logs WHERE traceId = 'xxx' ORDER BY timestamp;
-
--- 文件查询
-grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
-```
-
-### Q: ClickHouse 类型错误：`Nullable(LowCardinality(String))`？
-
-**A**: ClickHouse 不支持此类型组合，改用 `Nullable(String)`。详见：[DATABASE.md](docs/guides/DATABASE.md)
-
-### Q: Vector 连接 ClickHouse 失败？
-
-**A**: 检查 `deploy/infra/vector/vector.toml` 中的连接配置，确保环境变量 `CLICKHOUSE_ENDPOINT` 和 `CLICKHOUSE_PASSWORD` 已设置。参考 `.env.example`。
-
-### Q: 如何切换用户的工作空间？
-
-**A**: 调用 `POST /api/auth/switch-workspace { workspaceId }`，后端验证成员身份后签发新 JWT（含新 `wid`）。前端 `authStore.switchWorkspace()` 自动保存新 token 并执行 `window.location.reload()` 全量刷新。详见：[AUTH-WORKSPACE.md](docs/guides/AUTH-WORKSPACE.md)
-
-### Q: 新建业务模块时如何实现工作空间隔离？
-
-**A**: 
-1. 数据表添加 `workspace_id BIGINT UNSIGNED` 字段
-2. Entity 实现 `WorkspaceAware` 接口
-3. Service 层所有查询使用 `.eq(Entity::getWorkspaceId, CurrentContext.getWorkspaceId())`
-4. 更新/删除使用 `WorkspaceGuard.requireInWorkspace(mapper.selectById(id), ErrorCode)` 一行完成校验
-5. 创建使用 `WorkspaceGuard.bind(entity)` 绑定 workspace
-6. 唯一索引必须与 `workspace_id` 组合：`UNIQUE KEY (name, workspace_id)`
-7. 名称唯一性检查使用 `WorkspaceGuard.checkNameUnique(mapper, ...)`
-
-详见：[AUTH-WORKSPACE.md](docs/guides/AUTH-WORKSPACE.md)
+- [ ] **字符串拼接**：循环内禁止 `+=` 拼接，使用 `StringBuilder`
+- [ ] **泛型完整**：禁止裸类型（`List` → `List<String>`），IDE 警告视为错误
+- [ ] **测试注解**：单元测试优先 `@ExtendWith(MockitoExtension.class)`，避免不必要 `@SpringBootTest`
 
 ---
 
@@ -377,84 +314,8 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 - **版本管理**：Git 语义化版本，重要变更记录在 git commit history 中
 
 ### 技术架构
-- **日志架构**：纯 JSON 格式（UTC），标准字段在顶层，业务字段按 logType 分类
 - **链路追踪**：基于 Brave/Micrometer Tracing 实现分布式追踪
-- **日志存储**：ClickHouse + Vector 采集，使用 Nullable 优化存储
 - **异步处理**：使用线程池隔离外部调用，确保服务稳定性
-
----
-
-## 系统风险清单
-
-> 基于 9 个模块的架构分析与风险修复后的复盘。用于指导新功能开发时的安全审查和测试优先级。
-> 最后更新：2026-05-20
-
-### 一、核心链路（5 条）
-
-| # | 链路名称 | 涉及模块/类 | 核心原因 |
-|:---|:---|:---|:---|
-| **1** | **Agent 对话链路** | `ChatController` → `ChatServiceImpl` → `ProviderAdapterFactory` → `LlmHttpClient` → SSE 流式输出 | 用户核心体验路径。涉及 LLM 调用、SSE 流式、工具调用循环（最多 5 轮）、RAG 检索增强。任一环失败用户直接感知 |
-| **2** | **工作流执行链路** | `WorkflowEngine` → 7 种 `NodeExecutor`（llm / api_call / code / condition / tool_call / start / end）→ `VariableResolver` | 系统最复杂的编排路径。DAG 拓扑执行，节点超时按类型区分（LLM 3min / API 30s），代码节点有沙箱隔离，变量系统单次替换防注入 |
-| **3** | **认证与工作空间隔离链路** | `JwtAuthFilter` → `JwtSecretValidator`（启动校验）→ `CurrentContext`（ThreadLocal）→ `ContextPropagatingTaskDecorator`（5 个线程池）→ `WorkspaceGuard` | 多租户安全防火墙。JWT 密钥生产环境强制校验，ThreadLocal 通过 TaskDecorator 传播到所有异步线程池 |
-| **4** | **知识库 RAG 链路** | `EmbeddingStrategy` → pgvector `<=>` 余弦相似度 → `ChunkService.search()` → `mergeAndRerank()` | 知识检索质量决定 Agent 回答准确度。涉及向量化、HNSW 索引、多知识库合并去重重排序 |
-| **5** | **MCP 工具调用链路** | `McpClientServiceImpl`（DCL+锁保护）→ `io.modelcontextprotocol` SDK → 外部 MCP Server | Agent 能力扩展通道。客户端缓存 5 分钟 TTL，DCL+同步锁防并发竞态，最多 2 次重试，按 serverId 缓存可用工具集 |
-
-### 二、风险集中区域
-
-#### 🔴 严重 — 安全红线，触碰即可能造成数据泄露或服务不可用
-
-| 风险点 | 类型 | 位置 | 关键防护 |
-|:---|:---|:---|:---|
-| **JWT 密钥泄露** | 安全 | `JwtAuthFilter` + 配置 | `JwtSecretValidator` 启动时检测已知默认值/空值/短密钥，非 dev 环境拒绝启动 |
-| **ApiNodeExecutor SSRF** | 安全 | `ApiNodeExecutor.validateUrl()` + `isBlockedAddress()` | 封堵 `file/ftp/jar/gopher`，阻止云元数据 IP，IPv4/IPv6 回环/内网/链路本地地址，IPv4-mapped IPv6 递归检查 |
-| **CodeNodeExecutor 沙箱** | 安全 | `CodeNodeExecutor` | 共享守护线程池（4 线程），30s 超时 + Future.cancel(true)，线程池满时 AbortPolicy 拒绝 |
-| **VariableResolver 注入** | 安全 | `VariableResolver` + 各消费者 | 单次替换防递归展开；消费者层防护：ConditionNodeExecutor 用 getVariable 取原始值，ApiNodeExecutor URL 校验，CodeNodeExecutor ScriptEngine.put 注入 |
-
-#### 🟡 高 — 可能造成部分功能不可用或数据不一致
-
-| 风险点 | 类型 | 位置 | 关键防护 |
-|:---|:---|:---|:---|
-| **ThreadLocal 丢失** | 并发 | `CurrentContext` + `ThreadPoolConfig` | `ObjectProvider<TaskDecorator>` 注入，5 个线程池自动应用 context 传播 |
-| **SSE 连接泄漏** | 性能 | `ChatServiceImpl` + `LlmHttpClient` | onTimeout/onCompletion/onError 三回调 + activeSessions 清理 + OkHttp ConnectionPool(20) |
-| **MCP Client 竞态** | 并发 | `McpClientServiceImpl` | DCL + synchronized(lock) + 独立锁对象 per serverId |
-| **节点超时不均** | 性能 | `WorkflowEngine.coreLoop()` | 按类型区分：LLM 3min / 默认 30s |
-
-#### 🟢 中 — 边界场景或性能退化
-
-| 风险点 | 类型 | 关键防护 |
-|:---|:---|:---|
-| **线程池满** | 性能 | llm/workflow/mcp/sse 四个池 AbortPolicy，仅 asyncExecutor 保留 CallerRunsPolicy |
-| **API 响应截断** | 数据一致性 | 512KB 截断 + warn 日志，需工作流设计层面约束 |
-
-### 三、测试重心
-
-#### P0 — 必须有测试覆盖
-
-| 测试对象 | 原因 | 状态 |
-|:---|:---|:---|
-| `ApiNodeExecutor` SSRF 防护 | 安全红线 | ✅ 12 个测试 |
-| `JwtSecretValidator` 密钥校验 | 安全红线 | ✅ 8 个测试 |
-| `ConditionNodeExecutor` 条件路由 | 工作流核心 | ✅ 18 个测试 |
-| `WorkspaceGuard` 空间隔离 | 多租户安全 | ✅ 已有 |
-| `CodeNodeExecutor` 沙箱超时 | 安全红线 | ✅ 已有 |
-
-#### P1 — 应该有测试覆盖
-
-| 测试对象 | 原因 | 状态 |
-|:---|:---|:---|
-| `WorkflowEngine` 端到端 | 多节点 DAG + 分支 + 超时 | ⚠️ 仅单测 |
-| `ChatServiceImpl` SSE 生命周期 | 连接异常处理 | ⚠️ 仅 mock |
-| `McpClientServiceImpl` 生命周期 | 缓存/竞态/降级 | ❌ 无 |
-| `ProviderAdapter` SSE 解析 | 各厂商协议差异 | ❌ 无 |
-| `ChunkService` RAG 检索 | 向量搜索 + 降级 | ❌ 无 |
-
-#### P2 — 可以后补
-
-| 类别 | 原因 |
-|:---|:---|
-| CRUD Controller / Mapper XML | 样板代码，Service 层已验证 |
-| 游标分页 | MyBatis-Plus 封装 |
-| 前端组件单测 | TS 类型检查 + vitest 基础覆盖即可，复杂交互用 e2e |
 
 ---
 
@@ -501,72 +362,11 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 |:---|:---|:---|
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 线程池配置 | 调用外部 LLM API / 实现 SSE 流式响应 |
 | [WORKFLOW.md](docs/guides/WORKFLOW.md) | 工作流引擎设计 | 开发工作流节点、理解节点类型和变量系统 |
+| [SECURITY.md](docs/guides/SECURITY.md) | 系统风险清单 | 安全敏感代码审查前必读 |
+| [E2E-TESTING.md](docs/guides/E2E-TESTING.md) | 端到端测试指南 | 编写 Playwright e2e 测试 |
 
 ### 运维文档
 
 | 文档 | 用途 | 何时查看 |
 |:---|:---|:---|
 | [DEPLOYMENT.md](docs/DEPLOYMENT.md) | 部署与 CI/CD | 部署到生产环境、CI/CD 流水线、故障排查 |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构与编码规范 | 模块结构、命名规范、分层职责 |
-
----
-
-## 附录
-
-### 项目结构
-
-```
-eify/
-├── CLAUDE.md              # Claude Code 指导（根目录仅此 4 个文件）
-├── DESIGN.md              # 设计系统规范（AI 编码助手的视觉参考）
-├── start.sh               # 启动脚本
-├── stop.sh                # 停止脚本
-│
-├── eify-common/           # 公共模块（工具类、常量、异常、DTO）
-├── eify-auth/              # 认证与工作空间（JWT、用户管理、多租户隔离）
-├── eify-provider/         # LLM 提供商模块
-├── eify-agent/            # Agent 模块
-├── eify-chat/             # 对话模块
-├── eify-mcp/              # MCP 工具模块
-├── eify-workflow/         # 工作流引擎模块
-├── eify-knowledge/        # 知识库模块
-├── eify-app/              # 应用模块（Spring Boot 入口）
-├── eify-web/              # 前端模块（Vue 3 + TypeScript）
-│
-├── docs/                  # 项目文档（按开发者查阅路径组织）
-│   ├── ARCHITECTURE.md    # 架构 + 编码规范
-│   ├── API-SPEC.md        # API 接口规范
-│   ├── DEPLOYMENT.md      # 部署与 CI/CD（本地、Docker、K8s、Jenkins）
-│   ├── ADRs/              # 架构决策记录（ADR）
-│   └── guides/            # HOW-TO 指南
-│       ├── AUTH-WORKSPACE.md  # 认证 + 多租户
-│       ├── DATABASE.md        # MySQL + ClickHouse + 游标分页
-│       ├── LOGGING.md         # 日志系统完整指南
-│       └── WORKFLOW.md        # 工作流引擎设计
-│
-├── scripts/               # 开发/运维工具脚本
-├── Jenkinsfile            # CI/CD 流水线定义
-├── deploy/                # 部署配置
-│   ├── Dockerfile         # 后端镜像构建
-│   ├── Dockerfile.web     # 前端镜像构建
-│   ├── nginx.conf         # Nginx 反向代理
-│   ├── k8s/               # K8s 清单（Deployment、Service、Ingress）
-│   ├── sql/               # MySQL 初始化脚本（统一入口）
-│   ├── clickhouse/        # ClickHouse DDL
-│   ├── vector/            # Vector 采集配置
-│   ├── postgresql/        # PostgreSQL pgvector 初始化脚本
-│   ├── clickvisual/       # ClickVisual 配置
-│   ├── optional/          # 可选组件（Jaeger 等）
-│   └── *.yml              # Docker Compose 文件
-│
-└── .env.example           # 环境变量模板
-```
-
-### 环境配置
-
-| 环境 | 配置文件 | 用途 | 部署方式 |
-|:---|:---|:---|:---|
-| **开发** | `application-dev.yml` | 本地开发 | Docker Compose |
-| **测试** | `application-test.yml` | CCE Turbo K8s 自动化测试 | K8s Deployment |
-| **预发布** | `application-staging.yml` | CCE Turbo K8s 预发布 | K8s Deployment |
-| **生产** | `application-prod.yml` | CCE Turbo K8s 生产 | K8s Deployment |

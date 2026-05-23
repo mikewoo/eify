@@ -119,10 +119,10 @@ onUnmounted(() => {
       <!-- 工作空间切换 -->
       <el-dropdown trigger="click" v-if="authStore.workspaces.length > 0">
         <div class="eify-workspace-switcher">
-          <div class="eify-workspace-avatar">
+          <div class="eify-workspace-avatar text-xs">
             {{ authStore.workspace?.name?.charAt(0) || 'W' }}
           </div>
-          <span class="eify-workspace-name">{{ authStore.workspace?.name }}</span>
+          <span class="eify-workspace-name text-sm">{{ authStore.workspace?.name }}</span>
           <svg class="eify-workspace-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
@@ -130,7 +130,7 @@ onUnmounted(() => {
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item disabled>
-              <span class="eify-workspace-menu-label">{{ t('header.currentWorkspace') }}</span>
+              <span class="eify-workspace-menu-label text-xs">{{ t('header.currentWorkspace') }}</span>
             </el-dropdown-item>
             <el-dropdown-item disabled>
               <div class="eify-workspace-current-item">
@@ -140,7 +140,7 @@ onUnmounted(() => {
             </el-dropdown-item>
             <template v-if="otherWorkspaces.length > 0">
               <el-dropdown-item disabled divided>
-                <span class="eify-workspace-menu-label">{{ t('header.otherWorkspaces') }}</span>
+                <span class="eify-workspace-menu-label text-xs">{{ t('header.otherWorkspaces') }}</span>
               </el-dropdown-item>
               <el-dropdown-item
                 v-for="ws in otherWorkspaces"
@@ -148,7 +148,7 @@ onUnmounted(() => {
                 @click="handleSwitchWorkspace(ws.id)"
               >
                 <div class="eify-workspace-switch-item">
-                  <div class="eify-workspace-switch-icon">{{ ws.name.charAt(0) }}</div>
+                  <div class="eify-workspace-switch-icon text-xs">{{ ws.name.charAt(0) }}</div>
                   <span>{{ ws.name }}</span>
                   <el-tag size="small" round>{{ roleLabel(ws.role) }}</el-tag>
                 </div>
@@ -169,7 +169,7 @@ onUnmounted(() => {
           <ellipse cx="12" cy="12" rx="4" ry="10"/>
           <path d="M2 12h20"/>
         </svg>
-        <span class="locale-current-label">{{ currentLocaleLabel }}</span>
+        <span class="locale-current-label text-sm">{{ currentLocaleLabel }}</span>
         <svg class="locale-chevron" :class="{ open: localeOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 9 12 15 18 9"/>
         </svg>
@@ -178,23 +178,23 @@ onUnmounted(() => {
           <div v-if="localeOpen" class="locale-overlay" @click.stop="localeOpen = false" />
           <transition name="locale-drop">
             <div v-if="localeOpen" class="locale-dropdown" :style="localeDropdownStyle" @click.stop>
-              <div class="locale-dropdown-header">{{ t('common.language') }}</div>
+              <div class="locale-dropdown-header text-xs">{{ t('common.language') }}</div>
               <button
-                :class="['locale-dropdown-item', { active: localeStore.current === 'zh-CN' }]"
+                :class="['locale-dropdown-item text-sm', { active: localeStore.current === 'zh-CN' }]"
                 @click="selectLocale('zh-CN')"
               >
                 <span class="locale-item-label">中文</span>
-                <span class="locale-item-badge">简体中文</span>
+                <span class="locale-item-badge text-xs">简体中文</span>
                 <svg v-if="localeStore.current === 'zh-CN'" class="locale-item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               </button>
               <button
-                :class="['locale-dropdown-item', { active: localeStore.current === 'en-US' }]"
+                :class="['locale-dropdown-item text-sm', { active: localeStore.current === 'en-US' }]"
                 @click="selectLocale('en-US')"
               >
                 <span class="locale-item-label">English</span>
-                <span class="locale-item-badge">English</span>
+                <span class="locale-item-badge text-xs">English</span>
                 <svg v-if="localeStore.current === 'en-US'" class="locale-item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
@@ -239,7 +239,7 @@ onUnmounted(() => {
   padding: 4px 10px;
   border-radius: var(--eify-radius-md);
   transition: background var(--eify-duration-fast) var(--eify-ease-default);
-  margin-right: 8px;
+  margin-right: var(--eify-spacing-2);
   flex-shrink: 0;
   max-width: none;
 }
@@ -253,17 +253,15 @@ onUnmounted(() => {
   height: 26px;
   border-radius: 6px;
   background: var(--eify-gradient-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .eify-workspace-name {
-  font-size: 13px;
   font-weight: 500;
   color: var(--eify-text-primary);
   white-space: nowrap;
@@ -278,7 +276,6 @@ onUnmounted(() => {
 }
 
 .eify-workspace-menu-label {
-  font-size: 11px;
   color: var(--eify-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -288,7 +285,7 @@ onUnmounted(() => {
 .eify-workspace-switch-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--eify-spacing-2);
   min-width: 180px;
 }
 
@@ -301,7 +298,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -319,7 +315,7 @@ onUnmounted(() => {
   cursor: pointer;
   transition: background var(--eify-duration-fast) var(--eify-ease-default);
   user-select: none;
-  margin-right: 8px;
+  margin-right: var(--eify-spacing-2);
   flex-shrink: 0;
 }
 
@@ -342,7 +338,6 @@ onUnmounted(() => {
 
 /* 当前语言标签 */
 .locale-current-label {
-  font-size: 13px;
   font-weight: 500;
   color: var(--eify-text-primary);
 }
@@ -377,7 +372,7 @@ onUnmounted(() => {
     0 0 0 1px rgba(0, 0, 0, 0.03),
     0 4px 16px rgba(0, 0, 0, 0.08),
     0 8px 32px rgba(0, 0, 0, 0.04);
-  padding: 4px;
+  padding: var(--eify-spacing-1);
   overflow: hidden;
   transform-origin: top right;
 }
@@ -385,7 +380,6 @@ onUnmounted(() => {
 /* 下拉菜单头部 */
 .locale-dropdown-header {
   padding: 6px 10px 4px;
-  font-size: 11px;
   font-weight: 600;
   color: var(--eify-text-tertiary);
   text-transform: uppercase;
@@ -396,14 +390,13 @@ onUnmounted(() => {
 .locale-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--eify-spacing-2);
   width: 100%;
   padding: 7px 10px;
   border: none;
   border-radius: var(--eify-radius-md);
   background: transparent;
   cursor: pointer;
-  font-size: 13px;
   color: var(--eify-text-primary);
   transition: background var(--eify-duration-fast) var(--eify-ease-default);
   text-align: left;
@@ -425,7 +418,6 @@ onUnmounted(() => {
 
 /* 菜单项副文本 */
 .locale-item-badge {
-  font-size: 11px;
   color: var(--eify-text-tertiary);
 }
 
@@ -439,7 +431,7 @@ onUnmounted(() => {
   height: 16px;
   color: var(--eify-primary);
   flex-shrink: 0;
-  margin-left: 4px;
+  margin-left: var(--eify-spacing-1);
 }
 
 /* ===== 下拉菜单过渡动画 ===== */
@@ -466,8 +458,8 @@ onUnmounted(() => {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
+  gap: var(--eify-spacing-2);
+  padding: var(--eify-spacing-1) var(--eify-spacing-2);
   border-radius: var(--eify-radius-md);
   transition: background var(--eify-duration-fast) var(--eify-ease-default);
   flex-shrink: 0;

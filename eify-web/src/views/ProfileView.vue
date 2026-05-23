@@ -133,21 +133,21 @@ async function handleGenerateInvite() {
       <div class="eify-card profile-user-card">
         <div class="profile-user-banner">
           <div class="profile-user-avatar">{{ userInitial }}</div>
-          <h3 class="profile-user-name">{{ authStore.displayName }}</h3>
-          <p class="profile-user-username">@{{ authStore.user?.username }}</p>
+          <h3 class="profile-user-name text-2xl">{{ authStore.displayName }}</h3>
+          <p class="profile-user-username text-base">@{{ authStore.user?.username }}</p>
         </div>
         <div class="profile-user-details">
-          <div class="profile-detail-item">
+          <div class="profile-detail-item text-sm">
             <el-icon :size="16"><User /></el-icon>
             <span class="profile-detail-label">{{ t('profile.userId') }}</span>
             <span class="profile-detail-value">{{ authStore.user?.id }}</span>
           </div>
-          <div class="profile-detail-item">
+          <div class="profile-detail-item text-sm">
             <el-icon :size="16"><Message /></el-icon>
             <span class="profile-detail-label">{{ t('profile.email') }}</span>
             <span class="profile-detail-value">{{ authStore.user?.email || '-' }}</span>
           </div>
-          <div class="profile-detail-item">
+          <div class="profile-detail-item text-sm">
             <el-icon :size="16"><Lock /></el-icon>
             <span class="profile-detail-label">{{ t('profile.status') }}</span>
             <el-tag size="small" type="success" round>{{ t('profile.statusNormal') }}</el-tag>
@@ -159,7 +159,7 @@ async function handleGenerateInvite() {
       <div class="eify-card profile-workspaces-card">
         <div class="eify-card-header">
           <span class="eify-card-title">{{ t('profile.workspaces') }}</span>
-          <span class="profile-count-badge">{{ t('profile.workspaceCount', { count: authStore.workspaces.length }) }}</span>
+          <span class="profile-count-badge text-xs">{{ t('profile.workspaceCount', { count: authStore.workspaces.length }) }}</span>
           <div class="eify-card-header-actions">
             <el-button size="small" :icon="Plus" @click="openCreateDialog">{{ t('profile.createWorkspace') }}</el-button>
             <el-button size="small" @click="openJoinDialog">{{ t('profile.joinWorkspace') }}</el-button>
@@ -174,15 +174,15 @@ async function handleGenerateInvite() {
                   {{ authStore.workspace.name?.charAt(0) || 'W' }}
                 </div>
                 <div class="profile-ws-info">
-                  <span class="profile-ws-name">{{ authStore.workspace.name }}</span>
-                  <span class="profile-ws-id">ID: {{ authStore.workspace.id }}</span>
+                  <span class="profile-ws-name text-base">{{ authStore.workspace.name }}</span>
+                  <span class="profile-ws-id text-xs">ID: {{ authStore.workspace.id }}</span>
                 </div>
               </div>
               <div class="profile-ws-right">
                 <el-tag :type="roleType(authStore.workspace.role)" effect="dark" round size="small">
                   {{ roleLabel(authStore.workspace.role) }}
                 </el-tag>
-                <span class="profile-ws-badge">{{ t('profile.current') }}</span>
+                <span class="profile-ws-badge text-xs">{{ t('profile.current') }}</span>
                 <el-button
                   v-if="authStore.workspace.role === 'owner' || authStore.workspace.role === 'admin'"
                   size="small"
@@ -202,12 +202,12 @@ async function handleGenerateInvite() {
               :key="ws.id"
             >
               <div class="profile-ws-left">
-                <div class="profile-ws-icon">
+                <div class="profile-ws-icon text-base">
                   {{ ws.name.charAt(0) }}
                 </div>
                 <div class="profile-ws-info">
-                  <span class="profile-ws-name">{{ ws.name }}</span>
-                  <span class="profile-ws-id">ID: {{ ws.id }}</span>
+                  <span class="profile-ws-name text-base">{{ ws.name }}</span>
+                  <span class="profile-ws-id text-xs">ID: {{ ws.id }}</span>
                 </div>
               </div>
               <div class="profile-ws-right">
@@ -215,7 +215,7 @@ async function handleGenerateInvite() {
                   {{ roleLabel(ws.role) }}
                 </el-tag>
                 <button
-                  class="profile-ws-switch-btn"
+                  class="profile-ws-switch-btn text-xs"
                   :disabled="switchingId === ws.id"
                   @click="handleSwitchWorkspace(ws.id)"
                 >
@@ -224,7 +224,7 @@ async function handleGenerateInvite() {
               </div>
             </div>
             <!-- 空状态 -->
-            <div v-if="authStore.workspaces.length === 0" class="profile-workspace-empty">
+            <div v-if="authStore.workspaces.length === 0" class="profile-workspace-empty text-sm">
               {{ t('profile.noWorkspace') }}
             </div>
           </div>
@@ -237,7 +237,7 @@ async function handleGenerateInvite() {
           <span class="eify-card-title">{{ t('profile.accountOps') }}</span>
         </div>
         <div class="eify-card-body">
-          <p class="profile-hint">{{ t('profile.logoutHint') }}</p>
+          <p class="profile-hint text-sm">{{ t('profile.logoutHint') }}</p>
         </div>
         <div class="eify-card-footer">
           <button class="eify-btn eify-btn-danger" @click="handleLogout">
@@ -307,7 +307,7 @@ async function handleGenerateInvite() {
   height: 80px;
   border-radius: var(--eify-radius-full);
   background: var(--eify-gradient-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,14 +319,12 @@ async function handleGenerateInvite() {
 
 .profile-user-name {
   margin: 0;
-  font-size: 22px;
   font-weight: 600;
   color: var(--eify-text-primary);
 }
 
 .profile-user-username {
   margin: var(--eify-spacing-1) 0 0;
-  font-size: 14px;
   color: var(--eify-text-secondary);
 }
 
@@ -342,7 +340,6 @@ async function handleGenerateInvite() {
   display: flex;
   align-items: center;
   gap: var(--eify-spacing-2);
-  font-size: 13px;
   color: var(--eify-text-secondary);
 }
 
@@ -364,9 +361,8 @@ async function handleGenerateInvite() {
 }
 
 .profile-count-badge {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
-  background: var(--eify-bg-tertiary, #f1f5f9);
+  background: var(--eify-bg-surface);
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -415,19 +411,18 @@ async function handleGenerateInvite() {
   width: 40px;
   height: 40px;
   border-radius: var(--eify-radius-lg);
-  background: var(--eify-bg-tertiary, #f1f5f9);
+  background: var(--eify-bg-surface);
   color: var(--eify-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .profile-ws-icon.current-icon {
   background: var(--eify-gradient-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
 }
 
 .profile-ws-info {
@@ -437,13 +432,11 @@ async function handleGenerateInvite() {
 }
 
 .profile-ws-name {
-  font-size: 14px;
   font-weight: 600;
   color: var(--eify-text-primary);
 }
 
 .profile-ws-id {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -454,7 +447,6 @@ async function handleGenerateInvite() {
 }
 
 .profile-ws-badge {
-  font-size: 11px;
   color: var(--eify-primary);
   background: var(--eify-primary-50, rgba(99, 102, 241, 0.1));
   padding: 2px 8px;
@@ -463,7 +455,6 @@ async function handleGenerateInvite() {
 }
 
 .profile-ws-switch-btn {
-  font-size: 12px;
   padding: 4px 12px;
   border-radius: var(--eify-radius-base);
   border: 1px solid var(--eify-border);
@@ -489,7 +480,6 @@ async function handleGenerateInvite() {
   text-align: center;
   padding: 32px;
   color: var(--eify-text-tertiary);
-  font-size: 13px;
 }
 
 .profile-actions-card {
@@ -498,7 +488,6 @@ async function handleGenerateInvite() {
 
 .profile-hint {
   margin: 0;
-  font-size: 13px;
   color: var(--eify-text-secondary);
   line-height: 1.6;
 }

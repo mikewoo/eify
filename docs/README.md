@@ -58,7 +58,9 @@ docs/
 └── guides/                    # HOW-TO 指南（体量大、持续更新）
     ├── AUTH-WORKSPACE.md      # 用户认证与工作空间多租户
     ├── DATABASE.md            # 数据库设计（MySQL + ClickHouse + 游标分页）
+    ├── E2E-TESTING.md         # Playwright 端到端测试指南
     ├── LOGGING.md             # 日志系统完整指南（架构、格式、MQ、监控、性能）
+    ├── SECURITY.md            # 系统风险清单 + 安全审查
     └── WORKFLOW.md            # 工作流引擎设计（节点类型、变量系统、参考实现）
 ```
 
@@ -211,10 +213,12 @@ Eify 项目采用模块化文档管理，遵循以下原则：
 | **数据库设计** | DATABASE.md（含 MySQL + ClickHouse + 游标分页） |
 | **日志系统** | LOGGING.md |
 | **LLM 调用 / SSE 流式** | ARCHITECTURE.md（线程池配置）、LOGGING.md |
+| **安全审查** | SECURITY.md（系统风险清单） |
+| **端到端测试** | E2E-TESTING.md（Playwright 模式） |
 | **性能优化** | LOGGING.md#性能分析与瓶颈、DEPLOYMENT.md#扩容触发条件 |
 | **部署运维** | DEPLOYMENT.md |
 | **CI/CD 流水线** | DEPLOYMENT.md |
-| **监控告警** | LOGGING.md#日志监控方案 |
+| **监控告警** | LOGGING.md#日志监控方案、DATABASE.md#ClickHouse-监控查询 |
 
 ## 贡献指南
 

@@ -27,9 +27,9 @@
     <template #footer>
       <div class="eify-form-dialog-footer">
         <slot name="footer" :mode="mode" :loading="submitLoading">
-          <el-button class="eify-btn-secondary" @click="handleClose">{{ t('common.cancel') }}</el-button>
+          <el-button class="eify-btn-secondary text-base" @click="handleClose">{{ t('common.cancel') }}</el-button>
           <el-button
-            class="eify-btn-primary"
+            class="eify-btn-primary text-base"
             :loading="submitLoading"
             @click="handleSubmit"
           >
@@ -346,7 +346,6 @@ defineExpose({
 .eify-form-dialog-footer .el-button {
   height: 38px;
   padding: 0 20px;
-  font-size: 14px;
   font-weight: 500;
   border-radius: var(--eify-radius-md);
   transition: all var(--eify-duration-base) var(--eify-ease-default);
@@ -360,7 +359,7 @@ defineExpose({
 
 /* 次要按钮 */
 .eify-form-dialog-footer .eify-btn-secondary {
-  background-color: #ffffff;
+  background-color: var(--eify-bg-base);
   color: var(--eify-text-secondary);
   border-color: var(--eify-border-default);
 }
@@ -378,7 +377,7 @@ defineExpose({
 /* 主要按钮 - 蓝紫渐变 */
 .eify-form-dialog-footer .eify-btn-primary {
   background: var(--eify-gradient-primary);
-  color: #ffffff;
+  color: var(--eify-text-inverse);
   border: none;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }

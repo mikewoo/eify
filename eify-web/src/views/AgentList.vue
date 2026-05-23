@@ -1492,7 +1492,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .model-text {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -1540,7 +1539,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .status-text {
-  font-size: 14px;
 }
 
 /* 表单样式调整 */
@@ -1557,7 +1555,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .param-value {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-top: 8px;
   text-align: center;
@@ -1585,7 +1582,6 @@ const quickPrompts = getQuickPrompts()
   position: absolute;
   right: 0;
   top: 0;
-  font-size: 14px;
   font-weight: 500;
   color: var(--eify-primary);
   line-height: 32px;
@@ -1603,11 +1599,9 @@ const quickPrompts = getQuickPrompts()
 
 .model-name {
   flex: 1;
-  font-size: 14px;
 }
 
 .model-type {
-  font-size: 11px;
   color: var(--eify-text-tertiary);
   padding: 2px 6px;
   background: var(--eify-bg-surface);
@@ -1644,7 +1638,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .tools-hint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-bottom: 16px;
   padding: 8px 12px;
@@ -1658,7 +1651,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .tool-group-header {
-  font-size: 13px;
   font-weight: 600;
   color: var(--eify-primary);
   padding: 6px 12px;
@@ -1686,14 +1678,12 @@ const quickPrompts = getQuickPrompts()
 }
 
 .tool-name {
-  font-size: 13px;
   font-weight: 500;
   color: var(--eify-text-primary);
   white-space: nowrap;
 }
 
 .tool-desc {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1710,7 +1700,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .form-hint {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-top: 4px;
   line-height: 1.5;
@@ -1718,7 +1707,7 @@ const quickPrompts = getQuickPrompts()
 
 /* ========== 卡片视图 ========== */
 .agent-card {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: hidden;
@@ -1742,7 +1731,7 @@ const quickPrompts = getQuickPrompts()
   gap: var(--eify-spacing-3);
   padding: var(--eify-spacing-4);
   border-bottom: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, var(--eify-bg-base) 100%);
   min-height: 64px;
 }
 
@@ -1756,7 +1745,6 @@ const quickPrompts = getQuickPrompts()
   justify-content: center;
   color: var(--eify-primary);
   flex-shrink: 0;
-  font-size: 18px;
 }
 
 .card-title {
@@ -1764,7 +1752,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .card-title h3 {
-  font-size: 15px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin: 0 0 var(--eify-spacing-1) 0;
@@ -1826,7 +1813,6 @@ const quickPrompts = getQuickPrompts()
   justify-content: space-between;
   align-items: center;
   padding: var(--eify-spacing-1) 0;
-  font-size: 12px;
 }
 
 .info-label {
@@ -1916,7 +1902,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .toolbar-right .agent-name {
-  font-size: 13px;
   font-weight: 500;
   color: var(--eify-text-secondary);
 }
@@ -1963,17 +1948,16 @@ const quickPrompts = getQuickPrompts()
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 13px;
 }
 
 .user-avatar {
   background: var(--eify-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
 }
 
 .assistant-avatar {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff;
+  background: var(--eify-gradient-primary);
+  color: var(--eify-text-inverse);
 }
 
 .message-bubble {
@@ -1986,7 +1970,7 @@ const quickPrompts = getQuickPrompts()
 
 .user-bubble {
   background: var(--eify-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
   border-bottom-right-radius: 4px;
 }
 
@@ -1996,7 +1980,7 @@ const quickPrompts = getQuickPrompts()
 }
 
 .ai-bubble {
-  background: #fff;
+  background: var(--eify-bg-base);
   color: var(--eify-text-primary);
   border: 1px solid var(--eify-border-default);
   border-bottom-left-radius: 4px;
@@ -2004,12 +1988,12 @@ const quickPrompts = getQuickPrompts()
 }
 
 .error-bubble {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: var(--eify-error-light);
+  border-color: var(--eify-error-200);
 }
 
 .welcome-bubble {
-  background: #f8fafc;
+  background: var(--eify-bg-secondary);
   border-style: dashed;
   font-style: italic;
   color: var(--eify-text-secondary);
@@ -2023,13 +2007,12 @@ const quickPrompts = getQuickPrompts()
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #dc2626;
-  font-size: 13px;
+  color: var(--eify-error-600);
 }
 
 .error-icon {
   flex-shrink: 0;
-  color: #dc2626;
+  color: var(--eify-error-600);
 }
 
 /* 消息元信息行（操作按钮 + 时间/统计 同行） */
@@ -2038,7 +2021,6 @@ const quickPrompts = getQuickPrompts()
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 11px;
   margin-top: 6px;
 }
 
@@ -2059,7 +2041,6 @@ const quickPrompts = getQuickPrompts()
 
 /* ========== 消息时间 ========== */
 .message-time {
-  font-size: 11px;
   white-space: nowrap;
   flex-shrink: 0;
   margin-left: auto;
@@ -2118,7 +2099,6 @@ const quickPrompts = getQuickPrompts()
 
 /* ========== 打字机效果 ========== */
 .typewriter-content {
-  font-size: 14px;
   line-height: 1.7;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -2141,7 +2121,6 @@ const quickPrompts = getQuickPrompts()
 
 /* ========== Markdown 渲染 ========== */
 .markdown-body {
-  font-size: 14px;
   line-height: 1.65;
 }
 
@@ -2163,7 +2142,7 @@ const quickPrompts = getQuickPrompts()
   font-size: 0.88em;
 }
 .markdown-body :deep(pre) {
-  background: #1e293b;
+  background: var(--eify-gray-800);
   padding: 0.7em 0.9em;
   border-radius: 8px;
   overflow-x: auto;
@@ -2172,7 +2151,7 @@ const quickPrompts = getQuickPrompts()
 .markdown-body :deep(pre code) {
   background: transparent;
   padding: 0;
-  color: #e2e8f0;
+  color: var(--eify-gray-200);
   font-size: 0.85em;
 }
 .markdown-body :deep(a) { color: var(--eify-primary); text-decoration: none; }
@@ -2225,7 +2204,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .prompt-label {
-  font-size: 11px;
   color: var(--eify-text-quaternary);
   flex-shrink: 0;
 }
@@ -2233,12 +2211,11 @@ const quickPrompts = getQuickPrompts()
 .prompt-tag {
   cursor: pointer;
   transition: all 0.15s;
-  font-size: 11px;
 }
 
 .prompt-tag:hover {
   background: var(--eify-primary);
-  color: #fff;
+  color: var(--eify-text-inverse);
   border-color: var(--eify-primary);
 }
 
@@ -2272,7 +2249,6 @@ const quickPrompts = getQuickPrompts()
 }
 
 .prompt-label {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-right: var(--eify-spacing-1);
 }

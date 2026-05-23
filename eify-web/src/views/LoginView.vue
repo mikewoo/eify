@@ -127,7 +127,7 @@ async function handleRegister() {
     <!-- Login card -->
     <div class="login-card">
       <!-- 语言切换 -->
-      <div class="login-locale">
+      <div class="login-locale text-sm">
         <el-select
           :model-value="localeStore.current"
           :placeholder="t('login.localeLabel')"
@@ -147,10 +147,10 @@ async function handleRegister() {
 
       <div class="login-brand">
         <div class="login-logo">EIFY</div>
-        <div class="login-subtitle">AI Agent Platform</div>
+        <div class="login-subtitle text-sm">AI Agent Platform</div>
       </div>
 
-      <el-tabs v-model="activeTab" class="login-tabs" :stretch="true">
+      <el-tabs v-model="activeTab" class="login-tabs text-lg" :stretch="true">
         <el-tab-pane :label="t('login.loginTab')" name="login">
           <el-form
             ref="loginFormRef"
@@ -166,7 +166,7 @@ async function handleRegister() {
               <el-input v-model="loginForm.password" type="password" :placeholder="t('login.passwordPlaceholder')" prefix-icon="Lock" show-password />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" class="login-btn" :loading="loading" @click="handleLogin">
+              <el-button type="primary" class="login-btn text-lg" :loading="loading" @click="handleLogin">
                 {{ t('login.loginBtn') }}
               </el-button>
             </el-form-item>
@@ -194,7 +194,7 @@ async function handleRegister() {
               <el-input v-model="registerForm.confirmPassword" type="password" :placeholder="t('login.confirmPasswordPlaceholder')" prefix-icon="Lock" show-password />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" class="login-btn" :loading="loading" @click="handleRegister">
+              <el-button type="primary" class="login-btn text-lg" :loading="loading" @click="handleRegister">
                 {{ t('login.registerBtn') }}
               </el-button>
             </el-form-item>
@@ -204,10 +204,10 @@ async function handleRegister() {
 
       <div class="login-footer">
         <div class="login-version">
-          <span class="login-version-text">v{{ appVersion }}</span>
-          <span v-if="versionBadge" class="login-version-badge">{{ versionBadge }}</span>
+          <span class="login-version-text text-xs">v{{ appVersion }}</span>
+          <span v-if="versionBadge" class="login-version-badge text-xs">{{ versionBadge }}</span>
         </div>
-        <div class="login-copyright">
+        <div class="login-copyright text-xs">
           {{ t('login.copyright', { year: currentYear }) }}
         </div>
       </div>
@@ -253,13 +253,13 @@ async function handleRegister() {
 .login-bg-glow-1 {
   top: -200px;
   right: -100px;
-  background: #6366f1;
+  background: var(--eify-primary);
 }
 
 .login-bg-glow-2 {
   bottom: -200px;
   left: -100px;
-  background: #8b5cf6;
+  background: var(--eify-primary-400);
 }
 
 .login-card {
@@ -307,13 +307,12 @@ async function handleRegister() {
 }
 
 .locale-select :deep(.el-input.is-focus .el-input__wrapper) {
-  border-color: #6366f1;
+  border-color: var(--eify-primary);
   box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2) !important;
 }
 
 .locale-select :deep(.el-input__inner) {
   color: rgba(255, 255, 255, 0.85);
-  font-size: 13px;
   font-weight: 600;
 }
 
@@ -336,7 +335,7 @@ async function handleRegister() {
   font-size: 36px;
   font-weight: 800;
   letter-spacing: 8px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: var(--eify-gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -344,7 +343,6 @@ async function handleRegister() {
 
 .login-subtitle {
   margin-top: 8px;
-  font-size: 13px;
   color: rgba(255, 255, 255, 0.35);
   letter-spacing: 2px;
 }
@@ -360,15 +358,14 @@ async function handleRegister() {
 
 .login-tabs :deep(.el-tabs__item) {
   color: rgba(255, 255, 255, 0.35);
-  font-size: 15px;
 }
 
 .login-tabs :deep(.el-tabs__item.is-active) {
-  color: #6366f1;
+  color: var(--eify-primary);
 }
 
 .login-tabs :deep(.el-tabs__active-bar) {
-  background: #6366f1;
+  background: var(--eify-primary);
 }
 
 .login-tabs :deep(.el-form-item__label) {
@@ -386,7 +383,7 @@ async function handleRegister() {
 }
 
 .login-tabs :deep(.el-input__wrapper.is-focus) {
-  border-color: #6366f1;
+  border-color: var(--eify-primary);
   box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
 }
 
@@ -397,14 +394,13 @@ async function handleRegister() {
 .login-btn {
   width: 100%;
   height: 42px;
-  font-size: 15px;
   margin-top: 8px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: var(--eify-gradient-primary);
   border: none;
 }
 
 .login-btn:hover {
-  background: linear-gradient(135deg, #5558e6, #7c4fea);
+  background: var(--eify-gradient-primary);
 }
 
 .login-footer {
@@ -423,23 +419,20 @@ async function handleRegister() {
 }
 
 .login-version-text {
-  font-size: 12px;
   color: rgba(255, 255, 255, 0.25);
   font-family: monospace;
 }
 
 .login-version-badge {
-  font-size: 10px;
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 3px;
   background: rgba(99, 102, 241, 0.2);
-  color: #a5b4fc;
+  color: var(--eify-primary-300);
   letter-spacing: 1px;
 }
 
 .login-copyright {
-  font-size: 12px;
   color: rgba(255, 255, 255, 0.2);
 }
 </style>
@@ -465,7 +458,7 @@ async function handleRegister() {
 }
 
 .locale-popper .el-select-dropdown__item.is-selected {
-  color: #6366f1 !important;
+  color: var(--eify-primary) !important;
   font-weight: 600;
   background: transparent !important;
 }

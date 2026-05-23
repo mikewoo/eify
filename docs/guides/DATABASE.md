@@ -1047,4 +1047,57 @@ DROP TABLE IF EXISTS app_logs;
 -- 从备份恢复
 CREATE TABLE app_logs AS app_logs_backup ENGINE = MergeTree() ...;
 INSERT INTO app_logs SELECT * FROM app_logs_backup;
+
+---
+
+## ClickHouse 监控查询
+
+### 慢查询排查
+
+```sql
+-- 查询最近 1 小时耗时超过 1 秒的查询
+SELECT
+    query_start_time,
+    query_duration_ms,
+    user,
+    query
+FROM system.query_log
+WHERE type = 'QueryFinish'
+  AND query_duration_ms > 1000
+  AND event_time > now() - INTERVAL 1 HOUR
+ORDER BY query_duration_ms DESC
+LIMIT 20;
+```
+
+### 存储统计
+
+```sql
+-- 按表查看磁盘占用和数据量
+SELECT
+    table,
+    formatReadableSize(sum(bytes_on_disk)) AS disk_size,
+    sum(rows) AS total_rows,
+    max(modification_time) AS last_modified
+FROM system.parts
+WHERE active
+GROUP BY table
+ORDER BY sum(bytes_on_disk) DESC;
+```
+
+### 写入吞吐监控
+
+```sql
+-- 最近 1 小时内各表的写入行数
+SELECT
+    table,
+    count() AS inserts,
+    sum(rows) AS total_rows_written,
+    formatReadableSize(sum(bytes)) AS total_written
+FROM system.query_log
+WHERE type = 'QueryFinish'
+  AND query_kind = 'Insert'
+  AND event_time > now() - INTERVAL 1 HOUR
+GROUP BY table
+ORDER BY inserts DESC;
+```
 ```

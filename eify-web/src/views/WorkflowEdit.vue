@@ -14,7 +14,7 @@
         <el-button :icon="Setting" circle @click="basicDialogVisible = true" />
       </div>
       <div class="header-right">
-        <span class="header-hint" v-if="dirty">{{ t('workflow.unsavedHint') }}</span>
+        <span class="header-hint text-xs" v-if="dirty">{{ t('workflow.unsavedHint') }}</span>
         <el-button @click="handleBack">{{ t('common.cancel') }}</el-button>
         <el-button type="primary" :loading="saving" @click="handleSave">{{ t('common.save') }}</el-button>
       </div>
@@ -176,7 +176,7 @@
             <el-select v-model="configForm.providerId" :placeholder="t('workflow.supplierPlaceholder')" style="width:100%" @change="onProviderChange">
               <el-option v-for="p in providerOptions" :key="p.id" :label="`${p.name} (${p.type})`" :value="p.id" />
             </el-select>
-            <div class="form-tip" v-if="providerOptions.length === 0">{{ t('provider.unsyncedHint') }}</div>
+            <div class="form-tip text-xs" v-if="providerOptions.length === 0">{{ t('provider.unsyncedHint') }}</div>
           </el-form-item>
           <el-form-item :label="t('workflow.modelLabel')">
             <el-select v-model="configForm.model" :placeholder="t('workflow.modelPlaceholder')" style="width:100%" filterable>
@@ -254,7 +254,7 @@
           </el-form-item>
           <el-form-item :label="t('workflow.conditionExpression')">
             <el-input v-model="configForm.expression" :placeholder="t('workflow.conditionPlaceholder')" />
-            <div class="form-tip">{{ t('workflow.conditionExpressionHint') }}</div>
+            <div class="form-tip text-xs">{{ t('workflow.conditionExpressionHint') }}</div>
           </el-form-item>
         </template>
 
@@ -856,8 +856,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  background: var(--eify-bg-surface, #fff);
-  border-bottom: 1px solid var(--eify-border-subtle, #e5e7eb);
+  background: var(--eify-bg-surface);
+  border-bottom: 1px solid var(--eify-border-subtle);
   z-index: 10;
   flex-shrink: 0;
 }
@@ -881,8 +881,8 @@ onMounted(() => {
 }
 
 .header-name-input :deep(.el-input__inner):focus {
-  background: #f8fafc;
-  border-bottom: 2px solid #6366f1;
+  background: var(--eify-bg-secondary);
+  border-bottom: 2px solid var(--eify-primary);
 }
 
 .header-right {
@@ -892,8 +892,7 @@ onMounted(() => {
 }
 
 .header-hint {
-  font-size: 12px;
-  color: #f59e0b;
+  color: var(--eify-warning);
 }
 
 /* ========== 画布区域 ========== */
@@ -942,7 +941,6 @@ onMounted(() => {
 }
 
 .form-tip {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-top: 4px;
 }

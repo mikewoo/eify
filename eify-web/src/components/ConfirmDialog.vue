@@ -124,12 +124,12 @@ function handleCancel() {
 
 .icon-danger {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--eify-error);
 }
 
 .icon-warning {
   background: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
+  color: var(--eify-warning-400);
 }
 
 .icon-info {
@@ -189,22 +189,22 @@ function handleCancel() {
 }
 
 .modal-btn-confirm.btn-danger {
-  background: #ef4444;
+  background: var(--eify-error);
 }
 
 .modal-btn-confirm.btn-danger:hover {
-  background: #dc2626;
+  background: var(--eify-error-600);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .modal-btn-confirm.btn-warning {
-  background: #fbbf24;
-  color: #78350f;
+  background: var(--eify-warning-400);
+  color: var(--eify-warning-900);
 }
 
 .modal-btn-confirm.btn-warning:hover {
-  background: #f59e0b;
+  background: var(--eify-warning);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }

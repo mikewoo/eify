@@ -451,13 +451,13 @@ class AgentServiceImplTest {
 
 ## 代码检查清单
 
+> 完整提交检查清单已统一至 **[CLAUDE.md § 代码提交检查清单](../../CLAUDE.md#代码提交检查清单)**，涵盖结构合规、安全、数据库、API、前端、外部调用、代码质量等全部检查项。此处保留架构结构相关摘要。
+
 - [ ] 包结构符合模块规范，类/方法命名符合规范
 - [ ] Controller 只做参数校验和返回封装，业务逻辑在 Service 层
 - [ ] Entity 继承 `BaseEntity`，使用 Lombok + MyBatis-Plus 注解
 - [ ] DTO 使用 JSR-303 校验注解，Response 只包含必要字段
 - [ ] 跨模块调用通过 Maven pom.xml 声明，不引入循环依赖
-- [ ] 异常处理使用 `ErrorCode` 枚举
 - [ ] 事务在 Service 层控制，外部调用使用线程池隔离
-- [ ] 日志使用 SLF4J 占位符，级别正确（ERROR/WARN/INFO/DEBUG）
 - [ ] 新 Entity 实现 `WorkspaceAware`，Service 层查询过滤 `workspace_id`
 - [ ] 新模块有对应的单元测试（`src/test/java/.../{Service}Test.java`）
