@@ -667,7 +667,7 @@ watch(inputContent, () => {
 
     <main class="chat-main">
       <header class="chat-header">
-        <div class="chat-title">
+        <div class="chat-title text-lg">
           <div v-if="currentAgent" class="agent-info">
             <img v-if="currentAgent.avatar" :src="currentAgent.avatar" class="agent-avatar" alt="">
             <div v-else class="agent-avatar-placeholder">{{ currentAgent.name.charAt(0) }}</div>
@@ -1098,7 +1098,6 @@ watch(inputContent, () => {
 
 .conversation-title {
   color: var(--eify-text-inverse);
-  font-size: 14px;
   font-weight: 500;
   margin-bottom: 4px;
   overflow: hidden;
@@ -1108,7 +1107,6 @@ watch(inputContent, () => {
 
 .conversation-time {
   color: var(--eify-text-quaternary);
-  font-size: 12px;
 }
 
 .empty-state {
@@ -1118,7 +1116,6 @@ watch(inputContent, () => {
 }
 
 .empty-state .hint {
-  font-size: 12px;
   margin-top: 8px;
 }
 
@@ -1142,7 +1139,6 @@ watch(inputContent, () => {
 }
 
 .chat-title {
-  font-size: 16px;
   font-weight: 600;
   color: var(--eify-text-primary);
 }
@@ -1170,7 +1166,6 @@ watch(inputContent, () => {
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 16px;
 }
 
 .agent-avatar-placeholder.workflow-placeholder {
@@ -1183,14 +1178,12 @@ watch(inputContent, () => {
 }
 
 .agent-name {
-  font-size: 14px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin-bottom: 2px;
 }
 
 .agent-info .conversation-title {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   font-weight: 400;
 }
@@ -1221,7 +1214,6 @@ watch(inputContent, () => {
 }
 
 .messages-empty .hint {
-  font-size: 12px;
   margin-top: 8px;
   color: var(--eify-text-quaternary);
 }
@@ -1249,7 +1241,6 @@ watch(inputContent, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -1274,7 +1265,6 @@ watch(inputContent, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
 }
 
 .message-content {
@@ -1302,7 +1292,6 @@ watch(inputContent, () => {
 
 /* ========== 消息时间 ========== */
 .message-time {
-  font-size: 11px;
   line-height: 1.2;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1402,7 +1391,6 @@ watch(inputContent, () => {
   align-items: center;
   gap: 8px;
   color: var(--eify-error-600);
-  font-size: 14px;
 }
 
 .error-icon {
@@ -1449,7 +1437,6 @@ watch(inputContent, () => {
 
 /* ========== Markdown 样式 ========== */
 .markdown-body {
-  font-size: 14px;
   line-height: 1.65;
   white-space: normal;
   word-break: break-word;
@@ -1601,7 +1588,6 @@ watch(inputContent, () => {
 
 /* ========== 打字机效果 ========== */
 .typewriter-content {
-  font-size: 14px;
   line-height: 1.7;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -1648,7 +1634,6 @@ watch(inputContent, () => {
   border: 1px solid var(--eify-border-default);
   border-radius: 12px;
   padding: 12px 16px;
-  font-size: 14px;
   font-family: inherit;
   line-height: 1.5;
   outline: none;
@@ -1713,7 +1698,6 @@ watch(inputContent, () => {
 
 .input-hint {
   text-align: center;
-  font-size: 12px;
   color: var(--eify-text-tertiary);
   margin-top: 8px;
 }
@@ -1791,7 +1775,6 @@ watch(inputContent, () => {
   border: none;
   background: transparent;
   color: var(--eify-text-secondary);
-  font-size: 13px;
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
@@ -1809,7 +1792,6 @@ watch(inputContent, () => {
 }
 
 .agent-selector-header h3 {
-  font-size: 18px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin: 0;
@@ -1849,7 +1831,6 @@ watch(inputContent, () => {
 
 .conversation-name-input label {
   display: block;
-  font-size: 14px;
   font-weight: 500;
   color: var(--eify-text-primary);
   margin-bottom: 8px;
@@ -1860,7 +1841,6 @@ watch(inputContent, () => {
   padding: 10px 14px;
   border: 1px solid var(--eify-border-default);
   border-radius: 8px;
-  font-size: 14px;
   color: var(--eify-text-primary);
   background: var(--eify-bg-base);
   outline: none;
@@ -1878,7 +1858,6 @@ watch(inputContent, () => {
 }
 
 .input-counter {
-  font-size: 12px;
   color: var(--eify-text-quaternary);
   text-align: right;
   display: block;
@@ -1902,7 +1881,6 @@ watch(inputContent, () => {
 }
 
 .agent-empty .hint {
-  font-size: 12px;
   margin-top: 8px;
 }
 
@@ -1954,7 +1932,6 @@ watch(inputContent, () => {
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 18px;
 }
 
 .agent-item-info {
@@ -1963,14 +1940,12 @@ watch(inputContent, () => {
 }
 
 .agent-item-name {
-  font-size: 16px;
   font-weight: 600;
   color: var(--eify-text-primary);
   margin-bottom: 4px;
 }
 
 .agent-item-description {
-  font-size: 13px;
   color: var(--eify-text-secondary);
   margin-bottom: 8px;
   overflow: hidden;
@@ -1985,7 +1960,6 @@ watch(inputContent, () => {
 
 .model-tag,
 .provider-tag {
-  font-size: 11px;
   padding: 2px 8px;
   border-radius: 4px;
   font-weight: 500;
@@ -2024,7 +1998,6 @@ watch(inputContent, () => {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
   font-weight: 500;
   z-index: 3000;
   min-width: 280px;
