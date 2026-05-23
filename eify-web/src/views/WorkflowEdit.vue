@@ -881,8 +881,8 @@ onMounted(() => {
 }
 
 .header-name-input :deep(.el-input__inner):focus {
-  background: #f8fafc;
-  border-bottom: 2px solid #6366f1;
+  background: var(--eify-bg-secondary);
+  border-bottom: 2px solid var(--eify-primary);
 }
 
 .header-right {
