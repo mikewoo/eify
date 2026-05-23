@@ -1,5 +1,6 @@
 package com.eify.mcp.service.impl;
 
+import com.eify.common.context.CurrentContext;
 import com.eify.common.exception.BusinessException;
 import com.eify.mcp.domain.entity.McpServer;
 import com.eify.mcp.mapper.McpServerMapper;
@@ -56,6 +57,16 @@ class McpClientServiceImplTest {
         }
     }
 
+    @BeforeEach
+    void setUpContext() {
+        CurrentContext.set(1L, 1L);
+    }
+
+    @AfterEach
+    void tearDownContext() {
+        CurrentContext.clear();
+    }
+
     @AfterEach
     void tearDown() {
         mcClientStatic.close();
@@ -66,6 +77,7 @@ class McpClientServiceImplTest {
         server.setId(id);
         server.setName("test-server");
         server.setEndpoint(endpoint);
+        server.setWorkspaceId(1L);
         server.setEnabled(1);
         return server;
     }
@@ -183,6 +195,18 @@ class McpClientServiceImplTest {
             // NPE 不重试，所以只调用 1 次（不是 3 次）
             verify(mockClient, times(1)).callTool(any());
         }
+
+        @Test
+        @DisplayName("跨工作空间 serverId 调用 callTool 时抛出 MCP_SERVER_NOT_FOUND")
+        void shouldRejectCrossWorkspaceServerOnCallTool() {
+            McpServer otherWsServer = buildServer(1L, "http://localhost:8080");
+            otherWsServer.setWorkspaceId(2L);
+            when(mcpServerMapper.selectById(1L)).thenReturn(otherWsServer);
+
+            assertThatThrownBy(() -> service.callTool(1L, "search", Map.of()))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("MCP 服务器不存在");
+        }
     }
 
     // ==================== listTools ====================
@@ -240,6 +264,18 @@ class McpClientServiceImplTest {
             List<String> tools = service.listTools(1L);
 
             assertThat(tools).containsExactly("recovered-tool");
+        }
+
+        @Test
+        @DisplayName("跨工作空间 serverId 调用 listTools 时抛出 MCP_SERVER_NOT_FOUND")
+        void shouldRejectCrossWorkspaceServerOnListTools() {
+            McpServer otherWsServer = buildServer(1L, "http://localhost:8080");
+            otherWsServer.setWorkspaceId(2L);
+            when(mcpServerMapper.selectById(1L)).thenReturn(otherWsServer);
+
+            assertThatThrownBy(() -> service.listTools(1L))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("MCP 服务器不存在");
         }
     }
 
