@@ -210,7 +210,7 @@ main → rc → beta → alpha
 
 > 合并提交含 `[forward-merge]` 标记，防止级联循环。
 
-> **Git Tag 自动创建**：`main` 分支合并后，GitHub Actions 从 `pom.xml` 提取 `<eify.version>` 作为版本号，自动创建 Tag，格式为 `v{版本号}.{BUILD_DATETIME}.{BUILD_NUMBER}`（`BUILD_DATETIME` = `yyyyMMddHHmmss` 时间戳，`BUILD_NUMBER` = GitHub Actions 运行编号）。**生产部署需手动在 Jenkins 指定 Git Tag 触发。**
+> **Git Tag 自动创建**：`main` 分支合并后，GitHub Actions 从 `.flattened-pom.xml`（`flatten-maven-plugin` 生成）提取已解析的 `<version>` 作为版本号，自动创建 Tag，格式为 `v{版本号}.{BUILD_DATETIME}.{BUILD_NUMBER}`（`BUILD_DATETIME` = `yyyyMMddHHmmss` 时间戳，`BUILD_NUMBER` = GitHub Actions 运行编号）。**生产部署需手动在 Jenkins 指定 Git Tag 触发。**
 
 ### 流水线架构
 
