@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.eify.common.entity.BaseEntity;
 import com.eify.common.workspace.WorkspaceAware;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("agent_mcp_tool")
 public class AgentMcpTool extends BaseEntity implements WorkspaceAware {
 
