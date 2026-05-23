@@ -14,7 +14,7 @@
 
     <groupId>com.eify</groupId>
     <artifactId>eify-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Eify Parent</name>
@@ -64,7 +64,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- 项目版本 -->
-        <eify.version>1.0.0-SNAPSHOT</eify.version>
+        <eify.version>1.0.1-SNAPSHOT</eify.version>
 
         <!-- 依赖版本 -->
         <mybatis-plus.version>3.5.15</mybatis-plus.version>

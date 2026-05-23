@@ -459,6 +459,16 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | [docs/specs/](docs/specs/) | 功能规格说明 | 实现前编写、实施中对照、完成后归档 |
 | [docs/ADRs/](docs/ADRs/) | 架构决策记录 | 理解历史设计取舍 |
 
+### 研发 Skills
+
+| Skill | 用途 | 何时调用 |
+|:---|:---|:---|
+| [unit-test](.claude/skills/unit-test.md) | Java Service 方法单元测试 | 说"单测"、"写单测"、"unit test"或使用 /unit-test 命令 |
+| [integration-test](.claude/skills/integration-test.md) | Spring Boot 模块集成测试 | 说"集成测试"、"integration test"或使用 /集成测试 命令 |
+| [workspace-isolation-testing](.claude/skills/workspace-isolation-testing.md) | 工作空间隔离集成测试（integration-test 专项补充） | 新模块上线前 / 发现隔离 bug / 补隔离集成测 |
+| [provider-adapter](.claude/skills/provider-adapter.md) | 新 LLM 供应商适配器开发 | 接入新的 LLM 供应商（如 OpenAI、Claude、DeepSeek 等） |
+| [module-delivery](.claude/skills/module-delivery.md) | 标准化模块交付流程 | 新业务模块从需求到验收的完整交付 |
+
 ### 专项文档
 
 | 文档 | 用途 | 何时查看 |
