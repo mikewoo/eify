@@ -31,6 +31,13 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.Executor;
 
+import com.eify.common.context.CurrentContext;
+import com.eify.mcp.domain.entity.McpTool;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.junit.jupiter.api.AfterEach;
+
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -67,6 +74,16 @@ class ChatServiceImplTest {
                 routeResolver, knowledgeService,
                 workflowEngine, workflowNodeMapper, mcpClientService, mcpToolMapper,
                 sseExecutor);
+    }
+
+    @BeforeEach
+    void setUpContext() {
+        CurrentContext.set(1L, 1L);
+    }
+
+    @AfterEach
+    void tearDownContext() {
+        CurrentContext.clear();
     }
 
     // ==================== getDefaultContextRounds ====================
@@ -165,6 +182,46 @@ class ChatServiceImplTest {
             chatService.saveAssistantMessage(100L, "AI response", null, 1L, 1L, 1L);
 
             verify(messageService).save(any(Message.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("findServerIdForTool - 工作空间隔离")
+    class FindServerIdForToolWorkspaceIsolation {
+
+        @Test
+        @DisplayName("按工具名查询时携带 workspace_id 过滤")
+        void shouldFilterByWorkspaceIdWhenLookingUpTool() throws Exception {
+            McpTool ws1Tool = new McpTool();
+            ws1Tool.setId(10L);
+            ws1Tool.setServerId(5L);
+            ws1Tool.setName("search");
+            ws1Tool.setWorkspaceId(1L);
+
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(ws1Tool));
+
+            var method = ChatServiceImpl.class.getDeclaredMethod(
+                    "findServerIdForTool", String.class, java.util.List.class);
+            method.setAccessible(true);
+            Long serverId = (Long) method.invoke(chatService, "search", List.of());
+
+            assertThat(serverId).isEqualTo(5L);
+            verify(mcpToolMapper).selectList(any(LambdaQueryWrapper.class));
+        }
+
+        @Test
+        @DisplayName("跨工作空间工具不可见 — 同名工具在另一空间返回 null")
+        void shouldReturnNullForToolInOtherWorkspace() throws Exception {
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of());
+
+            var method = ChatServiceImpl.class.getDeclaredMethod(
+                    "findServerIdForTool", String.class, java.util.List.class);
+            method.setAccessible(true);
+            Long serverId = (Long) method.invoke(chatService, "get_data", List.of());
+
+            assertThat(serverId).isNull();
         }
     }
 }
