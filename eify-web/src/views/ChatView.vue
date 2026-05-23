@@ -621,8 +621,8 @@ watch(inputContent, () => {
     <!-- 左侧：会话列表 -->
     <aside class="chat-sidebar">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">{{ t('sidebar.chat') }}</h2>
-        <button class="new-chat-btn-header" @click="createNewConversation" :disabled="isSending">
+        <h2 class="sidebar-title text-xl">{{ t('sidebar.chat') }}</h2>
+        <button class="new-chat-btn-header text-sm" @click="createNewConversation" :disabled="isSending">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M5 12h14"/>
           </svg>
@@ -982,7 +982,6 @@ watch(inputContent, () => {
 }
 
 .sidebar-title {
-  font-size: 18px;
   font-weight: 600;
   color: var(--eify-text-inverse);
 }
@@ -998,7 +997,6 @@ watch(inputContent, () => {
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -1091,7 +1089,7 @@ watch(inputContent, () => {
 
 .delete-conversation-btn:hover {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--eify-error);
 }
 
 .conversation-item.active {
@@ -1176,7 +1174,7 @@ watch(inputContent, () => {
 }
 
 .agent-avatar-placeholder.workflow-placeholder {
-  background: linear-gradient(135deg, var(--eify-primary), #8b5cf6);
+  background: var(--eify-gradient-primary);
 }
 
 .agent-item-avatar .workflow-avatar-icon {
@@ -1395,15 +1393,15 @@ watch(inputContent, () => {
 }
 
 .ai-bubble.error-bubble {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: var(--eify-error-light);
+  border-color: var(--eify-error-200);
 }
 
 .error-content {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #dc2626;
+  color: var(--eify-error-600);
   font-size: 14px;
 }
 
@@ -1510,7 +1508,7 @@ watch(inputContent, () => {
 }
 
 .markdown-body :deep(pre) {
-  background: #1e293b;
+  background: var(--eify-gray-800);
   padding: 0.75em 1em;
   border-radius: 8px;
   overflow-x: auto;
@@ -1524,7 +1522,7 @@ watch(inputContent, () => {
 .markdown-body :deep(pre code) {
   background: transparent;
   padding: 0;
-  color: #e2e8f0;
+  color: var(--eify-gray-200);
   font-size: 0.85em;
   line-height: 1.5;
 }
@@ -2017,9 +2015,9 @@ watch(inputContent, () => {
   position: fixed;
   top: 80px;
   right: 24px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: var(--eify-error-light);
+  border: 1px solid var(--eify-error-200);
+  color: var(--eify-error-600);
   padding: 14px 20px;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -2034,7 +2032,7 @@ watch(inputContent, () => {
 
 .error-toast svg {
   flex-shrink: 0;
-  color: #ef4444;
+  color: var(--eify-error);
 }
 
 /* Toast 动画 */
