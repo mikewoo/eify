@@ -63,7 +63,9 @@ public class McpServerServiceImpl implements McpServerService {
         if (!servers.isEmpty()) {
             List<Long> serverIds = servers.stream().map(McpServer::getId).collect(Collectors.toList());
             List<McpTool> allTools = mcpToolMapper.selectList(
-                    new LambdaQueryWrapper<McpTool>().in(McpTool::getServerId, serverIds));
+                    new LambdaQueryWrapper<McpTool>()
+                            .in(McpTool::getServerId, serverIds)
+                            .eq(McpTool::getWorkspaceId, com.eify.common.context.CurrentContext.getWorkspaceId()));
             toolCountMap = allTools.stream()
                     .collect(Collectors.groupingBy(McpTool::getServerId, Collectors.counting()));
         }
@@ -152,11 +154,15 @@ public class McpServerServiceImpl implements McpServerService {
 
         // 检查是否有 Agent 绑定该 Server 的工具
         List<McpTool> tools = mcpToolMapper.selectList(
-                new LambdaQueryWrapper<McpTool>().eq(McpTool::getServerId, id));
+                new LambdaQueryWrapper<McpTool>()
+                        .eq(McpTool::getServerId, id)
+                        .eq(McpTool::getWorkspaceId, com.eify.common.context.CurrentContext.getWorkspaceId()));
         if (!tools.isEmpty()) {
             Set<Long> toolIds = tools.stream().map(McpTool::getId).collect(Collectors.toSet());
             Long bindCount = agentMcpToolMapper.selectCount(
-                    new LambdaQueryWrapper<AgentMcpTool>().in(AgentMcpTool::getToolId, toolIds));
+                    new LambdaQueryWrapper<AgentMcpTool>()
+                            .in(AgentMcpTool::getToolId, toolIds)
+                            .eq(AgentMcpTool::getWorkspaceId, com.eify.common.context.CurrentContext.getWorkspaceId()));
             if (bindCount > 0) {
                 throw new BusinessException(ErrorCode.MCP_SERVER_HAS_BINDINGS);
             }
@@ -202,6 +208,7 @@ public class McpServerServiceImpl implements McpServerService {
                         tool.setName(t.name());
                         tool.setDescription(t.description());
                         tool.setInputSchema(convertToJsonNode(t.inputSchema()));
+                        WorkspaceGuard.bind(tool);
                         mcpToolMapper.insert(tool);
                         toolNames.add(t.name());
                     }
@@ -252,7 +259,9 @@ public class McpServerServiceImpl implements McpServerService {
 
     private McpServerResponse toFullResponse(McpServer server) {
         List<McpTool> tools = mcpToolMapper.selectList(
-                new LambdaQueryWrapper<McpTool>().eq(McpTool::getServerId, server.getId()));
+                new LambdaQueryWrapper<McpTool>()
+                        .eq(McpTool::getServerId, server.getId())
+                        .eq(McpTool::getWorkspaceId, com.eify.common.context.CurrentContext.getWorkspaceId()));
 
         List<McpServerResponse.McpToolResponse> toolResponses = tools.stream()
                 .map(t -> McpServerResponse.McpToolResponse.builder()
