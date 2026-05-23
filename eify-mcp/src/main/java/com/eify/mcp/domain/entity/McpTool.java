@@ -5,13 +5,14 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import tools.jackson.databind.JsonNode;
 import com.eify.common.entity.BaseEntity;
 import com.eify.common.handler.JsonNodeTypeHandler;
+import com.eify.common.workspace.WorkspaceAware;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("mcp_tool")
-public class McpTool extends BaseEntity {
+public class McpTool extends BaseEntity implements WorkspaceAware {
 
     @TableField("server_id")
     private Long serverId;
@@ -36,4 +37,7 @@ public class McpTool extends BaseEntity {
      */
     @TableField(value = "input_schema", typeHandler = JsonNodeTypeHandler.class)
     private JsonNode inputSchema;
+
+    @TableField("workspace_id")
+    private Long workspaceId;
 }
