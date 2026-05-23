@@ -90,17 +90,67 @@ User
 
 ### 验证策略
 
-每批完成后：`vue-tsc --noEmit` + `vitest run`
-全部完成后：`mvn test -q`
+CSS 变量替换本质上是**视觉层变更**，当前项目没有视觉回归测试（如 Storybook + Chromatic）。验证分两层：自动化保障代码不坏，人工保障视觉不错。
+
+#### 自动验证（每批 + 全部）
+
+每批文件改完后：
+```bash
+cd eify-web && npx vue-tsc --noEmit && cd ..   # TypeScript 类型检查
+cd eify-web && npx vitest run && cd ..          # 前端单元测试（1 文件 11 用例）
+```
+
+全部改完后：
+```bash
+mvn test -q                                     # 后端全部测试
+```
+
+**自动化验证能发现的：**
+- 类型错误（import 路径、props 类型不匹配）
+- ConfirmDialog 组件逻辑被打破
+- 后端编译/测试失败
+
+**自动化验证检测不到的：**
+- CSS 变量替换后颜色偏差（如目标 token 的色值与原硬编码不完全一致）
+- font-size 工具类与原始 px 值的微小视觉差异（如 11px → `.text-xs`(12px)）
+- CSS 优先级变化导致样式失效
+- 替换后遗漏导致部分元素回退到浏览器默认样式
+
+#### 视觉验证（全改完后手动执行）
+
+```bash
+./start.sh dev                                    # 启动应用
+```
+
+逐页目视检查清单（12 页）：
+
+| # | 页面 | 路由 | 重点检查 |
+|:---|:---|:---|:---|
+| 1 | 登录页 | `/login` | 背景色、品牌渐变、按钮颜色、输入框聚焦环 |
+| 2 | Agent 列表 | `/agents` | 卡片背景、表格行 hover、标签颜色、搜索框 |
+| 3 | Chat 对话 | `/chat` | 聊天气泡渐变、错误提示色、加载动画 |
+| 4 | Provider 列表 | `/providers` | 卡片、表格、状态标签 |
+| 5 | MCP Server 列表 | `/mcp-servers` | 卡片、日志查看器颜色（Catppuccin 豁免区） |
+| 6 | 知识库 | `/knowledge` | 卡片、搜索区、上传区域 |
+| 7 | 文档 | `/documents` | 预览组件、分页 |
+| 8 | 工作流列表 | `/workflows` | 卡片、状态色（running/stopped/error） |
+| 9 | 工作流创建 | `/workflows/create` | 节点面板、表单输入框 |
+| 10 | 工作流编辑 | `/workflows/:id/edit` | 画布连接线、节点颜色、变量表格 |
+| 11 | 个人设置 | `/profile` | 头像渐变、表单、分页 |
+| 12 | 侧边栏 + 顶栏 | 全局 | 菜单 hover/active 效果、Logo glow、折叠按钮 |
+
+每页通过标准：颜色无异常变化、文字层级正确、交互反馈（hover/active/focus）正常。
 
 ### 完成标准
 
-- 20 个文件硬编码色值全部替换
-- font-size 替换为工具类
-- 豁免项保持原样
-- TypeScript 类型检查通过
-- 前后端测试通过
-- git diff 逐文件自查确认
+- [ ] 20 个文件硬编码色值全部替换
+- [ ] font-size 替换为工具类
+- [ ] 豁免项保持原样
+- [ ] `vue-tsc --noEmit` 通过
+- [ ] `vitest run` 通过
+- [ ] `mvn test -q` 通过
+- [ ] 12 页视觉检查全部通过
+- [ ] git diff 逐文件自查确认
 
 ## Consequences
 
