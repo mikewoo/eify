@@ -13,12 +13,12 @@
         <div
           v-for="(condition, index) in searchConditions"
           :key="index"
-          class="eify-search-tag"
+          class="eify-search-tag text-sm"
           :class="{ 'is-active': activeConditionIndex === index }"
           @click.stop="handleTagClick(index)"
         >
           <span class="tag-field">{{ condition.fieldLabel }}</span>
-          <span class="tag-operator">：</span>
+          <span class="tag-operator text-xs">：</span>
           <span class="tag-value">{{ condition.displayValue }}</span>
           <el-icon class="tag-delete" :size="14" @click.stop="removeCondition(index)">
             <Close />
@@ -30,7 +30,7 @@
           ref="inputRef"
           v-model="inputValue"
           type="text"
-          class="eify-search-input"
+          class="eify-search-input text-base"
           :placeholder="searchConditions.length === 0 ? placeholder : t('common.addFilter')"
           @focus="handleFocus"
           @blur="handleBlur"
@@ -41,7 +41,7 @@
 
       <!-- 快捷键提示（内部右侧） -->
       <div v-if="showShortcut && !focused && searchConditions.length === 0" class="eify-search-bar__shortcut">
-        <span>⌘K</span>
+        <span class="text-xs">⌘K</span>
       </div>
 
       <!-- 搜索栏内右侧删除按钮 -->
@@ -74,7 +74,7 @@
     >
       <!-- 搜索条件列表 -->
       <div v-if="dropdownMode === 'select'" class="dropdown-section">
-        <div class="dropdown-title">{{ t('common.selectFilter') }}</div>
+        <div class="dropdown-title text-sm">{{ t('common.selectFilter') }}</div>
         <div
           v-for="field in availableFields"
           :key="field.key"
@@ -86,17 +86,17 @@
             <el-icon :size="16"><component :is="getFieldIcon(field.key)" /></el-icon>
           </div>
           <div class="item-content">
-            <div class="item-label">{{ field.label }}</div>
-            <div class="item-desc">{{ field.description || '' }}</div>
+            <div class="item-label text-lg">{{ field.label }}</div>
+            <div class="item-desc text-xs">{{ field.description || '' }}</div>
           </div>
         </div>
       </div>
 
       <!-- 条件值输入/选择 -->
       <div v-if="dropdownMode === 'input'" class="dropdown-section">
-        <div class="dropdown-title">
+        <div class="dropdown-title text-sm">
           {{ currentField?.label }}
-          <span class="title-operator">{{ currentOperator?.label }}</span>
+          <span class="title-operator text-xs">{{ currentOperator?.label }}</span>
         </div>
 
         <!-- 文本输入 -->
@@ -141,8 +141,8 @@
 
         <!-- 操作按钮 -->
         <div class="dropdown-actions">
-          <el-button size="small" @click.stop="closeDropdown">{{ t('common.cancel') }}</el-button>
-          <el-button type="primary" size="small" @click.stop="confirmCondition">{{ t('common.confirm') }}</el-button>
+          <el-button class="text-sm" size="small" @click.stop="closeDropdown">{{ t('common.cancel') }}</el-button>
+          <el-button class="text-sm" type="primary" size="small" @click.stop="confirmCondition">{{ t('common.confirm') }}</el-button>
         </div>
       </div>
     </div>
@@ -720,7 +720,7 @@ defineExpose({
   align-items: center;
   flex: 1;
   min-width: 0;
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border: 1px solid var(--eify-border-default);
   border-radius: var(--eify-radius-md);
   transition: all var(--eify-duration-base) var(--eify-ease-out);
@@ -802,7 +802,6 @@ defineExpose({
   );
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: 6px;
-  font-size: 13px;
   transition: all var(--eify-duration-base) var(--eify-ease-out);
   cursor: pointer;
   position: relative;
@@ -863,7 +862,6 @@ defineExpose({
 
 .tag-operator {
   color: var(--eify-text-tertiary);
-  font-size: 12px;
   position: relative;
   z-index: 1;
 }
@@ -895,7 +893,6 @@ defineExpose({
   border: none;
   outline: none;
   background: transparent;
-  font-size: 14px;
   color: var(--eify-text-primary);
   font-family: inherit;
   min-width: 150px;
@@ -963,7 +960,7 @@ defineExpose({
   width: 40px;
   height: 40px;
   flex-shrink: 0;
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border: 1px solid var(--eify-border-default);
   border-radius: var(--eify-radius-md);
   color: var(--eify-text-tertiary);
@@ -1069,7 +1066,6 @@ defineExpose({
 }
 
 .dropdown-title {
-  font-size: 13px;
   font-weight: 700;
   background: var(--eify-gradient-primary);
   -webkit-background-clip: text;
@@ -1108,7 +1104,6 @@ defineExpose({
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 11px;
   border: 1px solid rgba(99, 102, 241, 0.3);
   box-shadow: 0 1px 4px rgba(99, 102, 241, 0.15);
 }
@@ -1195,12 +1190,12 @@ defineExpose({
 }
 
 .dropdown-item.is-disabled .item-label {
-  color: #0f172a;
+  color: var(--eify-text-primary);
   font-weight: 600;
 }
 
 .dropdown-item.is-disabled .item-desc {
-  color: #64748b;
+  color: var(--eify-text-secondary);
 }
 
 .item-icon {
@@ -1272,16 +1267,15 @@ defineExpose({
 }
 
 .item-label {
-  font-size: 15px;
   font-weight: 600;
-  color: #334155;
+  color: var(--eify-gray-700);
   position: relative;
   z-index: 1;
   transition: all var(--eify-duration-base) ease;
 }
 
 .dropdown-item:hover .item-label {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: var(--eify-gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1289,8 +1283,7 @@ defineExpose({
 }
 
 .item-desc {
-  font-size: 12px;
-  color: #64748b;
+  color: var(--eify-text-secondary);
   margin-top: 4px;
   position: relative;
   z-index: 1;
@@ -1300,7 +1293,7 @@ defineExpose({
 }
 
 .dropdown-item:hover .item-desc {
-  color: #334155;
+  color: var(--eify-gray-700);
 }
 
 .dropdown-input,
@@ -1330,7 +1323,7 @@ defineExpose({
 
 .dropdown-input :deep(.el-input__wrapper.is-focus) {
   border-color: var(--eify-primary);
-  background: #ffffff;
+  background: var(--eify-bg-base);
   box-shadow:
     0 0 0 4px rgba(99, 102, 241, 0.1),
     0 2px 8px rgba(99, 102, 241, 0.15);
@@ -1360,9 +1353,8 @@ defineExpose({
     rgba(255, 255, 255, 0.8) 100%
   );
   border-color: rgba(99, 102, 241, 0.2);
-  color: #0f172a;
+  color: var(--eify-text-primary);
   font-weight: 600;
-  font-size: 13px;
   padding: 8px 18px;
   height: 36px;
   transition: all var(--eify-duration-base) cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1385,7 +1377,7 @@ defineExpose({
 .dropdown-actions :deep(.el-button--primary) {
   background: var(--eify-gradient-primary);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--eify-text-inverse);
   box-shadow:
     0 2px 8px rgba(99, 102, 241, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -1397,7 +1389,7 @@ defineExpose({
     rgba(139, 92, 246, 1) 100%
   );
   border-color: transparent;
-  color: #ffffff;
+  color: var(--eify-text-inverse);
   transform: translateY(-2px) scale(1.02);
   box-shadow:
     0 6px 20px rgba(99, 102, 241, 0.4),
@@ -1424,7 +1416,6 @@ defineExpose({
   align-items: center;
   justify-content: center;
   padding: 2px 6px;
-  font-size: 11px;
   font-weight: 500;
   color: var(--eify-text-tertiary);
   background: var(--eify-bg-surface);
@@ -1449,7 +1440,6 @@ defineExpose({
   align-items: center;
   justify-content: center;
   padding: 2px 6px;
-  font-size: 11px;
   font-weight: 500;
   color: var(--eify-text-tertiary);
   background: var(--eify-bg-surface);
