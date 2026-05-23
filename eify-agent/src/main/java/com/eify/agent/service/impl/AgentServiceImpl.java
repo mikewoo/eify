@@ -312,7 +312,7 @@ public class AgentServiceImpl implements AgentService {
 
         // 更新 MCP 工具关联（全量替换）
         if (request.getMcpToolIds() != null) {
-            agentMcpToolMapper.deleteByAgentId(id);
+            agentMcpToolMapper.deleteByAgentId(id, CurrentContext.getWorkspaceId());
             if (!request.getMcpToolIds().isEmpty()) {
                 validateAndInsertMcpTools(id, request.getMcpToolIds());
             }
@@ -333,7 +333,7 @@ public class AgentServiceImpl implements AgentService {
 
         agentMapper.deleteById(id);
         agentKnowledgeMapper.softDeleteByAgentId(id);
-        agentMcpToolMapper.deleteByAgentId(id);
+        agentMcpToolMapper.deleteByAgentId(id, CurrentContext.getWorkspaceId());
         log.info("删除 Agent 成功，id: {}, name: {}", id, existing.getName());
     }
 
