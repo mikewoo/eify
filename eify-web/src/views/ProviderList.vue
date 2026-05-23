@@ -1008,7 +1008,7 @@ const handleSubmit = async (data: any, mode: string) => {
 
 /* ========== 卡片视图 ========== */
 .provider-card {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: hidden;
@@ -1032,7 +1032,7 @@ const handleSubmit = async (data: any, mode: string) => {
   gap: var(--eify-spacing-3);
   padding: var(--eify-spacing-4);
   border-bottom: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--eify-bg-surface) 0%, var(--eify-bg-base) 100%);
   min-height: 64px;
 }
 
@@ -1262,7 +1262,7 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .error-icon {
-  color: var(--eify-danger, #ef4444);
+  color: var(--eify-error);
   background: rgba(239, 68, 68, 0.1);
 }
 
@@ -1284,7 +1284,7 @@ const handleSubmit = async (data: any, mode: string) => {
 }
 
 .sync-result-title.error-text {
-  color: var(--eify-danger, #ef4444);
+  color: var(--eify-error);
 }
 
 .sync-result-model-list {
@@ -1319,7 +1319,7 @@ const handleSubmit = async (data: any, mode: string) => {
 
 /* ========== URL Tooltip 样式 ========== */
 :deep(.eify-url-tooltip) {
-  background: #ffffff !important;
+  background: var(--eify-bg-base) !important;
   border: 1px solid var(--eify-border-default) !important;
   border-radius: var(--eify-radius-md) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
