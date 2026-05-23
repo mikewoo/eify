@@ -11,7 +11,7 @@
           <!-- 视图切换 -->
           <div v-if="showViewToggle" class="view-toggle">
             <div
-              class="toggle-btn"
+              class="toggle-btn text-base"
               :class="{ active: viewMode === 'table' }"
               @click="viewMode = 'table'"
             >
@@ -19,7 +19,7 @@
               {{ t('common.viewList') }}
             </div>
             <div
-              class="toggle-btn"
+              class="toggle-btn text-base"
               :class="{ active: viewMode === 'card' }"
               @click="viewMode = 'card'"
             >
@@ -48,17 +48,17 @@
             class="stat-item"
           >
             <div class="stat-value" :class="stat.class">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
+            <div class="stat-label text-xs">{{ stat.label }}</div>
           </div>
         </div>
       </div>
 
       <!-- 搜索结果提示 -->
       <div v-if="searchConditions.length > 0 && showSearchHint" class="search-result-hint">
-        <span class="hint-text">
+        <span class="hint-text text-sm">
           {{ t('common.filterHint', { count: searchConditions.length, total: filteredCount }) }}
         </span>
-        <el-button link type="primary" size="small" @click="handleClearSearch">
+        <el-button class="text-sm" link type="primary" size="small" @click="handleClearSearch">
           <el-icon><Close /></el-icon>
           {{ t('common.clearFilter') }}
         </el-button>
@@ -101,7 +101,7 @@
 
         <!-- 卡片视图分页 -->
         <div v-if="!loadAll && filteredCount > 0" class="card-pagination-wrapper">
-          <div class="card-pagination-info">
+          <div class="card-pagination-info text-xs">
             {{ t('common.showingRange', { start: cardPageStart, end: cardPageEnd, total: filteredCount }) }}
             <el-button
               v-if="filteredCount > cardPageSize"
@@ -129,7 +129,7 @@
 
         <!-- 加载全部后的统计 -->
         <div v-else-if="loadAll && filteredCount > 0" class="card-all-loaded">
-          <div class="loaded-info">
+          <div class="loaded-info text-sm">
             <el-icon><Check /></el-icon>
             {{ t('common.loadedAll', { total: filteredCount }) }}
           </div>
@@ -449,7 +449,6 @@ defineExpose({
   cursor: pointer;
   transition: var(--eify-transition-base);
   color: var(--eify-text-secondary);
-  font-size: 14px;
 }
 
 .toggle-btn:hover {
@@ -458,7 +457,7 @@ defineExpose({
 }
 
 .toggle-btn.active {
-  background: #ffffff;
+  background: var(--eify-bg-base);
   color: var(--eify-primary);
   box-shadow: var(--eify-shadow-sm);
 }
@@ -481,7 +480,6 @@ defineExpose({
 }
 
 .stat-label {
-  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -501,7 +499,6 @@ defineExpose({
 }
 
 .hint-text {
-  font-size: 13px;
   color: var(--eify-text-secondary);
 }
 
@@ -511,14 +508,13 @@ defineExpose({
 }
 
 .search-result-hint .el-button {
-  font-size: 13px;
   padding: 0;
   height: auto;
 }
 
 /* ========== 卡片视图 ========== */
 .card-view-container {
-  background-color: #ffffff;
+  background-color: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: hidden;
@@ -585,7 +581,7 @@ defineExpose({
   align-items: center;
   padding: var(--eify-spacing-3) var(--eify-spacing-4);
   border-top: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, #ffffff 0%, var(--eify-bg-surface) 100%);
+  background: linear-gradient(180deg, var(--eify-bg-base) 0%, var(--eify-bg-surface) 100%);
   position: relative;
   min-height: 48px;
 }
@@ -608,7 +604,6 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: var(--eify-spacing-2);
-  font-size: 12px;
   color: var(--eify-text-secondary);
 }
 
@@ -662,14 +657,13 @@ defineExpose({
   align-items: center;
   padding: var(--eify-spacing-4) var(--eify-spacing-5);
   border-top: 1px solid var(--eify-border-subtle);
-  background: linear-gradient(180deg, #ffffff 0%, var(--eify-bg-surface) 100%);
+  background: linear-gradient(180deg, var(--eify-bg-base) 0%, var(--eify-bg-surface) 100%);
 }
 
 .loaded-info {
   display: flex;
   align-items: center;
   gap: var(--eify-spacing-2);
-  font-size: 13px;
   color: var(--eify-text-secondary);
 }
 
