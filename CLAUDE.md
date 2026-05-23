@@ -105,7 +105,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | **docs/** | 按开发者查阅路径组织的规范文档 | `ARCHITECTURE.md`、`API-SPEC.md` |
 | **docs/guides/** | HOW-TO 指南（体量大、持续更新） | `DATABASE.md`、`LOGGING.md` |
 | **docs/ADRs/** | 设计决策记录（ADR，一次性归档） | `ADR-0001-cursor-pagination-improvement.md` |
-| **docs/specs/** | 功能实现规格说明（开发前编写，实施中迭代） | `2026-05-23-mcp-workspace-isolation-fix-design.md` |
+| **docs/specs/** | 功能实现规格说明（开发前编写，实施中迭代）。**所有 spec 必须放此目录，禁止使用 `docs/superpowers/specs/` 等其他路径** | `2026-05-23-mcp-workspace-isolation-fix-design.md` |
 | **scripts/** | 开发/运维工具脚本 | `mock-mcp-server.py` |
 | **deploy/** | 部署配置和脚本 | `Dockerfile`、`nginx.conf`、`k8s/`、`infra/` |
 | **deploy/infra/deploy/** | Docker Compose 和部署脚本 | `docker-compose.yml`、`deploy-local.sh` |
@@ -120,6 +120,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 - **规范文档**（docs/）：开发时随时查阅的入口文档，持续更新，与代码同步
 - **HOW-TO 指南**（docs/guides/）：体量较大的操作指南，持续更新
 - **决策记录**（docs/ADRs/）：一次性写入的 ADR，基本不改
+- **规格说明**（docs/specs/）：功能实现前的设计文档，命名 `YYYY-MM-DD-<topic>-design.md`
 - 每个指南对应一个开发场景："我要建表" → guides/DATABASE.md，"我要加日志" → guides/LOGGING.md
 
 ### 环境配置规范
