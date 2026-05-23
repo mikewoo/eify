@@ -92,7 +92,7 @@
           </template>
           <template #description>
             <slot name="empty-description">
-              <span class="eify-table-empty-text">{{ emptyText }}</span>
+              <span class="eify-table-empty-text text-base">{{ emptyText }}</span>
             </slot>
           </template>
         </el-empty>
@@ -349,7 +349,7 @@ defineExpose({
 
 <style scoped>
 .eify-table-container {
-  background-color: #ffffff;
+  background-color: var(--eify-bg-base);
   border-radius: var(--eify-card-radius);
   box-shadow: var(--eify-card-shadow);
   overflow: auto;
@@ -397,7 +397,6 @@ defineExpose({
 /* 空状态样式 */
 .eify-table-empty-text {
   color: var(--eify-text-tertiary);
-  font-size: 14px;
 }
 
 /* 分页样式 */
@@ -408,7 +407,7 @@ defineExpose({
   gap: var(--eify-spacing-3);
   padding: var(--eify-spacing-4) var(--eify-spacing-5);
   border-top: 1px solid var(--eify-border-subtle);
-  background-color: #ffffff;
+  background-color: var(--eify-bg-base);
 }
 
 .eify-table-pagination-info {
@@ -464,7 +463,7 @@ defineExpose({
 
 :deep(.el-pagination.is-background .el-pager li:not(.is-disabled).is-active) {
   background: var(--eify-gradient-primary);
-  color: #ffffff;
+  color: var(--eify-text-inverse);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
