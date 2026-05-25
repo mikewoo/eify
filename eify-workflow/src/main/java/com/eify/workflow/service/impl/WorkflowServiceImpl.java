@@ -130,6 +130,11 @@ public class WorkflowServiceImpl implements WorkflowService {
     public void delete(Long id) {
         getWorkflowOrThrow(id);
 
+        int convRefs = workflowMapper.countConversationReferences(id);
+        if (convRefs > 0) {
+            throw new BusinessException(ErrorCode.WORKFLOW_IN_USE);
+        }
+
         edgeMapper.delete(new LambdaQueryWrapper<WorkflowEdge>().eq(WorkflowEdge::getWorkflowId, id));
         nodeMapper.delete(new LambdaQueryWrapper<WorkflowNode>().eq(WorkflowNode::getWorkflowId, id));
         workflowMapper.deleteById(id);

@@ -309,6 +309,7 @@
   },
   "knowledge": {
     "title": "知识库管理",
+    "unnamed": "知识库 #{id}",
     "description": "管理知识库，上传文档并构建向量索引",
     "addKnowledge": "新增知识库",
     "editKnowledge": "编辑知识库",
@@ -595,7 +596,10 @@
     "conversationWithAgent": "与 {name} 的对话",
     "resend": "重新发送",
     "copyMessage": "复制消息",
-    "messageCopied": "消息已复制"
+    "messageCopied": "消息已复制",
+    "agentUnavailableHint": "该 Agent 已被删除，无法发送消息",
+    "workflowUnavailableHint": "该工作流已被删除，无法发送消息",
+    "sendErrorHint": "服务暂时不可用，请稍后重试"
   },
   "error": {
     "networkError": "网络连接失败",

@@ -8,6 +8,7 @@ import com.eify.chat.domain.entity.Message;
 import com.eify.chat.service.ConversationService;
 import com.eify.chat.service.MessageService;
 import com.eify.common.error.ErrorCode;
+import com.eify.common.util.MessageUtil;
 import com.eify.common.exception.BusinessException;
 import com.eify.knowledge.repository.ChunkRepository;
 import com.eify.knowledge.route.EmbeddingRouteResolver;
@@ -61,6 +62,7 @@ class ChatServiceImplTest {
     @Mock McpClientService mcpClientService;
     @Mock McpToolMapper mcpToolMapper;
     @Mock Executor sseExecutor;
+    @Mock MessageUtil messageUtil;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -73,7 +75,7 @@ class ChatServiceImplTest {
                 adapterFactory, objectMapper, chunkService, embeddingStrategy,
                 routeResolver, knowledgeService,
                 workflowEngine, workflowNodeMapper, mcpClientService, mcpToolMapper,
-                sseExecutor);
+                messageUtil, sseExecutor);
     }
 
     @BeforeEach
@@ -118,7 +120,7 @@ class ChatServiceImplTest {
         }
 
         @Test
-        @DisplayName("无 sessionId、无 agentId、无 workflowId 应创建新会话后抛出参数错误")
+        @DisplayName("无 sessionId、无 agentId、无 workflowId 应创建新会话后通过 SSE 返回错误事件")
         void shouldCreateNewConversationWhenNoSessionId() {
             SendChatRequest req = new SendChatRequest();
             req.setContent("hello");
@@ -126,10 +128,8 @@ class ChatServiceImplTest {
             conv.setId(1L);
             when(conversationService.create(eq(1L), isNull(), isNull(), isNull())).thenReturn(conv);
 
-            assertThatThrownBy(() -> chatService.sendMessage(1L, req))
-                    .isInstanceOf(BusinessException.class)
-                    .extracting("code")
-                    .isEqualTo(ErrorCode.PARAM_ERROR.getCode());
+            SseEmitter emitter = chatService.sendMessage(1L, req);
+            assertThat(emitter).isNotNull();
         }
     }
 

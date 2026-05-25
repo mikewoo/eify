@@ -309,6 +309,7 @@
   },
   "knowledge": {
     "title": "Knowledge Base",
+    "unnamed": "Knowledge base #{id}",
     "description": "Manage knowledge bases, upload documents and build vector indexes",
     "addKnowledge": "Add Knowledge Base",
     "editKnowledge": "Edit Knowledge Base",
@@ -595,7 +596,10 @@
     "conversationWithAgent": "Chat with {name}",
     "resend": "Resend",
     "copyMessage": "Copy message",
-    "messageCopied": "Message copied"
+    "messageCopied": "Message copied",
+    "agentUnavailableHint": "This agent has been deleted and cannot send messages",
+    "workflowUnavailableHint": "This workflow has been deleted and cannot send messages",
+    "sendErrorHint": "Service is temporarily unavailable, please try again later"
   },
   "error": {
     "networkError": "Network error",

@@ -168,6 +168,12 @@ public class McpServerServiceImpl implements McpServerService {
             }
         }
 
+        // 检查是否有 Workflow ToolCall 节点引用此 Server
+        int workflowRefs = mcpServerMapper.countWorkflowToolCallReferences(id);
+        if (workflowRefs > 0) {
+            throw new BusinessException(ErrorCode.MCP_SERVER_IN_USE_BY_WORKFLOW);
+        }
+
         mcpServerMapper.deleteById(id);
     }
 

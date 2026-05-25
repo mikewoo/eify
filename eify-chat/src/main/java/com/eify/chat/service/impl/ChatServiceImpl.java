@@ -14,6 +14,7 @@ import com.eify.chat.service.MessageService;
 import com.eify.common.context.CurrentContext;
 import com.eify.common.error.ErrorCode;
 import com.eify.common.exception.BusinessException;
+import com.eify.common.util.MessageUtil;
 import com.eify.knowledge.domain.entity.KnowledgeBase;
 import com.eify.knowledge.repository.ChunkRepository;
 import com.eify.knowledge.route.EmbeddingRoute;
@@ -100,6 +101,7 @@ public class ChatServiceImpl implements ChatService {
     private final WorkflowNodeMapper workflowNodeMapper;
     private final McpClientService mcpClientService;
     private final McpToolMapper mcpToolMapper;
+    private final MessageUtil messageUtil;
 
     private final Executor sseExecutor;
 
@@ -123,6 +125,7 @@ public class ChatServiceImpl implements ChatService {
             WorkflowNodeMapper workflowNodeMapper,
             McpClientService mcpClientService,
             McpToolMapper mcpToolMapper,
+            MessageUtil messageUtil,
             @Qualifier("sseExecutor") Executor sseExecutor) {
         this.conversationService = conversationService;
         this.messageService = messageService;
@@ -141,6 +144,7 @@ public class ChatServiceImpl implements ChatService {
         this.workflowNodeMapper = workflowNodeMapper;
         this.mcpClientService = mcpClientService;
         this.mcpToolMapper = mcpToolMapper;
+        this.messageUtil = messageUtil;
         this.sseExecutor = sseExecutor;
     }
 
@@ -206,9 +210,11 @@ public class ChatServiceImpl implements ChatService {
         Message userMessage = saveUserMessage(conversation.getId(), request.getContent(), userId, convWorkspaceId);
         log.info("[ChatService] 保存用户消息耗时 - sessionId={}, {}ms", conversation.getId(), System.currentTimeMillis() - saveStart);
 
+        Flux<ChatStreamChunk> stream = null;
+        Agent agent;
+        try {
         // 7. 路由决策：conversation.workflowId 优先，其次 agent.workflowId
         final Long execWorkflowId;
-        final Agent agent;
 
         Long convWorkflowId = conversation.getWorkflowId();
         if (convWorkflowId != null) {
@@ -265,7 +271,6 @@ public class ChatServiceImpl implements ChatService {
         long llmStart = System.currentTimeMillis();
         log.info("[ChatService] 开始调用 LLM API - sessionId={}, provider={}, model={}",
                 conversation.getId(), provider.getType(), agent.getDefaultModel());
-        Flux<ChatStreamChunk> stream;
         try {
             stream = adapterFactory
                     .getAdapter(provider.getType())
@@ -291,6 +296,23 @@ public class ChatServiceImpl implements ChatService {
                 emitter.complete();
             } catch (IllegalStateException ex) {
                 log.debug("[ChatService] Emitter 已完成，忽略 complete 调用");
+            }
+            return emitter;
+        }
+
+        } catch (BusinessException e) {
+            activeSessions.remove(conversation.getId());
+            log.warn("[ChatService] 消息发送业务异常 - sessionId={}, code={}, message={}",
+                    conversation.getId(), e.getCode(), e.getMessage());
+            try {
+                sendSseEvent(emitter, SseEvent.error(messageUtil.get(ErrorCode.of(e.getCode()))));
+            } catch (IllegalStateException | IOException ex) {
+                log.debug("[ChatService] SSE 已关闭，无法发送错误事件");
+            }
+            try {
+                emitter.complete();
+            } catch (IllegalStateException ex) {
+                log.debug("[ChatService] Emitter 已完成");
             }
             return emitter;
         }

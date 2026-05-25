@@ -100,6 +100,8 @@ public class AgentServiceImpl implements AgentService {
                 .map(a -> toBasicResponse(a, providerMap))
                 .collect(Collectors.toList());
 
+        batchPopulateKnowledgeBases(responses);
+
         return PageResult.of(responses, result.getTotal(), page, pageSize);
     }
 
@@ -132,6 +134,8 @@ public class AgentServiceImpl implements AgentService {
         List<AgentResponse> responses = result.getRecords().stream()
                 .map(a -> toBasicResponse(a, providerMap))
                 .collect(Collectors.toList());
+
+        batchPopulateKnowledgeBases(responses);
 
         return PageResult.of(responses, result.getTotal(), page, pageSize);
     }
@@ -334,6 +338,11 @@ public class AgentServiceImpl implements AgentService {
     public void delete(Long id) {
         Agent existing = WorkspaceGuard.requireInWorkspace(
                 agentMapper.selectById(id), ErrorCode.NOT_FOUND);
+
+        int convRefs = agentMapper.countConversationReferences(id);
+        if (convRefs > 0) {
+            throw new BusinessException(ErrorCode.AGENT_IN_USE);
+        }
 
         agentMapper.deleteById(id);
         agentKnowledgeMapper.softDeleteByAgentId(id);
@@ -597,9 +606,10 @@ public class AgentServiceImpl implements AgentService {
         // 查询关联的 Provider
         Provider provider = providerMapper.selectById(agent.getDefaultProviderId());
 
-        // 加载知识库 IDs
+        // 加载知识库 IDs 及简要信息
         List<Long> knowledgeIds = agentKnowledgeMapper.selectKnowledgeIdsByAgentId(agent.getId());
         agent.setKnowledgeIds(knowledgeIds);
+        List<AgentResponse.KnowledgeBaseBrief> knowledgeBases = loadKnowledgeBaseBriefs(knowledgeIds);
 
         // 加载 MCP 工具 IDs 及简要信息
         List<Long> mcpToolIds = agentMcpToolMapper.selectToolIdsByAgentId(agent.getId(), CurrentContext.getWorkspaceId());
@@ -629,6 +639,7 @@ public class AgentServiceImpl implements AgentService {
                 .updatedAt(agent.getUpdatedAt().toString())
                 .creatorId(agent.getCreatorId())
                 .knowledgeIds(knowledgeIds)
+                .knowledgeBases(knowledgeBases)
                 .mcpToolIds(mcpToolIds)
                 .mcpTools(mcpTools)
                 .ragEnabled(agent.getRagEnabled())
@@ -728,6 +739,49 @@ public class AgentServiceImpl implements AgentService {
         }
 
         agentMcpToolMapper.batchInsert(agentId, toolIds, CurrentContext.getWorkspaceId());
+    }
+
+    /**
+     * 加载知识库简要信息。已删除的 KB 返回 name=null，前端据此展示 "(不可用)"。
+     */
+    private List<AgentResponse.KnowledgeBaseBrief> loadKnowledgeBaseBriefs(List<Long> kbIds) {
+        if (kbIds == null || kbIds.isEmpty()) return List.of();
+        Map<Long, Map<String, Object>> nameMap = agentMapper.selectKnowledgeBaseNames(kbIds);
+        return kbIds.stream()
+                .map(id -> {
+                    Map<String, Object> row = nameMap.get(id);
+                    return AgentResponse.KnowledgeBaseBrief.builder()
+                            .id(id)
+                            .name(row != null ? (String) row.get("name") : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 批量填充响应列表的 knowledgeBases 字段
+     */
+    private void batchPopulateKnowledgeBases(List<AgentResponse> responses) {
+        List<Long> allKbIds = responses.stream()
+                .filter(r -> r.getKnowledgeIds() != null)
+                .flatMap(r -> r.getKnowledgeIds().stream())
+                .distinct()
+                .collect(Collectors.toList());
+        if (allKbIds.isEmpty()) return;
+        Map<Long, Map<String, Object>> nameMap = agentMapper.selectKnowledgeBaseNames(allKbIds);
+        responses.forEach(r -> {
+            if (r.getKnowledgeIds() != null) {
+                r.setKnowledgeBases(r.getKnowledgeIds().stream()
+                        .map(id -> {
+                            Map<String, Object> row = nameMap.get(id);
+                            return AgentResponse.KnowledgeBaseBrief.builder()
+                                    .id(id)
+                                    .name(row != null ? (String) row.get("name") : null)
+                                    .build();
+                        })
+                        .collect(Collectors.toList()));
+            }
+        });
     }
 
     /**

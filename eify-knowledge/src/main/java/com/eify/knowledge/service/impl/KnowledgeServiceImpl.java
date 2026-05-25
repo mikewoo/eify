@@ -111,6 +111,12 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeRepository, Knowl
 
         WorkspaceGuard.requireInWorkspace(getById(id), ErrorCode.KNOWLEDGE_NOT_FOUND);
 
+        int agentRefs = knowledgeRepository.countAgentReferences(id);
+        if (agentRefs > 0) {
+            throw new BusinessException(ErrorCode.KNOWLEDGE_IN_USE);
+        }
+
+        knowledgeRepository.softDeleteAgentKnowledgeByKnowledgeId(id);
         chunkRepository.deleteByKnowledgeId(id);
         removeById(id);
     }

@@ -36,4 +36,10 @@ public interface AgentKnowledgeMapper extends BaseMapper<AgentKnowledge> {
 
     @Update("UPDATE agent_knowledge SET deleted = 1, updated_at = NOW() WHERE agent_id = #{agentId} AND deleted = 0")
     int softDeleteByAgentId(@Param("agentId") Long agentId);
+
+    @Select("SELECT COUNT(*) FROM agent_knowledge WHERE knowledge_id = #{knowledgeId} AND deleted = 0")
+    int countByKnowledgeId(@Param("knowledgeId") Long knowledgeId);
+
+    @Update("UPDATE agent_knowledge SET deleted = 1, updated_at = NOW() WHERE knowledge_id = #{knowledgeId} AND deleted = 0")
+    int softDeleteByKnowledgeId(@Param("knowledgeId") Long knowledgeId);
 }

@@ -49,6 +49,7 @@ public enum ErrorCode {
     AGENT_DISABLED(3001, "Agent 已禁用"),
     AGENT_CONFIG_INVALID(3002, "Agent 配置无效"),
     AGENT_NAME_DUPLICATE(3003, "Agent 名称已存在"),
+    AGENT_IN_USE(3004, "Agent 已被对话使用，无法删除"),
 
     // ========== Chat (4000-4999) ==========
     CONVERSATION_NOT_FOUND(4000, "对话不存在"),
@@ -64,6 +65,7 @@ public enum ErrorCode {
     MCP_CALL_FAILED(5003, "MCP 工具调用失败"),
     MCP_SERVER_HAS_BINDINGS(5004, "MCP 服务器有 Agent 绑定，无法删除"),
     MCP_TOOL_LIMIT_EXCEEDED(5005, "单个 Agent 最多绑定 10 个 MCP 工具"),
+    MCP_SERVER_IN_USE_BY_WORKFLOW(5006, "MCP 服务器已被工作流使用，无法删除"),
 
     // ========== Workflow (6000-6999) ==========
     WORKFLOW_NOT_FOUND(6000, "工作流不存在"),
@@ -75,6 +77,7 @@ public enum ErrorCode {
     WORKFLOW_NODE_EXECUTION_FAILED(6006, "节点执行失败"),
     WORKFLOW_EXECUTION_CANCELLED(6007, "执行已取消"),
     WORKFLOW_EXPRESSION_ERROR(6008, "条件表达式求值失败"),
+    WORKFLOW_IN_USE(6009, "工作流已被对话使用，无法删除"),
 
     // ========== Auth (8000-8999) ==========
     USER_NOT_FOUND(8000, "用户不存在"),
@@ -105,6 +108,7 @@ public enum ErrorCode {
     KNOWLEDGE_NAME_DUPLICATE(7005, "知识库名称已存在"),
     DOCUMENT_NOT_FOUND(7006, "文档不存在"),
     EMBEDDING_MODEL_NOT_AVAILABLE(7007, "选定的嵌入模型不可用，请检查供应商配置"),
+    KNOWLEDGE_IN_USE(7008, "知识库已被 Agent 使用，无法删除"),
     ;
 
     /**

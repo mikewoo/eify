@@ -59,6 +59,10 @@ const conversationToDelete = ref<number | null>(null)
 const showErrorToast = ref(false)
 const errorMessage = ref('')
 
+// 实体不可用状态（Agent/Workflow 被删除后进入对话时设置）
+const entityUnavailable = ref(false)
+const entityUnavailableHint = ref('')
+
 // Agent/工作流 选择相关状态
 const showAgentSelector = ref(false)
 const selectorMode = ref<'agent' | 'workflow'>('agent')
@@ -219,6 +223,8 @@ async function selectConversation(id: number) {
 
   currentConversationId.value = id
   const conversation = conversations.value.find(c => c.id === id)
+  entityUnavailable.value = false
+  entityUnavailableHint.value = ''
 
   // 加载 Agent/工作流 信息
   if (conversation?.agentId) {
@@ -230,7 +236,18 @@ async function selectConversation(id: number) {
       console.error('加载 Agent 信息失败:', error)
       currentAgent.value = null
       currentAgentId.value = null
+      entityUnavailable.value = true
+      entityUnavailableHint.value = t('chat.agentUnavailableHint')
     }
+  } else if (conversation?.workflowId) {
+    try {
+      await workflowApi.getById(conversation.workflowId)
+    } catch (error) {
+      entityUnavailable.value = true
+      entityUnavailableHint.value = t('chat.workflowUnavailableHint')
+    }
+    currentAgent.value = null
+    currentAgentId.value = null
   } else {
     currentAgent.value = null
     currentAgentId.value = null
@@ -676,6 +693,21 @@ watch(inputContent, () => {
               <div class="conversation-title">{{ currentConversation?.title || t('chat.newChat') }}</div>
             </div>
           </div>
+          <div v-else-if="entityUnavailable" class="agent-info entity-unavailable-info">
+            <div class="agent-avatar-placeholder unavailable-placeholder">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4M12 16h.01"/>
+              </svg>
+            </div>
+            <div>
+              <div class="agent-name entity-name-unavailable">
+                {{ currentConversation?.title || t('chat.newChat') }}
+                <span class="unavailable-badge">{{ t('provider.unavailable') }}</span>
+              </div>
+              <div class="conversation-title hint-unavailable">{{ entityUnavailableHint }}</div>
+            </div>
+          </div>
           <div v-else-if="currentConversation?.workflowId" class="agent-info">
             <div class="agent-avatar-placeholder workflow-placeholder">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -788,15 +820,15 @@ watch(inputContent, () => {
             ref="inputRef"
             v-model="inputContent"
             class="message-input"
-            :placeholder="t('chat.inputPlaceholder')"
+            :placeholder="entityUnavailable ? entityUnavailableHint : t('chat.inputPlaceholder')"
             rows="1"
-            :disabled="isSending"
+            :disabled="isSending || entityUnavailable"
             @keydown="handleKeyDown"
           ></textarea>
           <button
             class="send-button"
             @click="sendMessage"
-            :disabled="!inputContent.trim() || isSending"
+            :disabled="!inputContent.trim() || isSending || entityUnavailable"
             :class="{ sending: isSending }"
           >
             <svg v-if="!isSending" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2028,5 +2060,28 @@ watch(inputContent, () => {
 .toast-leave-from {
   opacity: 1;
   transform: translateX(0);
+}
+</style>
+
+<style>
+/* 实体不可用样式（非 scoped，穿透子组件） */
+.entity-unavailable-info .entity-name-unavailable {
+  color: var(--eify-error);
+}
+
+.unavailable-badge {
+  color: var(--eify-error);
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+.unavailable-placeholder {
+  background-color: var(--eify-error-bg, #fef2f2);
+  border: 1px dashed var(--eify-error);
+  color: var(--eify-error);
+}
+
+.hint-unavailable {
+  color: var(--eify-error) !important;
 }
 </style>

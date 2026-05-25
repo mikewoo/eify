@@ -285,13 +285,31 @@
             <el-input v-model="configForm._name" :placeholder="t('workflow.nodeNamePlaceholder')" maxlength="50" />
           </el-form-item>
           <el-form-item :label="t('workflow.mcpServerLabel')">
-            <el-select v-model="configForm.serverId" :placeholder="t('workflow.mcpServerPlaceholder')" style="width:100%" @change="onServerChange">
-              <el-option v-for="s in mcpServerOptions" :key="s.id" :label="`${s.name} (${t('workflow.toolCount', { count: s.toolCount || 0 })})`" :value="s.id" />
+            <el-select v-model="configForm.serverId" :placeholder="t('workflow.mcpServerPlaceholder')" style="width:100%" :class="{ 'provider-unavailable': isMcpServerUnavailable }" @change="onServerChange">
+              <el-option
+                v-for="s in mcpServerOptions"
+                :key="s.id"
+                :label="s.type === '' ? s.name : `${s.name} (${t('workflow.toolCount', { count: s.toolCount || 0 })})`"
+                :value="s.id"
+                :disabled="s.type === ''"
+              >
+                <span :style="s.type === '' ? { color: 'var(--eify-error)' } : {}">{{ s.name }}</span>
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item :label="t('workflow.toolNameLabel')">
-            <el-select v-model="configForm.toolName" :placeholder="t('workflow.toolPlaceholder')" style="width:100%" filterable :loading="loadingTools">
-              <el-option v-for="t in availableTools" :key="t.name" :label="t.description ? `${t.name} - ${t.description}` : t.name" :value="t.name" />
+            <el-select v-model="configForm.toolName" :placeholder="t('workflow.toolPlaceholder')" style="width:100%" :class="{ 'model-unavailable': isMcpServerUnavailable }" filterable :loading="loadingTools">
+              <el-option
+                v-for="t in availableTools"
+                :key="t.name"
+                :label="(t as any).unavailable ? `${t.name}${t('provider.unavailable')}` : (t.description ? `${t.name} - ${t.description}` : t.name)"
+                :value="t.name"
+                :disabled="(t as any).unavailable"
+              >
+                <span :style="(t as any).unavailable ? { color: 'var(--eify-error)' } : {}">
+                  {{ (t as any).unavailable ? `${t.name}${t('provider.unavailable')}` : (t.description ? `${t.name} - ${t.description}` : t.name) }}
+                </span>
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item :label="t('workflow.argTemplate')">
@@ -432,6 +450,12 @@ const isProviderUnavailable = computed(() => {
   if (!providerId) return false
   const p = providerOptions.value.find(p => p.id === providerId)
   return !!p && !p.type
+})
+const isMcpServerUnavailable = computed(() => {
+  const serverId = configForm.value.serverId
+  if (!serverId) return false
+  const s = mcpServerOptions.value.find(s => s.id === serverId)
+  return !!s && !s.type
 })
 const availableTools = ref<McpToolResponse[]>([])
 const loadingTools = ref(false)
@@ -638,7 +662,33 @@ function openConfig(nodeId: string) {
     const tmpl = configForm.value.argumentsTemplate || {}
     configArgsList.value = Object.entries(tmpl).map(([k, v]) => ({ key: k, value: String(v) }))
     if (configForm.value.serverId) {
-      onServerChange(configForm.value.serverId)
+      const serverFound = mcpServerOptions.value.some(s => s.id === configForm.value.serverId)
+      if (!serverFound) {
+        const serverName = configForm.value.serverName || `MCP Server #${configForm.value.serverId}`
+        mcpServerOptions.value.push({
+          id: configForm.value.serverId,
+          name: `${serverName}${t('provider.unavailable')}`,
+          type: '' as any,
+          baseUrl: '',
+          enabled: 0,
+          toolCount: 0,
+          status: null,
+          createdAt: '',
+          updatedAt: ''
+        } as McpServerResponse)
+        // 注入不可用 tool 选项
+        if (configForm.value.toolName) {
+          availableTools.value = [{
+            name: configForm.value.toolName,
+            description: '',
+            unavailable: true
+          } as any]
+        } else {
+          availableTools.value = []
+        }
+      } else {
+        onServerChange(configForm.value.serverId)
+      }
     } else {
       availableTools.value = []
     }

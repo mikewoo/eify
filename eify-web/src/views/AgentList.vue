@@ -362,14 +362,19 @@
               style="width: 100%"
             >
               <el-option
-                v-for="kb in knowledgeList"
+                v-for="kb in knowledgeSelectOptions"
                 :key="kb.id"
-                :label="kb.name"
+                :label="kb.available ? kb.name : `${kb.name}${t('provider.unavailable')}`"
                 :value="kb.id"
+                :disabled="!kb.available"
               >
                 <div class="kb-option">
-                  <span>{{ kb.name }}</span>
-                  <el-tag size="small" effect="plain">{{ kb.embeddingModel }}</el-tag>
+                  <span :style="!kb.available ? { color: 'var(--eify-error)' } : {}">
+                    {{ kb.available ? kb.name : `${kb.name}${t('provider.unavailable')}` }}
+                  </span>
+                  <el-tag v-if="kb.available && kb.embeddingModel" size="small" effect="plain">
+                    {{ kb.embeddingModel }}
+                  </el-tag>
                 </div>
               </el-option>
             </el-select>
@@ -766,6 +771,7 @@ const deleteTarget = ref<{ id: number; name: string } | null>(null)
 const providers = ref<ProviderResponse[]>([])
 const providerModelsMap = ref<Map<number, ModelConfigInfo[]>>(new Map())
 const unavailableProviderOption = ref<{ id: number; name: string; originalName: string } | null>(null)
+const unavailableKnowledgeOptions = ref<Array<{ id: number; name: string }>>([])
 
 /** 合并后的 provider 选项（含不可用 provider 的兜底选项） */
 const providerSelectOptions = computed(() => {
@@ -786,6 +792,21 @@ const providerSelectOptions = computed(() => {
       originalName: opt.originalName
     })
   }
+  return options
+})
+/** 合并后的 knowledge 选项（含不可用 KB 的兜底选项） */
+const knowledgeSelectOptions = computed(() => {
+  const options = knowledgeList.value.map(kb => ({
+    id: kb.id,
+    name: kb.name,
+    embeddingModel: kb.embeddingModel || '',
+    available: true
+  }))
+  unavailableKnowledgeOptions.value.forEach(opt => {
+    if (!options.some(o => o.id === opt.id)) {
+      options.push({ id: opt.id, name: opt.name, embeddingModel: '', available: false })
+    }
+  })
   return options
 })
 const knowledgeList = ref<KnowledgeBaseResponse[]>([])
@@ -1127,6 +1148,7 @@ const scrollToBottom = () => {
 const handleAdd = () => {
   activeTab.value = 'basic'
   unavailableProviderOption.value = null
+  unavailableKnowledgeOptions.value = []
   loadMcpTools()
   dialogRef.value?.open()
 }
@@ -1166,6 +1188,17 @@ const handleEdit = (row: Record<string, any>) => {
     formData.defaultModel = (row.defaultModel || '') + t('provider.unavailable')
   } else {
     unavailableProviderOption.value = null
+  }
+  // 检测不可用的知识库
+  if (row.knowledgeBases) {
+    unavailableKnowledgeOptions.value = row.knowledgeBases
+      .filter((kb: { id: number; name: string | null }) => kb.name === null)
+      .map((kb: { id: number }) => ({
+        id: kb.id,
+        name: `${t('knowledge.unnamed', { id: kb.id })}${t('provider.unavailable')}`
+      }))
+  } else {
+    unavailableKnowledgeOptions.value = []
   }
   activeTab.value = 'basic'
   loadMcpTools()

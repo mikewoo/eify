@@ -1,4 +1,5 @@
 import { get, post, del } from '@/utils/request'
+import i18n from '@/i18n'
 
 /**
  * 发送消息请求
@@ -80,7 +81,16 @@ export async function sendChat(
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      let errorMessage = i18n.global.t('chat.sendErrorHint', { status: response.status })
+      try {
+        const errorBody = await response.json()
+        if (errorBody.message) {
+          errorMessage = errorBody.message
+        }
+      } catch {
+        // 无法解析 JSON 响应体，使用国际化友好提示
+      }
+      throw new Error(errorMessage)
     }
 
     const reader = response.body?.getReader()

@@ -28,4 +28,10 @@ public interface KnowledgeRepository extends BaseMapper<KnowledgeBase> {
 
     @Update("UPDATE knowledge_base SET chunk_count = chunk_count + #{delta} WHERE id = #{id}")
     void incrementChunkCount(@Param("id") Long id, @Param("delta") int delta);
+
+    @org.apache.ibatis.annotations.Select("SELECT COUNT(*) FROM agent_knowledge WHERE knowledge_id = #{knowledgeId} AND deleted = 0")
+    int countAgentReferences(@Param("knowledgeId") Long knowledgeId);
+
+    @Update("UPDATE agent_knowledge SET deleted = 1, updated_at = NOW() WHERE knowledge_id = #{knowledgeId} AND deleted = 0")
+    int softDeleteAgentKnowledgeByKnowledgeId(@Param("knowledgeId") Long knowledgeId);
 }
