@@ -272,6 +272,16 @@ public class ProviderServiceImpl implements ProviderService {
         Provider existing = WorkspaceGuard.requireInWorkspace(
                 providerMapper.selectById(id), ErrorCode.NOT_FOUND);
 
+        int agentRefs = providerMapper.countAgentReferences(id);
+        if (agentRefs > 0) {
+            throw new BusinessException(ErrorCode.PROVIDER_IN_USE);
+        }
+
+        int workflowRefs = providerMapper.countWorkflowLlmReferences(id);
+        if (workflowRefs > 0) {
+            throw new BusinessException(ErrorCode.PROVIDER_IN_USE_BY_WORKFLOW);
+        }
+
         modelConfigMapper.delete(new LambdaQueryWrapper<ModelConfig>()
                 .eq(ModelConfig::getProviderId, id)
                 .eq(ModelConfig::getWorkspaceId, CurrentContext.getWorkspaceId()));
