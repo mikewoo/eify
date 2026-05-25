@@ -418,30 +418,44 @@
         </el-tab-pane>
 
         <el-tab-pane :label="t('agent.mcpTools')" name="tools">
-          <div v-if="mcpToolOptions.length === 0" class="empty-tools">
+          <div v-if="mcpServers.length === 0" class="empty-tools">
             <el-empty :description="t('agent.noToolsAvailable')" :image-size="80" />
           </div>
           <div v-else class="tools-wrapper">
-            <div class="tools-hint">
-              {{ t('agent.toolsHint') }}
-            </div>
+            <div class="tools-hint">{{ t('agent.toolsHint') }}</div>
             <el-checkbox-group v-model="data.mcpToolIds" :max="10">
-              <div
-                v-for="(tools, serverName) in groupedMcpTools"
-                :key="serverName"
-                class="tool-group"
-              >
-                <div class="tool-group-header">{{ serverName }}</div>
-                <div
-                  v-for="tool in tools"
-                  :key="tool.id"
-                  class="tool-item"
-                >
-                  <el-checkbox :value="tool.id" :label="tool.id">
-                    <span class="tool-name">{{ tool.name }}</span>
-                  </el-checkbox>
-                  <span class="tool-desc" :title="tool.description">{{ tool.description }}</span>
+              <div v-for="server in mcpServers" :key="server.id" class="tool-group">
+                <div class="tool-group-header">
+                  <span class="eify-status-dot" :class="server.online ? 'online' : 'offline'" />
+                  <span class="server-name">{{ server.name }}</span>
+                  <span class="eify-tag eify-tag-gray server-endpoint">{{ server.endpoint }}</span>
+                  <span class="server-tool-count">{{ server.toolCount }} {{ t('agent.toolsCount') }}</span>
                 </div>
+                <template v-for="tool in server.tools" :key="tool.id">
+                  <div class="tool-item" :class="{ 'tool-disabled': !server.online }">
+                    <el-checkbox :value="tool.id" :label="tool.id" :disabled="!server.online">
+                      <span class="tool-name">{{ tool.name }}</span>
+                    </el-checkbox>
+                    <span class="tool-desc" :title="tool.description">{{ tool.description }}</span>
+                    <button v-if="tool.inputSchema && hasProperties(tool.inputSchema)"
+                            class="eify-btn eify-btn-text eify-btn-sm tool-expand-btn"
+                            type="button"
+                            @click="toggleExpand(tool.id)">
+                      {{ expandedToolId === tool.id ? t('common.collapse') : t('agent.expandParams') }}
+                    </button>
+                  </div>
+                  <div v-if="expandedToolId === tool.id && tool.inputSchema && hasProperties(tool.inputSchema)" class="tool-params">
+                    <div class="params-header">{{ t('agent.paramsHint') }}</div>
+                    <div v-for="(param, key) in tool.inputSchema.properties" :key="key" class="param-row">
+                      <span class="param-name">{{ key }}</span>
+                      <span class="param-type">{{ param.type || '-' }}</span>
+                      <span :class="isRequired(tool.inputSchema.required, key) ? 'param-required' : 'param-optional'">
+                        {{ isRequired(tool.inputSchema.required, key) ? t('agent.required') : t('agent.optional') }}
+                      </span>
+                      <span class="param-desc">{{ param.description || '-' }}</span>
+                    </div>
+                  </div>
+                </template>
               </div>
             </el-checkbox-group>
           </div>
@@ -703,13 +717,24 @@ interface AgentFormData {
   ragStrategy: string
 }
 
-/** MCP 工具选项（按 Server 分组） */
+/** MCP 工具选项（含 inputSchema） */
 interface McpToolOption {
   id: number
   name: string
   description: string
   serverName: string
   serverId: number
+  inputSchema: Record<string, any> | null
+}
+
+interface McpServerWithTools {
+  id: number
+  name: string
+  endpoint: string
+  enabled: number
+  online: boolean
+  toolCount: number
+  tools: McpToolOption[]
 }
 
 interface ChatMessage {
@@ -810,7 +835,16 @@ const knowledgeSelectOptions = computed(() => {
   return options
 })
 const knowledgeList = ref<KnowledgeBaseResponse[]>([])
-const mcpToolOptions = ref<McpToolOption[]>([])
+const mcpServers = ref<McpServerWithTools[]>([])
+const expandedToolId = ref<number | null>(null)
+
+function toggleExpand(toolId: number) {
+  expandedToolId.value = expandedToolId.value === toolId ? null : toolId
+}
+
+function isRequired(required: string[] | undefined, key: string): boolean {
+  return required?.includes(key) ?? false
+}
 const currentAgent = ref<AgentResponse | null>(null)
 const chatMessages = ref<ChatMessage[]>([])
 const testMessage = ref('')
@@ -938,50 +972,16 @@ const loadKnowledgeList = async () => {
 }
 
 /**
- * 加载 MCP 工具选项（按 Server 分组）
+ * 加载 MCP 工具选项（批量 API，含 Server 信息）
  */
 const loadMcpTools = async () => {
   try {
-    const result = await mcpApi.getList({ pageSize: 100, enabled: 1 })
-    const options: McpToolOption[] = []
-    const servers = (result as any).list || result.records || []
-    for (const server of servers) {
-      if (server.enabled !== 1) continue
-      try {
-        const detail = await mcpApi.getById(server.id)
-        if (detail.tools) {
-          for (const tool of detail.tools) {
-            options.push({
-              id: tool.id,
-              name: tool.name,
-              description: tool.description,
-              serverName: server.name,
-              serverId: server.id
-            })
-          }
-        }
-      } catch {
-        // 跳过无法加载的 Server
-      }
-    }
-    mcpToolOptions.value = options
+    const servers = await mcpApi.getToolsByServer({ enabled: 1 })
+    mcpServers.value = servers
   } catch (error) {
     console.error('Failed to load MCP tools:', error)
   }
 }
-
-/**
- * 按 Server 分组工具选项
- */
-const groupedMcpTools = computed(() => {
-  const groups: Record<string, McpToolOption[]> = {}
-  for (const tool of mcpToolOptions.value) {
-    const key = tool.serverName || `Server #${tool.serverId}`
-    if (!groups[key]) groups[key] = []
-    groups[key].push(tool)
-  }
-  return groups
-})
 
 /**
  * 获取 Agent 列表
@@ -1107,6 +1107,11 @@ const stripUnavailableSuffix = (value: string): string => {
     return value.slice(0, -suffix.length)
   }
   return value
+}
+
+/** 检查 JSON Schema 是否有 properties */
+function hasProperties(schema: Record<string, any> | null): boolean {
+  return !!(schema && schema.properties && Object.keys(schema.properties).length > 0)
 }
 
 const truncateText = (text: string, maxLength: number) => {
@@ -1735,6 +1740,9 @@ const quickPrompts = getQuickPrompts()
 }
 
 .tool-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   color: var(--eify-primary);
   padding: 6px 12px;
@@ -1773,6 +1781,80 @@ const quickPrompts = getQuickPrompts()
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 300px;
+}
+
+.server-name {
+  font-weight: 600;
+}
+
+.server-endpoint {
+  flex-shrink: 0;
+}
+
+.server-tool-count {
+  margin-left: auto;
+  font-weight: 400;
+  color: var(--eify-text-tertiary);
+}
+
+.tool-item.tool-disabled {
+  opacity: 0.5;
+}
+
+.tool-expand-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.tool-params {
+  margin: 4px 12px 12px 44px;
+  padding: 12px;
+  background: var(--eify-bg-subtle);
+  border: 1px solid var(--eify-border-subtle);
+  border-radius: var(--eify-radius-sm);
+}
+
+.params-header {
+  font-weight: 600;
+  color: var(--eify-text-secondary);
+  margin-bottom: 8px;
+}
+
+.param-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.param-name {
+  font-weight: 500;
+  color: var(--eify-text-primary);
+  min-width: 80px;
+}
+
+.param-type {
+  display: inline-block;
+  padding: 1px 6px;
+  background: var(--eify-bg-surface);
+  border-radius: var(--eify-radius-xs);
+  color: var(--eify-text-secondary);
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: var(--eify-font-size-xs);
+}
+
+.param-required {
+  color: var(--eify-error);
+  font-weight: 500;
+}
+
+.param-optional {
+  color: var(--eify-text-tertiary);
+}
+
+.param-desc {
+  color: var(--eify-text-secondary);
+  flex: 1;
 }
 
 /* ========== RAG 配置 ========== */

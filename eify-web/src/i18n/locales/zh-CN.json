@@ -57,7 +57,8 @@
     "all": "全部",
     "total": "总数",
     "refreshing": "刷新中...",
-    "language": "中文"
+    "language": "中文",
+    "collapse": "收起"
   },
   "sidebar": {
     "chat": "对话",
@@ -203,6 +204,11 @@
     "ragStrategyHint": "混合检索结合语义相似度和关键词匹配，推荐使用",
     "noToolsAvailable": "暂无可用工具，请先注册 MCP Server 并测试连通",
     "toolsHint": "选择工具后，Agent 在对话中可调用这些工具。最多选择 10 个。",
+    "toolsCount": "个工具",
+    "expandParams": "参数",
+    "paramsHint": "参数说明",
+    "required": "必填",
+    "optional": "可选",
     "quickPrompt": "快速提示：",
     "testMessagePlaceholder": "输入测试消息...",
     "sendMessage": "发送 (Ctrl+Enter)",
