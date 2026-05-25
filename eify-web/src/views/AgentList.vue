@@ -1125,10 +1125,10 @@ const handleEdit = (row: Record<string, any>) => {
     ragTopK: row.ragTopK ?? 5,
     ragStrategy: row.ragStrategy || 'hybrid'
   }
-  if (row.defaultProviderId && row.defaultProviderAvailable === false) {
+  if (row.defaultProviderId && !providers.value.some(p => p.id === row.defaultProviderId)) {
     unavailableProviderOption.value = {
       id: row.defaultProviderId,
-      name: t('provider.unavailable')
+      name: row.defaultProviderName || t('provider.unavailable')
     }
   } else {
     unavailableProviderOption.value = null

@@ -638,10 +638,10 @@ function openConfig(nodeId: string) {
   if (data.type === 'llm' && configForm.value.providerId) {
     const providerId = configForm.value.providerId
     const found = providerOptions.value.find(p => p.id === providerId)
-    if (!found && configForm.value.providerAvailable === false) {
+    if (!found) {
       providerOptions.value.push({
         id: providerId,
-        name: t('provider.unavailable'),
+        name: configForm.value.providerName || t('provider.unavailable'),
         type: '' as any,
         baseUrl: '',
         authConfig: null,
