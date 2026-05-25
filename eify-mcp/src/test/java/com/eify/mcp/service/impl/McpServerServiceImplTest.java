@@ -918,4 +918,120 @@ class McpServerServiceImplTest {
             assertNotNull(result);
         }
     }
+
+    // ========== listToolsByWorkspace() ==========
+
+    @Nested
+    @DisplayName("listToolsByWorkspace")
+    class ListToolsByWorkspaceTests {
+
+        @Test
+        @DisplayName("按 enabled=1 过滤，仅返回启用的 Server 及其工具")
+        void shouldFilterByEnabled() {
+            McpServer s1 = buildServer(1L, "知识检索", "http://kb:8080", 1L);
+            s1.setEnabled(1);
+            McpServer s2 = buildServer(2L, "数据服务", "http://data:9090", 1L);
+            s2.setEnabled(0);
+
+            McpTool tool1 = buildTool(10L, 1L, "search");
+            tool1.setDescription("搜索");
+            tool1.setWorkspaceId(1L);
+            McpTool tool2 = buildTool(11L, 1L, "get-doc");
+            tool2.setDescription("获取文档");
+            tool2.setWorkspaceId(1L);
+
+            when(mcpServerMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(s1));
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(tool1, tool2));
+            when(mcpClientService.isClientCached(eq(1L))).thenReturn(false);
+
+            List<McpServerResponse> result = mcpServerService.listToolsByWorkspace(1);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getId()).isEqualTo(1L);
+            assertThat(result.get(0).getOnline()).isTrue(); // enabled=1 fallback
+            assertThat(result.get(0).getToolCount()).isEqualTo(2);
+            assertThat(result.get(0).getTools()).hasSize(2);
+            assertThat(result.get(0).getTools().get(0).getName()).isEqualTo("search");
+            assertThat(result.get(0).getTools().get(0).getDescription()).isEqualTo("搜索");
+        }
+
+        @Test
+        @DisplayName("enabled=0 的 Server online 应为 false")
+        void shouldMarkDisabledAsOffline() {
+            McpServer s1 = buildServer(1L, "离线服务", "http://off:8080", 1L);
+            s1.setEnabled(0);
+
+            when(mcpServerMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(s1));
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of());
+            when(mcpClientService.isClientCached(eq(1L))).thenReturn(false);
+
+            List<McpServerResponse> result = mcpServerService.listToolsByWorkspace(null);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getOnline()).isFalse();
+            assertThat(result.get(0).getTools()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("缓存中有连接记录时 online 为 true")
+        void shouldUseCacheForOnlineStatus() {
+            McpServer s1 = buildServer(1L, "在线服务", "http://on:8080", 1L);
+            s1.setEnabled(1);
+
+            when(mcpServerMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(s1));
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of());
+            when(mcpClientService.isClientCached(eq(1L))).thenReturn(true);
+
+            List<McpServerResponse> result = mcpServerService.listToolsByWorkspace(1);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getOnline()).isTrue();
+        }
+
+        @Test
+        @DisplayName("无符合条件的 Server 时应返回空列表")
+        void shouldReturnEmptyList() {
+            when(mcpServerMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of());
+
+            List<McpServerResponse> result = mcpServerService.listToolsByWorkspace(1);
+
+            assertThat(result).isEmpty();
+            verify(mcpToolMapper, never()).selectList(any(LambdaQueryWrapper.class));
+        }
+
+        @Test
+        @DisplayName("工具按 serverId 正确分组")
+        void shouldGroupToolsByServerId() {
+            McpServer s1 = buildServer(1L, "S1", "http://s1:8080", 1L);
+            s1.setEnabled(1);
+            McpServer s2 = buildServer(2L, "S2", "http://s2:9090", 1L);
+            s2.setEnabled(1);
+
+            McpTool t1 = buildTool(10L, 1L, "a");
+            t1.setWorkspaceId(1L);
+            McpTool t2 = buildTool(20L, 2L, "b");
+            t2.setWorkspaceId(1L);
+            McpTool t3 = buildTool(30L, 2L, "c");
+            t3.setWorkspaceId(1L);
+
+            when(mcpServerMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(s1, s2));
+            when(mcpToolMapper.selectList(any(LambdaQueryWrapper.class)))
+                    .thenReturn(List.of(t1, t2, t3));
+            when(mcpClientService.isClientCached(anyLong())).thenReturn(false);
+
+            List<McpServerResponse> result = mcpServerService.listToolsByWorkspace(1);
+
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getTools()).hasSize(1);
+            assertThat(result.get(1).getTools()).hasSize(2);
+        }
+    }
 }
