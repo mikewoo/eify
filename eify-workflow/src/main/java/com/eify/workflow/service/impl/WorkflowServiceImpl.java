@@ -21,6 +21,8 @@ import com.eify.workflow.mapper.WorkflowEdgeMapper;
 import com.eify.workflow.mapper.WorkflowMapper;
 import com.eify.workflow.mapper.WorkflowNodeMapper;
 import com.eify.workflow.service.WorkflowService;
+import com.eify.provider.domain.entity.Provider;
+import com.eify.provider.mapper.ProviderMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,6 +44,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper nodeMapper;
     private final WorkflowEdgeMapper edgeMapper;
+    private final ProviderMapper providerMapper;
 
     @Override
     public PageResult<WorkflowResponse> list(Integer page, Integer pageSize) {
@@ -290,6 +296,20 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     private NodeDetail toNodeDetail(WorkflowNode n) {
+        JsonNode config = n.getConfig();
+
+        if ("llm".equals(n.getType()) && config != null && config.has("providerId")) {
+            Long providerId = config.get("providerId").asLong();
+            Provider provider = providerMapper.selectById(providerId);
+            if (config.isObject()) {
+                ObjectNode mutableConfig = (ObjectNode) config;
+                mutableConfig.put("providerAvailable", provider != null);
+                if (provider != null) {
+                    mutableConfig.put("providerName", provider.getName());
+                }
+            }
+        }
+
         return NodeDetail.builder()
                 .id(n.getId())
                 .workflowId(n.getWorkflowId())
@@ -298,7 +318,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 .name(n.getLabel())
                 .positionX(n.getPositionX())
                 .positionY(n.getPositionY())
-                .config(n.getConfig())
+                .config(config)
                 .build();
     }
 

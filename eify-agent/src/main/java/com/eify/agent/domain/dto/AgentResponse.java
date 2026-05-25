@@ -54,6 +54,11 @@ public class AgentResponse {
     private String defaultProviderType;
 
     /**
+     * 默认供应商是否可用（false 表示已被删除或禁用）
+     */
+    private Boolean defaultProviderAvailable;
+
+    /**
      * 默认模型
      */
     private String defaultModel;

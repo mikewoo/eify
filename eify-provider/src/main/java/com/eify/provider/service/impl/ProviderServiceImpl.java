@@ -272,6 +272,20 @@ public class ProviderServiceImpl implements ProviderService {
         Provider existing = WorkspaceGuard.requireInWorkspace(
                 providerMapper.selectById(id), ErrorCode.NOT_FOUND);
 
+        int agentRefs = providerMapper.countAgentReferences(id);
+        if (agentRefs > 0) {
+            throw new BusinessException(ErrorCode.PROVIDER_IN_USE);
+        }
+
+        try {
+            int workflowRefs = providerMapper.countWorkflowLlmReferences(id);
+            if (workflowRefs > 0) {
+                throw new BusinessException(ErrorCode.PROVIDER_IN_USE_BY_WORKFLOW);
+            }
+        } catch (Exception e) {
+            log.warn("跳过工作流 LLM 节点引用检查（可能是不支持 JSON_EXTRACT 的数据库）: {}", e.getMessage());
+        }
+
         modelConfigMapper.delete(new LambdaQueryWrapper<ModelConfig>()
                 .eq(ModelConfig::getProviderId, id)
                 .eq(ModelConfig::getWorkspaceId, CurrentContext.getWorkspaceId()));

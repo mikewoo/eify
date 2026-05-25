@@ -179,33 +179,39 @@
           </el-form-item>
 
           <el-form-item :label="t('agent.selectProvider')" prop="defaultProviderId">
-            <el-select
-              v-model="data.defaultProviderId"
-              :placeholder="t('agent.selectProvider')"
-              style="width: 100%"
-              @change="handleProviderChange"
-            >
-              <el-option
-                v-for="provider in providers"
-                :key="provider.id"
-                :label="provider.name"
-                :value="provider.id"
+            <div :class="{ 'provider-unavailable': unavailableProviderOption && unavailableProviderOption.id === data.defaultProviderId }" style="width: 100%">
+              <el-select
+                v-model="data.defaultProviderId"
+                :placeholder="t('agent.selectProvider')"
+                style="width: 100%"
+                @change="handleProviderChange"
               >
-                <span>{{ provider.name }}</span>
-                <el-tag size="small" style="margin-left: 8px" effect="plain">{{ provider.type }}</el-tag>
+              <el-option
+                v-for="p in providerSelectOptions"
+                :key="p.id"
+                :label="p.available ? p.name : `${p.originalName}${t('provider.unavailable')}`"
+                :value="p.id"
+                :disabled="!p.available"
+              >
+                <span :style="!p.available ? { color: 'var(--eify-error)' } : {}">
+                  {{ p.available ? p.name : `${p.originalName}${t('provider.unavailable')}` }}
+                </span>
+                <el-tag v-if="p.available" size="small" style="margin-left: 8px" effect="plain">{{ p.type }}</el-tag>
               </el-option>
             </el-select>
-            <div class="form-hint" v-if="providers.length === 0">{{ t('provider.unsyncedHint') }}</div>
+            </div>
+            <div class="form-hint" v-if="providerSelectOptions.length === 0">{{ t('provider.unsyncedHint') }}</div>
           </el-form-item>
 
           <el-form-item :label="t('agent.selectModel')" prop="defaultModel">
-            <el-autocomplete
-              v-model="data.defaultModel"
-              :fetch-suggestions="searchModels"
-              :placeholder="t('agent.selectModel')"
-              style="width: 100%"
-              clearable
-            >
+            <div :class="{ 'model-unavailable': unavailableProviderOption && unavailableProviderOption.id === data.defaultProviderId }" style="width: 100%">
+              <el-autocomplete
+                v-model="data.defaultModel"
+                :fetch-suggestions="searchModels"
+                :placeholder="t('agent.selectModel')"
+                style="width: 100%"
+                clearable
+              >
               <template #default="{ item }">
                 <div class="model-suggestion">
                   <span class="model-name">{{ item.value }}</span>
@@ -226,6 +232,7 @@
                   {{ model }}
                 </el-tag>
               </el-text>
+            </div>
             </div>
           </el-form-item>
 
@@ -758,6 +765,29 @@ const showDeleteConfirm = ref(false)
 const deleteTarget = ref<{ id: number; name: string } | null>(null)
 const providers = ref<ProviderResponse[]>([])
 const providerModelsMap = ref<Map<number, ModelConfigInfo[]>>(new Map())
+const unavailableProviderOption = ref<{ id: number; name: string; originalName: string } | null>(null)
+
+/** 合并后的 provider 选项（含不可用 provider 的兜底选项） */
+const providerSelectOptions = computed(() => {
+  const options = providers.value.map(p => ({
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    available: true,
+    originalName: p.name
+  }))
+  if (unavailableProviderOption.value) {
+    const opt = unavailableProviderOption.value
+    options.push({
+      id: opt.id,
+      name: `${opt.originalName}${t('provider.unavailable')}`,
+      type: '' as string,
+      available: false,
+      originalName: opt.originalName
+    })
+  }
+  return options
+})
 const knowledgeList = ref<KnowledgeBaseResponse[]>([])
 const mcpToolOptions = ref<McpToolOption[]>([])
 const currentAgent = ref<AgentResponse | null>(null)
@@ -977,7 +1007,7 @@ const createAgent = async (data: AgentFormData) => {
     description: data.description || undefined,
     avatar: data.avatar || undefined,
     defaultProviderId: data.defaultProviderId,
-    defaultModel: data.defaultModel,
+    defaultModel: stripUnavailableSuffix(data.defaultModel),
     systemPrompt: data.systemPrompt,
     userMessagePrefix: data.userMessagePrefix || undefined,
     welcomeMessage: data.welcomeMessage || undefined,
@@ -1009,7 +1039,7 @@ const updateAgent = async (data: AgentFormData) => {
     description: data.description || undefined,
     avatar: data.avatar || undefined,
     defaultProviderId: data.defaultProviderId,
-    defaultModel: data.defaultModel,
+    defaultModel: stripUnavailableSuffix(data.defaultModel),
     systemPrompt: data.systemPrompt,
     userMessagePrefix: data.userMessagePrefix || undefined,
     welcomeMessage: data.welcomeMessage || undefined,
@@ -1049,6 +1079,15 @@ const testChat = async (id: number, message: string): Promise<AgentTestChatRespo
 
 /* ========== 工具方法 ========== */
 
+/** 去掉模型名称末尾的"(不可用)"后缀 */
+const stripUnavailableSuffix = (value: string): string => {
+  const suffix = t('provider.unavailable')
+  if (value && value.endsWith(suffix)) {
+    return value.slice(0, -suffix.length)
+  }
+  return value
+}
+
 const truncateText = (text: string, maxLength: number) => {
   if (!text) return ''
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
@@ -1087,6 +1126,7 @@ const scrollToBottom = () => {
 
 const handleAdd = () => {
   activeTab.value = 'basic'
+  unavailableProviderOption.value = null
   loadMcpTools()
   dialogRef.value?.open()
 }
@@ -1115,6 +1155,17 @@ const handleEdit = (row: Record<string, any>) => {
     ragEnabled: row.ragEnabled ?? 0,
     ragTopK: row.ragTopK ?? 5,
     ragStrategy: row.ragStrategy || 'hybrid'
+  }
+  if (row.defaultProviderId && !providers.value.some(p => p.id === row.defaultProviderId)) {
+    const originalName = row.defaultProviderName || `Provider #${row.defaultProviderId}`
+    unavailableProviderOption.value = {
+      id: row.defaultProviderId,
+      name: `${originalName}${t('provider.unavailable')}`,
+      originalName
+    }
+    formData.defaultModel = (row.defaultModel || '') + t('provider.unavailable')
+  } else {
+    unavailableProviderOption.value = null
   }
   activeTab.value = 'basic'
   loadMcpTools()
@@ -2312,5 +2363,21 @@ const quickPrompts = getQuickPrompts()
   padding-left: 12px;
   margin: 8px 0;
   color: var(--eify-text-secondary);
+}
+</style>
+
+<style>
+/* 不可用 provider/model 红色文字（非 scoped，确保穿透 Element Plus 组件） */
+.provider-unavailable,
+.provider-unavailable .el-input__inner,
+.provider-unavailable .el-select__input,
+.provider-unavailable .el-select__selected-item {
+  color: var(--eify-error) !important;
+  -webkit-text-fill-color: var(--eify-error) !important;
+}
+
+.model-unavailable .el-input__inner {
+  color: var(--eify-error) !important;
+  -webkit-text-fill-color: var(--eify-error) !important;
 }
 </style>

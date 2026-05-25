@@ -94,8 +94,10 @@ public class AgentServiceImpl implements AgentService {
         batchLoadKnowledgeIds(result.getRecords());
         batchLoadMcpToolIds(result.getRecords());
 
+        Map<Long, Provider> providerMap = batchLoadProvidersForAgents(result.getRecords());
+
         List<AgentResponse> responses = result.getRecords().stream()
-                .map(this::toBasicResponse)
+                .map(a -> toBasicResponse(a, providerMap))
                 .collect(Collectors.toList());
 
         return PageResult.of(responses, result.getTotal(), page, pageSize);
@@ -125,8 +127,10 @@ public class AgentServiceImpl implements AgentService {
         batchLoadKnowledgeIds(result.getRecords());
         batchLoadMcpToolIds(result.getRecords());
 
+        Map<Long, Provider> providerMap = batchLoadProvidersForAgents(result.getRecords());
+
         List<AgentResponse> responses = result.getRecords().stream()
-                .map(this::toBasicResponse)
+                .map(a -> toBasicResponse(a, providerMap))
                 .collect(Collectors.toList());
 
         return PageResult.of(responses, result.getTotal(), page, pageSize);
@@ -535,13 +539,18 @@ public class AgentServiceImpl implements AgentService {
     /**
      * 转换为基本响应对象
      */
-    private AgentResponse toBasicResponse(Agent agent) {
+    private AgentResponse toBasicResponse(Agent agent, Map<Long, Provider> providerMap) {
+        Provider provider = providerMap.get(agent.getDefaultProviderId());
+
         return AgentResponse.builder()
                 .id(agent.getId())
                 .name(agent.getName())
                 .description(agent.getDescription())
                 .avatar(agent.getAvatar())
                 .defaultProviderId(agent.getDefaultProviderId())
+                .defaultProviderName(provider != null ? provider.getName() : null)
+                .defaultProviderType(provider != null ? provider.getType().toString() : null)
+                .defaultProviderAvailable(provider != null)
                 .defaultModel(agent.getDefaultModel())
                 .systemPrompt(agent.getSystemPrompt())
                 .userMessagePrefix(agent.getUserMessagePrefix())
@@ -564,6 +573,21 @@ public class AgentServiceImpl implements AgentService {
                 .ragTopK(agent.getRagTopK())
                 .ragStrategy(agent.getRagStrategy())
                 .build();
+    }
+
+    /**
+     * 批量加载 Agent 列表关联的 Provider
+     */
+    private Map<Long, Provider> batchLoadProvidersForAgents(List<Agent> agents) {
+        Set<Long> providerIds = agents.stream()
+                .map(Agent::getDefaultProviderId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (providerIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return providerMapper.selectBatchIds(providerIds).stream()
+                .collect(Collectors.toMap(Provider::getId, p -> p));
     }
 
     /**
@@ -618,7 +642,12 @@ public class AgentServiceImpl implements AgentService {
                     .name(provider.getName())
                     .type(provider.getType().toString())
                     .baseUrl(provider.getBaseUrl())
-                    .build());
+                    .build())
+                    .defaultProviderName(provider.getName())
+                    .defaultProviderType(provider.getType().toString())
+                    .defaultProviderAvailable(true);
+        } else {
+            builder.defaultProviderAvailable(false);
         }
 
         return builder.build();
