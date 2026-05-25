@@ -8,8 +8,15 @@
 **范围**：
 - Section A：知识库删除 → Agent 编辑/列表页
 - Section B：Agent/Workflow 删除 → Chat 页面
+- Section C：MCP Server 删除 → Workflow Tool Call 节点编辑
 
-**不涉及**：MCP 删除 → Chat（MCP 工具仅后端使用，删除后静默跳过，无需 UI 处理）
+**排查后确认不需要修复的场景**：
+
+| 场景 | 结论 | 原因 |
+|:---|:---|:---|
+| MCP Server → Agent | 无需修复 | 后端 `McpServerServiceImpl.delete()` 会检查 agent 绑定，有绑定则阻止删除（`MCP_SERVER_HAS_BINDINGS`） |
+| Knowledge Base → Workflow | 不存在 | Workflow 不引用知识库，WorkflowEdit.vue 中无 knowledge 相关代码 |
+| MCP → Chat | 无需修复 | MCP 工具仅后端使用，Chat UI 不展示工具名 |
 
 ---
 
@@ -393,16 +400,129 @@ async function selectConversation(id: number) {
 
 ---
 
+## Section C：MCP Server 删除 → Workflow Tool Call 节点编辑
+
+### C.1 现状
+
+Workflow 的 Tool Call 节点存储 MCP 引用方式不同于 Agent（Agent 用 `agent_mcp_tool` 中间表），Tool Call 节点直接在 config JSON 中存 `serverId` + `toolName`。
+
+| 层面 | 问题 |
+|:---|:---|
+| 后端 `McpServerServiceImpl.delete()` | **不检查 Workflow 引用**——只检查 Agent 绑定，Workflow 节点引用不受保护 |
+| 前端 `WorkflowEdit.vue` `openConfig()` | `mcpServerOptions` 从 `mcpApi.getList({ enabled: 1 })` 加载，已删除 server 不出现。但 `configForm.serverId` 保留旧值，select 为空 |
+| 前端 tool 下拉 | `onServerChange()` 调用 `mcpApi.getById(serverId)`，已删除 server 返回 404，工具列表为空，`configForm.toolName` 保留旧值但不匹配任何 option |
+| 运行时 | `ToolCallNodeExecutor` 检查 `mcpServerMapper.selectById(config.serverId())`，返回 null 时报错 "MCP Server 不存在或已禁用: id=X"——**裸 ID 出现在错误消息中** |
+
+### C.2 修复方案
+
+参照 Provider 修复模式，在 `openConfig` 和 `onServerChange` 中处理不可用 server。
+
+#### Task C1：前端 — 新增 `unavailableMcpServer` 选项
+
+**文件**：`eify-web/src/views/WorkflowEdit.vue`
+
+参照已有的 `providerOptions` 不可用处理（Lines 649-658）：
+
+在 `openConfig()` 中，检测 `configForm.serverId` 是否在 `mcpServerOptions` 中：
+
+```typescript
+// openConfig 中 serverId 探测（参照 provider 处理 lines 649-658）
+if (configForm.serverId) {
+  const serverExists = mcpServerOptions.value.some(s => s.id === configForm.serverId)
+  if (!serverExists) {
+    // MCP Server 已被删除 —— 注入不可用选项
+    const unavailableOpt = {
+      id: configForm.serverId,
+      name: `MCP Server #${configForm.serverId}${t('provider.unavailable')}`,
+      type: '' // 标记为不可用（与 provider 的 type: '' 模式一致）
+    }
+    mcpServerOptions.value.push(unavailableOpt)
+    // tool 下拉同样注入不可用选项
+    toolOptions.value = [{
+      value: configForm.toolName,
+      label: `${configForm.toolName}${t('provider.unavailable')}`,
+      description: '',
+      unavailable: true
+    }]
+  } else {
+    await onServerChange(configForm.serverId)
+  }
+}
+```
+
+#### Task C2：模板 — Server 下拉展示不可用样式
+
+**文件**：同上
+
+Server select 中 disabled 不可用选项 + 红色文字（仿 provider 模式）：
+
+```html
+<el-select v-model="configForm.serverId" :class="{ 'provider-unavailable': isMcpServerUnavailable }" ...>
+  <el-option
+    v-for="s in mcpServerOptions"
+    :key="s.id"
+    :label="s.type === '' ? s.name : s.name"
+    :value="s.id"
+    :disabled="s.type === ''"
+  >
+    <span :style="s.type === '' ? { color: 'var(--eify-error)' } : {}">{{ s.name }}</span>
+  </el-option>
+</el-select>
+```
+
+新增 computed：
+```typescript
+const isMcpServerUnavailable = computed(() => {
+  if (!configForm.serverId) return false
+  const s = mcpServerOptions.value.find(s => s.id === configForm.serverId)
+  return !!s && !s.type // type 为空 = 不可用
+})
+```
+
+#### Task C3：模板 — Tool 下拉展示不可用样式
+
+Tool select 同理，当 server 不可用时，tool 也是不可用的：
+
+```html
+<el-select v-model="configForm.toolName" :class="{ 'model-unavailable': isMcpServerUnavailable }" ...>
+  <el-option
+    v-for="t in toolOptions"
+    :key="t.value"
+    :label="t.unavailable ? t.label : t.value"
+    :value="t.value"
+    :disabled="t.unavailable"
+  >
+    <span :style="t.unavailable ? { color: 'var(--eify-error)' } : {}">{{ t.label || t.value }}</span>
+  </el-option>
+</el-select>
+```
+
+#### Task C4：ToolCallNodeExecutor 错误消息优化（可选）
+
+**文件**：`eify-workflow/src/main/java/com/eify/workflow/engine/executor/ToolCallNodeExecutor.java`
+
+当前错误消息含裸 serverId：
+```java
+return NodeResult.fail("MCP Server 不存在或已禁用: id=" + config.serverId());
+```
+
+改进为包含上下文：
+```java
+return NodeResult.fail("MCP Server 不可用 (id=" + config.serverId() + ")，无法执行工具调用: " + config.toolName());
+```
+
+---
+
 ## 对照：与已完成的 Provider 修复模式一致
 
-| 修复维度 | Provider 修复（已完成） | KB 修复（Section A） | Chat 修复（Section B） |
-|:---|:---|:---|:---|
-| 后端标记不可用 | `defaultProviderAvailable=false` | `KnowledgeBaseBrief.name=null` | 不需要后端改动 |
-| 前端注入 fallback | `unavailableProviderOption` | `unavailableKnowledgeOptions` | `agentUnavailable` |
-| 名称来源 | 后端返回 `defaultProviderName` | 后端填充 `knowledgeBases` | 复用 `Conversation.title`（已持久化） |
-| 红色文字 | `provider-unavailable` CSS class | 同样 CSS class | `agent-name-unavailable` CSS class |
-| 禁用交互 | option `:disabled` | option `:disabled` | 输入框 + 发送按钮 `:disabled` |
-| i18n | `provider.unavailable: "(不可用)"` | 复用同上 key | 新增 `chat.agentUnavailableHint` |
+| 修复维度 | Provider（已完成） | KB→Agent（Sec A） | Agent/Workflow→Chat（Sec B） | MCP→Workflow（Sec C） |
+|:---|:---|:---|:---|:---|
+| 后端标记不可用 | `defaultProviderAvailable=false` | `KnowledgeBaseBrief.name=null` | 不需要后端改动 | `ToolCallNodeExecutor` 错误消息优化 |
+| 前端注入 fallback | `unavailableProviderOption` | `unavailableKnowledgeOptions` | `entityUnavailable` | 注入不可用 server/tool 选项 |
+| 名称来源 | 后端返回 name | 后端填充 `knowledgeBases` | 复用 `Conversation.title` | 用 `serverId` 构造（无法获取原名） |
+| 红色文字 | CSS class | 同左 | `entity-name-unavailable` | 复用已有 CSS class |
+| 禁用交互 | option `:disabled` | option `:disabled` | 输入框 + 按钮 `:disabled` | option `:disabled` |
+| i18n | `provider.unavailable` | 复用同 key | 新增 `chat.*Hint` | 复用 `provider.unavailable` |
 
 ---
 
