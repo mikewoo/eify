@@ -2,6 +2,22 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/) 规范。
 
+## [Unreleased] - 2026-05-25
+
+### 新增
+- 后端删除引用检查：Agent/知识库/MCP 服务器/工作流删除前检查是否被活跃对话或实体引用，被引用时拒绝删除并返回对应错误码
+- 新增错误码：`AGENT_IN_USE(3004)`、`KNOWLEDGE_IN_USE(7008)`、`WORKFLOW_IN_USE(6009)`、`MCP_SERVER_IN_USE_BY_WORKFLOW(5006)`
+- Agent 列表接口现在返回 `knowledgeBases` 字段，包含关联知识库的简要信息（已删除的 KB 名称返回 null）
+
+### 变更
+- 后端 SSE 错误消息现在通过 `MessageUtil` 解析，根据请求的 `Accept-Language` 头返回对应语言的错误信息，替代原有的硬编码中文消息
+- Provider 删除检查从 `PROVIDER_NOT_FOUND` 改为 `PROVIDER_IN_USE(2007)` / `PROVIDER_IN_USE_BY_WORKFLOW(2008)`
+
+### 修复
+- 修复当 Agent 关联的 Provider 已被删除时，发送消息返回不友好的 `HTTP error! status: 500` 问题。现在 ChatServiceImpl 在 SseEmitter 创建后捕获 `BusinessException`，通过 SSE 事件发送错误消息，避免异常到达 `GlobalExceptionHandler` 导致 `HttpMediaTypeNotAcceptableException`（`Accept: text/event-stream` 与 JSON 响应体不兼容）
+- 前端 ChatView/AgentList/WorkflowEdit 现在对已删除的引用实体（Agent、工作流、知识库）显示 `(不可用)` 标记，并禁用聊天输入框
+- 前端 SSE 错误回退提示使用 i18n 键 `sendErrorHint` 代替原始 HTTP 状态码
+
 ## [1.0.0] - 2026-05-18
 
 ### 新增
