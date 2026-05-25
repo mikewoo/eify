@@ -181,14 +181,31 @@ if (row.knowledgeBases) {
 | Workflow 被删除 | 顶栏始终用 `conversation.title`（持久化字段），不查 workflow 名 | 名称正常，但发消息时 workflow 引擎调用失败，错误不明确 |
 | Agent/Workflow 选择器 | 已删除的不会出现 | 正常，无需改动 |
 
-### B.2 约束
+### B.2 关键发现：名称已在 title 中持久化
 
-- `Conversation` 实体 **只存储 ID**（`agentId`、`workflowId`），不存名称。后向兼容考虑，不加字段。
-- 获取已删除实体的名称需要绕过 `@TableLogic` —— 目前后端没有提供这个能力。**Chat 场景不涉及列表渲染**，只涉及单个对话的顶栏展示，可以用后端已有的 `getEntityById` 改为允许查询已删除记录，或在 Chat API 返回时附加名称。
+创建对话时，title 已经包含了实体名称：
 
-### B.3 修复方案
+```typescript
+// ChatView.vue line 139 — 创建 Agent 对话
+const title = newConversationTitle.value.trim() || t('chat.conversationWithAgent', { name: agent.name })
+// 例："与 DeepSeek 的对话"
 
-**思路**：最小侵入。在 Chat 前端做降级展示 + 禁用输入，而非在 Conversation 表加冗余字段。
+// ChatView.vue line 189 — 创建 Workflow 对话
+const title = newConversationTitle.value.trim() || workflow.name
+// 例："客户服务流程"
+```
+
+**这意味着：不需要绕过 `@TableLogic` 查已删除数据，也不需要给 Conversation 表加冗余字段。title 就是已持久化的名称。**
+
+### B.3 约束
+
+- 🔴 **不绕过 `@TableLogic`**：已删除的数据不应被查询，尊重软删除语义
+- 🟡 **不加数据库字段**：title 已包含名称，无需冗余
+- 🟢 **Chat 降级展示**：用 title + "(不可用)" 标识 + 禁用输入
+
+### B.4 修复方案
+
+**思路**：利用 Conversation.title 已持久化的名称，在 Agent API 调用失败时标记不可用，顶栏展示 title + 红色 "(不可用)" 标识，同时禁用输入。
 
 #### Task B1：前端 — 新增 `agentUnavailable` 状态
 
@@ -197,98 +214,115 @@ if (row.knowledgeBases) {
 ```typescript
 // 新增状态：当前对话引用的 Agent 是否不可用
 const agentUnavailable = ref(false)
-const agentUnavailableName = ref('')
 ```
 
 在 `selectConversation()` 中修改错误处理：
 
 ```typescript
 async function selectConversation(id: number) {
-  // ... existing code ...
+  if (currentConversationId.value === id) return
+
+  currentConversationId.value = id
+  const conversation = conversations.value.find(c => c.id === id)
+  agentUnavailable.value = false  // 重置
+
   if (conversation?.agentId) {
-    agentUnavailable.value = false
     try {
       const agent = await agentApi.getAgent(conversation.agentId)
       currentAgent.value = agent
       currentAgentId.value = agent.id
     } catch (error) {
-      // Agent 已被删除或禁用
+      // Agent 已被删除或禁用 — 不查已删除数据，依赖 title 中已持久化的名称
       currentAgent.value = null
-      currentAgentId.value = conversation.agentId // 保留 ID 用于前端展示
+      currentAgentId.value = null
       agentUnavailable.value = true
-      // 尝试从 knowledgeBases/其他来源推测名称（做不到就用 ID 构造）
-      agentUnavailableName.value = `Agent #${conversation.agentId}`
     }
+  } else {
+    currentAgent.value = null
+    currentAgentId.value = null
   }
-  // ...
+
+  await loadConversationMessages(id)
 }
 ```
 
 #### Task B2：前端 — 顶栏展示不可用状态
 
-**文件**：`eify-web/src/views/ChatView.vue`
+**文件**：同上
 
-修改顶栏模板（当前 `v-if="currentAgent"` 的 block），新增 `agentUnavailable` 分支：
+title 本身就是 "与 DeepSeek 的对话" 或 workflow.name，不需要拼接额外名称。展示逻辑：
 
 ```html
-<!-- Agent 正常时 -->
+<!-- Agent 正常时（现有代码不变） -->
 <div v-if="currentAgent" class="agent-info">
-  <!-- 现有代码不变 -->
-</div>
-
-<!-- Agent 不可用时 -->
-<div v-else-if="agentUnavailable" class="agent-info agent-unavailable-info">
-  <div class="agent-avatar-placeholder unavailable-placeholder">
-    <svg><!-- warning icon --></svg>
-  </div>
+  <img v-if="currentAgent.avatar" :src="currentAgent.avatar" class="agent-avatar" alt="">
+  <div v-else class="agent-avatar-placeholder">{{ currentAgent.name.charAt(0) }}</div>
   <div>
-    <div class="agent-name agent-name-unavailable">
-      {{ agentUnavailableName }}
-      <span class="unavailable-badge">{{ t('provider.unavailable') }}</span>
-    </div>
+    <div class="agent-name">{{ currentAgent.name }}</div>
     <div class="conversation-title">{{ currentConversation?.title || t('chat.newChat') }}</div>
   </div>
 </div>
 
-<!-- Workflow / fallback -->
+<!-- Agent 不可用时（新增分支：展示 title + 不可用标识） -->
+<div v-else-if="agentUnavailable" class="agent-info agent-unavailable-info">
+  <div class="agent-avatar-placeholder unavailable-placeholder">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4M12 16h.01"/>
+    </svg>
+  </div>
+  <div>
+    <div class="agent-name agent-name-unavailable">
+      {{ currentConversation?.title || t('chat.newChat') }}
+      <span class="unavailable-badge">{{ t('provider.unavailable') }}</span>
+    </div>
+    <div class="conversation-title hint-unavailable">{{ t('chat.agentUnavailableHint') }}</div>
+  </div>
+</div>
+
+<!-- Workflow 模式（现有代码不变） -->
 <div v-else-if="currentConversation?.workflowId" class="agent-info">
-  <!-- 现有代码不变 -->
+  ...
+</div>
+
+<!-- 纯文本兜底（现有代码不变） -->
+<div v-else>
+  {{ currentConversation?.title || t('chat.newChat') }}
 </div>
 ```
 
-#### Task B3：前端 — 禁用输入框 + 提示
+**设计说明**：顶栏主标题直接使用 conversation.title（已包含 Agent 名），附加红色 "(不可用)" 标签；副标题显示不可用提示取代原来的 conversation title 重复。
+
+#### Task B3：前端 — 禁用输入 + 提示
 
 **文件**：同上
 
-当 `agentUnavailable` 为 true 时：
-1. 禁用输入框（textarea `:disabled` 增加 `agentUnavailable` 条件）
-2. 修改 placeholder 为提示文字
-3. 发送按钮禁用
-
 ```html
 <textarea
+  ref="inputRef"
+  v-model="inputContent"
+  class="message-input"
   :placeholder="agentUnavailable ? t('chat.agentUnavailableHint') : t('chat.inputPlaceholder')"
+  rows="1"
   :disabled="isSending || agentUnavailable"
-/>
-```
-
-```html
+  @keydown="handleKeyDown"
+></textarea>
 <button
+  class="send-button"
+  @click="sendMessage"
   :disabled="!inputContent.trim() || isSending || agentUnavailable"
-/>
+>
 ```
 
-#### Task B4：前端 — Workflow 不可用同理
+#### Task B4：Workflow 场景
 
-Workflow 的修复更简单——Conversation 的 title 已持久化，用户仍能看到对话名称。只需在 `currentConversation?.workflowId` 存在但 chat 调用失败时给出明确提示。目前的 SSE error 事件已有兜底，但可以增强错误信息。
-
-此项改动最小：确保后端 workflow 执行失败时返回包含 "workflow" 关键字的错误信息，前端不做额外改动。
+Workflow 删除后的处理更简单——title 就是 workflow.name，用户仍能看到。仅需：SSE error 事件返回时，显示更明确的错误信息。此项后端已有兜底，前端不做额外改动。
 
 #### Task B5：CSS — 不可用样式
 
 **文件**：`eify-web/src/views/ChatView.vue`
 
-仿照 AgentList 的 provider-unavailable 模式，在 `<style>` (non-scoped) 中添加：
+在 non-scoped `<style>` 块中添加：
 
 ```css
 .agent-unavailable-info .agent-name-unavailable {
@@ -305,6 +339,10 @@ Workflow 的修复更简单——Conversation 的 title 已持久化，用户仍
   background-color: var(--eify-error-bg, #fef2f2);
   border: 1px dashed var(--eify-error);
 }
+
+.hint-unavailable {
+  color: var(--eify-error);
+}
 ```
 
 #### Task B6：i18n
@@ -312,10 +350,17 @@ Workflow 的修复更简单——Conversation 的 title 已持久化，用户仍
 **文件**：`eify-web/src/i18n/locales/zh-CN.json`、`en-US.json`
 
 ```json
+// zh-CN
 {
   "chat": {
-    "agentUnavailableHint": "该 Agent 已被删除，无法发送消息",
-    "workflowUnavailableHint": "该工作流已被删除，无法发送消息"
+    "agentUnavailableHint": "该 Agent 已被删除，无法发送消息"
+  }
+}
+
+// en-US
+{
+  "chat": {
+    "agentUnavailableHint": "This agent has been deleted and cannot send messages"
   }
 }
 ```
@@ -326,10 +371,11 @@ Workflow 的修复更简单——Conversation 的 title 已持久化，用户仍
 
 | 修复维度 | Provider 修复（已完成） | KB 修复（Section A） | Chat 修复（Section B） |
 |:---|:---|:---|:---|
-| 后端标记不可用 | `defaultProviderAvailable=false` | `KnowledgeBaseBrief.name=null` | 前端探测（API 报错） |
-| 前端注入 fallback 选项 | `unavailableProviderOption` | `unavailableKnowledgeOptions` | `agentUnavailable` |
+| 后端标记不可用 | `defaultProviderAvailable=false` | `KnowledgeBaseBrief.name=null` | 不需要后端改动 |
+| 前端注入 fallback | `unavailableProviderOption` | `unavailableKnowledgeOptions` | `agentUnavailable` |
+| 名称来源 | 后端返回 `defaultProviderName` | 后端填充 `knowledgeBases` | 复用 `Conversation.title`（已持久化） |
 | 红色文字 | `provider-unavailable` CSS class | 同样 CSS class | `agent-name-unavailable` CSS class |
-| 禁用交互 | option `:disabled` | option `:disabled` | 输入框 `:disabled` |
+| 禁用交互 | option `:disabled` | option `:disabled` | 输入框 + 发送按钮 `:disabled` |
 | i18n | `provider.unavailable: "(不可用)"` | 复用同上 key | 新增 `chat.agentUnavailableHint` |
 
 ---
