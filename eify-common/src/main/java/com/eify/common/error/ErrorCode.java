@@ -41,6 +41,8 @@ public enum ErrorCode {
     PROVIDER_CIRCUIT_OPEN(2004, "模型熔断器已打开"),
     API_KEY_INVALID(2005, "API Key 无效"),
     MODEL_NOT_SUPPORTED(2006, "不支持的模型"),
+    PROVIDER_IN_USE(2007, "供应商已被 Agent 使用，无法删除"),
+    PROVIDER_IN_USE_BY_WORKFLOW(2008, "供应商已被工作流使用，无法删除"),
 
     // ========== Agent (3000-3999) ==========
     AGENT_NOT_FOUND(3000, "Agent 不存在"),
