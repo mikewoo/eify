@@ -376,6 +376,7 @@ CREATE TABLE IF NOT EXISTS `agent_knowledge` (
 CREATE TABLE IF NOT EXISTS `mcp_server` (
     `id`            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `name`          VARCHAR(100)    NOT NULL               COMMENT '服务器名称',
+    `description`   VARCHAR(500)    NULL                   COMMENT '服务器描述',
     `endpoint`      VARCHAR(500)    NOT NULL               COMMENT 'MCP Server URL (Streamable HTTP)',
     `enabled`       TINYINT         NOT NULL DEFAULT 1     COMMENT '启用状态：0=禁用，1=启用',
 
