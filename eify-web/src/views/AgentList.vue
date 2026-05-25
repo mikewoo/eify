@@ -1737,6 +1737,9 @@ const quickPrompts = getQuickPrompts()
 
 .tool-group {
   margin-bottom: 16px;
+  border: 1px solid var(--eify-border-default);
+  border-radius: var(--eify-radius-md);
+  overflow: hidden;
 }
 
 .tool-group-header {
@@ -1744,20 +1747,22 @@ const quickPrompts = getQuickPrompts()
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: var(--eify-primary);
-  padding: 6px 12px;
-  background: rgba(99, 102, 241, 0.06);
-  border-radius: var(--eify-radius-sm);
-  margin-bottom: 8px;
+  color: var(--eify-text-primary);
+  padding: 10px 16px;
+  background: var(--eify-bg-surface);
+  border-bottom: 1px solid var(--eify-border-subtle);
 }
 
 .tool-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--eify-radius-sm);
+  padding: 10px 16px;
   transition: background 0.2s;
+}
+
+.tool-item + .tool-item {
+  border-top: 1px solid var(--eify-border-subtle);
 }
 
 .tool-item:hover {
@@ -1776,15 +1781,12 @@ const quickPrompts = getQuickPrompts()
 }
 
 .tool-desc {
+  flex: 1;
+  min-width: 0;
   color: var(--eify-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 300px;
-}
-
-.server-name {
-  font-weight: 600;
 }
 
 .server-endpoint {
@@ -1794,6 +1796,7 @@ const quickPrompts = getQuickPrompts()
 .server-tool-count {
   margin-left: auto;
   font-weight: 400;
+  font-size: 12px;
   color: var(--eify-text-tertiary);
 }
 
@@ -1807,8 +1810,8 @@ const quickPrompts = getQuickPrompts()
 }
 
 .tool-params {
-  margin: 4px 12px 12px 44px;
-  padding: 12px;
+  margin: 0 16px 12px 60px;
+  padding: 12px 16px;
   background: var(--eify-bg-subtle);
   border: 1px solid var(--eify-border-subtle);
   border-radius: var(--eify-radius-sm);
@@ -1840,7 +1843,7 @@ const quickPrompts = getQuickPrompts()
   border-radius: var(--eify-radius-xs);
   color: var(--eify-text-secondary);
   font-family: 'SF Mono', Monaco, monospace;
-  font-size: var(--eify-font-size-xs);
+  font-size: 12px;
 }
 
 .param-required {
