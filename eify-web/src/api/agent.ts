@@ -91,6 +91,7 @@ export interface AgentResponse {
   defaultProviderId: number
   defaultProviderName: string | null
   defaultProviderType: string | null
+  defaultProviderAvailable?: boolean
   defaultModel: string
   systemPrompt: string
   userMessagePrefix: string | null

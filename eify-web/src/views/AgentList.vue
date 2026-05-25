@@ -194,8 +194,15 @@
                 <span>{{ provider.name }}</span>
                 <el-tag size="small" style="margin-left: 8px" effect="plain">{{ provider.type }}</el-tag>
               </el-option>
+              <el-option
+                v-if="unavailableProviderOption"
+                :key="unavailableProviderOption.id"
+                :label="unavailableProviderOption.name"
+                :value="unavailableProviderOption.id"
+                disabled
+              />
             </el-select>
-            <div class="form-hint" v-if="providers.length === 0">{{ t('provider.unsyncedHint') }}</div>
+            <div class="form-hint" v-if="providers.length === 0 && !unavailableProviderOption">{{ t('provider.unsyncedHint') }}</div>
           </el-form-item>
 
           <el-form-item :label="t('agent.selectModel')" prop="defaultModel">
@@ -758,6 +765,7 @@ const showDeleteConfirm = ref(false)
 const deleteTarget = ref<{ id: number; name: string } | null>(null)
 const providers = ref<ProviderResponse[]>([])
 const providerModelsMap = ref<Map<number, ModelConfigInfo[]>>(new Map())
+const unavailableProviderOption = ref<{ id: number; name: string } | null>(null)
 const knowledgeList = ref<KnowledgeBaseResponse[]>([])
 const mcpToolOptions = ref<McpToolOption[]>([])
 const currentAgent = ref<AgentResponse | null>(null)
@@ -1087,6 +1095,7 @@ const scrollToBottom = () => {
 
 const handleAdd = () => {
   activeTab.value = 'basic'
+  unavailableProviderOption.value = null
   loadMcpTools()
   dialogRef.value?.open()
 }
@@ -1115,6 +1124,14 @@ const handleEdit = (row: Record<string, any>) => {
     ragEnabled: row.ragEnabled ?? 0,
     ragTopK: row.ragTopK ?? 5,
     ragStrategy: row.ragStrategy || 'hybrid'
+  }
+  if (row.defaultProviderId && row.defaultProviderAvailable === false) {
+    unavailableProviderOption.value = {
+      id: row.defaultProviderId,
+      name: t('provider.unavailable')
+    }
+  } else {
+    unavailableProviderOption.value = null
   }
   activeTab.value = 'basic'
   loadMcpTools()
