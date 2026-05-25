@@ -173,14 +173,19 @@
             <el-input v-model="configForm._name" :placeholder="t('workflow.nodeNamePlaceholder')" maxlength="50" />
           </el-form-item>
           <el-form-item :label="t('workflow.supplier')">
-            <el-select v-model="configForm.providerId" :placeholder="t('workflow.supplierPlaceholder')" style="width:100%" @change="onProviderChange">
-              <el-option v-for="p in providerOptions" :key="p.id" :label="`${p.name} (${p.type})`" :value="p.id" />
+            <el-select v-model="configForm.providerId" :placeholder="t('workflow.supplierPlaceholder')" style="width:100%" :class="{ 'provider-unavailable': isProviderUnavailable }" @change="onProviderChange">
+              <el-option v-for="p in providerOptions" :key="p.id" :label="p.type ? `${p.name} (${p.type})` : p.name" :value="p.id" :disabled="!p.type">
+                <span :style="!p.type ? { color: 'var(--eify-error)' } : {}">{{ p.type ? `${p.name} (${p.type})` : p.name }}</span>
+              </el-option>
             </el-select>
             <div class="form-tip text-xs" v-if="providerOptions.length === 0">{{ t('provider.unsyncedHint') }}</div>
           </el-form-item>
           <el-form-item :label="t('workflow.modelLabel')">
-            <el-select v-model="configForm.model" :placeholder="t('workflow.modelPlaceholder')" style="width:100%" filterable>
+            <el-select v-model="configForm.model" :placeholder="t('workflow.modelPlaceholder')" style="width:100%" :class="{ 'model-unavailable': isProviderUnavailable }" filterable>
               <el-option v-for="m in availableModels" :key="m.modelName" :label="m.displayName || m.modelName" :value="m.modelName" />
+              <el-option v-if="isProviderUnavailable && configForm.model" :key="configForm.model" :label="`${configForm.model}${t('provider.unavailable')}`" :value="configForm.model" disabled>
+                <span style="color: var(--eify-error)">{{ configForm.model }}{{ t('provider.unavailable') }}</span>
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item :label="t('workflow.temperatureLabel')">
@@ -422,6 +427,12 @@ const providerOptions = ref<ProviderResponse[]>([])
 const providerModelsMap = ref<Map<number, ModelConfigInfo[]>>(new Map())
 const mcpServerOptions = ref<McpServerResponse[]>([])
 const availableModels = ref<ModelConfigInfo[]>([])
+const isProviderUnavailable = computed(() => {
+  const providerId = configForm.value.providerId
+  if (!providerId) return false
+  const p = providerOptions.value.find(p => p.id === providerId)
+  return !!p && !p.type
+})
 const availableTools = ref<McpToolResponse[]>([])
 const loadingTools = ref(false)
 
@@ -639,9 +650,10 @@ function openConfig(nodeId: string) {
     const providerId = configForm.value.providerId
     const found = providerOptions.value.find(p => p.id === providerId)
     if (!found) {
+      const providerName = configForm.value.providerName || `Provider #${providerId}`
       providerOptions.value.push({
         id: providerId,
-        name: configForm.value.providerName || t('provider.unavailable'),
+        name: `${providerName}${t('provider.unavailable')}`,
         type: '' as any,
         baseUrl: '',
         authConfig: null,
@@ -959,5 +971,21 @@ onMounted(() => {
 .form-tip {
   color: var(--eify-text-tertiary);
   margin-top: 4px;
+}
+</style>
+
+<style>
+/* 不可用 provider/model 红色文字（非 scoped，确保穿透 Element Plus 组件） */
+.provider-unavailable,
+.provider-unavailable .el-input__inner,
+.provider-unavailable .el-select__input,
+.provider-unavailable .el-select__selected-item {
+  color: var(--eify-error) !important;
+  -webkit-text-fill-color: var(--eify-error) !important;
+}
+
+.model-unavailable .el-input__inner {
+  color: var(--eify-error) !important;
+  -webkit-text-fill-color: var(--eify-error) !important;
 }
 </style>
