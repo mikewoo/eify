@@ -79,6 +79,36 @@ public class McpServerServiceImpl implements McpServerService {
     }
 
     @Override
+    public List<McpServerResponse> listToolsByWorkspace(Integer enabled) {
+        Long workspaceId = com.eify.common.context.CurrentContext.getWorkspaceId();
+        LambdaQueryWrapper<McpServer> wrapper = new LambdaQueryWrapper<McpServer>()
+                .eq(McpServer::getWorkspaceId, workspaceId)
+                .orderByAsc(McpServer::getName);
+        if (enabled != null) {
+            wrapper.eq(McpServer::getEnabled, enabled);
+        }
+        List<McpServer> servers = mcpServerMapper.selectList(wrapper);
+        if (servers.isEmpty()) {
+            return List.of();
+        }
+
+        // 批量查询所有工具
+        List<Long> serverIds = servers.stream().map(McpServer::getId).collect(Collectors.toList());
+        List<McpTool> allTools = mcpToolMapper.selectList(
+                new LambdaQueryWrapper<McpTool>()
+                        .in(McpTool::getServerId, serverIds)
+                        .eq(McpTool::getWorkspaceId, workspaceId));
+
+        // 按 serverId 分组
+        Map<Long, List<McpTool>> toolsByServer = allTools.stream()
+                .collect(Collectors.groupingBy(McpTool::getServerId));
+
+        return servers.stream()
+                .map(server -> toToolsListResponse(server, toolsByServer.getOrDefault(server.getId(), List.of())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public McpServerResponse getById(Long id) {
         McpServer server = mcpServerMapper.selectOne(new LambdaQueryWrapper<McpServer>()
                 .eq(McpServer::getId, id)
@@ -283,6 +313,34 @@ public class McpServerServiceImpl implements McpServerService {
                 .name(server.getName())
                 .endpoint(server.getEndpoint())
                 .enabled(server.getEnabled())
+                .toolCount(toolResponses.size())
+                .tools(toolResponses)
+                .createdAt(server.getCreatedAt())
+                .updatedAt(server.getUpdatedAt())
+                .build();
+    }
+
+    private McpServerResponse toToolsListResponse(McpServer server, List<McpTool> tools) {
+        boolean online = mcpClientService.isClientCached(server.getId());
+        if (!online && server.getEnabled() != null && server.getEnabled() == 1) {
+            online = true; // enabled 但未缓存 → 假定在线
+        }
+
+        List<McpServerResponse.McpToolResponse> toolResponses = tools.stream()
+                .map(t -> McpServerResponse.McpToolResponse.builder()
+                        .id(t.getId())
+                        .name(t.getName())
+                        .description(t.getDescription())
+                        .inputSchema(t.getInputSchema())
+                        .build())
+                .collect(Collectors.toList());
+
+        return McpServerResponse.builder()
+                .id(server.getId())
+                .name(server.getName())
+                .endpoint(server.getEndpoint())
+                .enabled(server.getEnabled())
+                .online(online)
                 .toolCount(toolResponses.size())
                 .tools(toolResponses)
                 .createdAt(server.getCreatedAt())
