@@ -139,6 +139,7 @@ public class McpServerServiceImpl implements McpServerService {
 
         McpServer server = new McpServer();
         server.setName(request.getName());
+        server.setDescription(request.getDescription());
         server.setEndpoint(request.getEndpoint());
         server.setEnabled(request.getEnabled() != null ? request.getEnabled() : 1);
         WorkspaceGuard.bind(server);
@@ -161,6 +162,9 @@ public class McpServerServiceImpl implements McpServerService {
                     McpServer::getName, McpServer::getWorkspaceId, McpServer::getId,
                     request.getName(), id, ErrorCode.PARAM_ERROR, "MCP Server 名称已存在");
             server.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            server.setDescription(request.getDescription());
         }
         if (request.getEndpoint() != null) {
             server.setEndpoint(request.getEndpoint());
@@ -285,6 +289,7 @@ public class McpServerServiceImpl implements McpServerService {
         return McpServerResponse.builder()
                 .id(server.getId())
                 .name(server.getName())
+                .description(server.getDescription())
                 .endpoint(server.getEndpoint())
                 .enabled(server.getEnabled())
                 .toolCount(toolCount)
@@ -311,6 +316,7 @@ public class McpServerServiceImpl implements McpServerService {
         return McpServerResponse.builder()
                 .id(server.getId())
                 .name(server.getName())
+                .description(server.getDescription())
                 .endpoint(server.getEndpoint())
                 .enabled(server.getEnabled())
                 .toolCount(toolResponses.size())
@@ -338,6 +344,7 @@ public class McpServerServiceImpl implements McpServerService {
         return McpServerResponse.builder()
                 .id(server.getId())
                 .name(server.getName())
+                .description(server.getDescription())
                 .endpoint(server.getEndpoint())
                 .enabled(server.getEnabled())
                 .online(online)

@@ -433,6 +433,7 @@
                   <span class="header-sep">│</span>
                   <span class="server-tool-count">{{ server.toolCount }} {{ t('agent.toolsCount') }}</span>
                 </div>
+                <div v-if="server.description" class="tool-group-desc">{{ server.description }}</div>
                 <template v-for="tool in server.tools" :key="tool.id">
                   <div class="tool-item" :class="{ 'tool-disabled': !server.online }">
                     <el-checkbox :value="tool.id" :label="tool.id" :disabled="!server.online">
@@ -1633,16 +1634,10 @@ const quickPrompts = getQuickPrompts()
 .status-text {
 }
 
-/* 表单样式调整 */
 :deep(.el-form-item__label) {
   font-weight: 500;
+  display: block;
   text-align: right;
-  line-height: 32px;
-}
-
-:deep(.el-form-item.is-required .el-form-item__label::before) {
-  display: inline;
-  margin-right: 4px;
 }
 
 .form-tabs {
@@ -1736,6 +1731,10 @@ const quickPrompts = getQuickPrompts()
   overflow-y: auto;
 }
 
+.tools-wrapper :deep(.el-checkbox-group) {
+  display: block;
+}
+
 .tools-hint {
   color: var(--eify-text-tertiary);
   margin-bottom: 16px;
@@ -1750,6 +1749,9 @@ const quickPrompts = getQuickPrompts()
   border: 1px solid var(--eify-border-default);
   border-radius: var(--eify-radius-md);
   overflow: hidden;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .tool-group-header {
@@ -1757,11 +1759,21 @@ const quickPrompts = getQuickPrompts()
   align-items: center;
   gap: 8px;
   font-weight: 600;
+  font-size: 14px;
   color: var(--eify-text-primary, #0f172a);
   padding: 10px 16px;
   background: var(--eify-bg-surface, #f3f4f6);
   border-bottom: 1px solid var(--eify-border-subtle, #e2e8f0);
   line-height: 1.5;
+}
+
+.tool-group-desc {
+  padding: 8px 16px;
+  color: var(--eify-text-secondary, #475569);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--eify-bg-subtle, #f8fafc);
+  border-bottom: 1px solid var(--eify-border-subtle, #e2e8f0);
 }
 
 .tool-item {
@@ -1770,6 +1782,8 @@ const quickPrompts = getQuickPrompts()
   gap: 12px;
   padding: 10px 16px;
   transition: background 0.2s;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--eify-text-primary, #0f172a);
 }
 
@@ -1802,6 +1816,7 @@ const quickPrompts = getQuickPrompts()
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.5;
 }
 
 .header-sep {
@@ -1841,6 +1856,8 @@ const quickPrompts = getQuickPrompts()
   background: var(--eify-bg-subtle, #f8fafc);
   border: 1px solid var(--eify-border-subtle, #e2e8f0);
   border-radius: var(--eify-radius-sm, 6px);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .params-header {
@@ -1855,6 +1872,7 @@ const quickPrompts = getQuickPrompts()
   align-items: baseline;
   gap: 8px;
   padding: 4px 0;
+  font-size: 13px;
   line-height: 1.6;
 }
 

@@ -101,6 +101,7 @@ public class McpServerController {
         return McpServerResponse.builder()
                 .id(entity.getId())
                 .name(entity.getName())
+                .description(entity.getDescription())
                 .endpoint(entity.getEndpoint())
                 .enabled(entity.getEnabled())
                 .createdAt(entity.getCreatedAt())

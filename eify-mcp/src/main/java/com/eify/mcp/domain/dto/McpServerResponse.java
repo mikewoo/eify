@@ -24,6 +24,9 @@ public class McpServerResponse {
     @Schema(description = "服务器名称")
     private String name;
 
+    @Schema(description = "服务器描述")
+    private String description;
+
     @Schema(description = "MCP Server URL")
     private String endpoint;
 

@@ -16,6 +16,10 @@ public class McpServerUpdateRequest {
     @Schema(description = "服务器名称")
     private String name;
 
+    @Size(max = 500, message = "描述长度不能超过500")
+    @Schema(description = "服务器描述")
+    private String description;
+
     @Size(max = 500, message = "Endpoint 长度不能超过500")
     @Schema(description = "MCP Server URL")
     private String endpoint;

@@ -7,12 +7,14 @@ import type { PageResult } from '@/types/api'
 
 export interface McpServerCreateRequest {
   name: string
+  description?: string
   endpoint: string
   enabled: number
 }
 
 export interface McpServerUpdateRequest {
   name?: string
+  description?: string
   endpoint?: string
   enabled?: number
 }
@@ -27,6 +29,7 @@ export interface McpToolResponse {
 export interface McpServerResponse {
   id: number
   name: string
+  description: string | null
   endpoint: string
   enabled: number
   toolCount: number | null
@@ -39,6 +42,7 @@ export interface McpServerResponse {
 export interface McpServerToolsResponse {
   id: number
   name: string
+  description: string | null
   endpoint: string
   enabled: number
   online: boolean

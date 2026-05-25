@@ -28,10 +28,13 @@
     <!-- 表格：名称列 -->
     <template #table-name="{ row }">
       <div class="name-cell">
-        <span class="server-name">{{ row.name }}</span>
-        <span v-if="row.toolCount && row.toolCount > 0" class="tool-count-badge">
-          {{ t('mcp.toolCountBadge', { count: row.toolCount }) }}
-        </span>
+        <div class="name-main">
+          <span class="server-name">{{ row.name }}</span>
+          <span v-if="row.toolCount && row.toolCount > 0" class="tool-count-badge">
+            {{ t('mcp.toolCountBadge', { count: row.toolCount }) }}
+          </span>
+        </div>
+        <span v-if="row.description" class="server-desc">{{ row.description }}</span>
       </div>
     </template>
 
@@ -97,6 +100,7 @@
           </div>
           <div class="card-title">
             <h3>{{ item.name }}</h3>
+            <span v-if="item.description" class="card-desc">{{ item.description }}</span>
             <span class="card-endpoint">{{ item.endpoint }}</span>
           </div>
           <div class="card-status">
@@ -107,6 +111,10 @@
         </div>
 
         <div class="card-body">
+          <div v-if="item.description" class="card-info-row">
+            <span class="info-label">{{ t('common.description') }}</span>
+            <span class="info-value">{{ item.description }}</span>
+          </div>
           <div class="card-info-row">
             <span class="info-label">{{ t('mcp.endpoint') }}</span>
             <el-tooltip
@@ -178,6 +186,17 @@
         />
       </el-form-item>
 
+      <el-form-item :label="t('common.description')" prop="description">
+        <el-input
+          v-model="data.description"
+          type="textarea"
+          :rows="3"
+          :placeholder="t('mcp.form.descriptionPlaceholder')"
+          maxlength="500"
+          show-word-limit
+        />
+      </el-form-item>
+
       <el-form-item :label="t('mcp.endpoint')" prop="endpoint">
         <el-input
           v-model="data.endpoint"
@@ -207,6 +226,10 @@
   >
     <div v-if="detailServer" class="detail-content">
       <div class="detail-meta">
+        <div class="detail-meta-item">
+          <span class="detail-label">{{ t('common.description') }}</span>
+          <span class="detail-value">{{ detailServer.description || '-' }}</span>
+        </div>
         <div class="detail-meta-item">
           <span class="detail-label">{{ t('mcp.endpoint') }}</span>
           <span class="detail-value">{{ detailServer.endpoint }}</span>
@@ -418,6 +441,7 @@ import type { ListStat } from '@/types/api'
 interface McpServerFormData {
   id?: number
   name: string
+  description: string
   endpoint: string
   enabled: number
 }
@@ -502,6 +526,7 @@ const statsConfig = computed<ListStat[]>(() => [
 
 const defaultFormData: McpServerFormData = {
   name: '',
+  description: '',
   endpoint: '',
   enabled: 1
 }
@@ -561,6 +586,7 @@ const fetchServers = async (params: {
 const createServer = async (data: McpServerFormData) => {
   return await mcpApi.create({
     name: data.name,
+    description: data.description || undefined,
     endpoint: data.endpoint,
     enabled: data.enabled
   })
@@ -570,6 +596,7 @@ const updateServer = async (data: McpServerFormData) => {
   if (!data.id) return
   return await mcpApi.update(data.id, {
     name: data.name,
+    description: data.description || undefined,
     endpoint: data.endpoint,
     enabled: data.enabled
   })
@@ -726,10 +753,11 @@ const handleAdd = () => {
   dialogRef.value?.open()
 }
 
-const handleEdit = (row: { id: number; name: string; endpoint: string; enabled: number }) => {
+const handleEdit = (row: { id: number; name: string; description?: string; endpoint: string; enabled: number }) => {
   const formData: McpServerFormData = {
     id: row.id,
     name: row.name,
+    description: row.description || '',
     endpoint: row.endpoint,
     enabled: row.enabled
   }
@@ -836,6 +864,12 @@ const handleSubmit = async (data: any, mode: string) => {
 /* ========== 表格单元格 ========== */
 .name-cell {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name-main {
+  display: flex;
   align-items: center;
   gap: 8px;
 }
@@ -843,6 +877,14 @@ const handleSubmit = async (data: any, mode: string) => {
 .server-name {
   font-weight: 500;
   color: var(--eify-text-primary);
+}
+
+.server-desc {
+  color: var(--eify-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
 }
 
 .tool-count-badge {
@@ -982,6 +1024,15 @@ const handleSubmit = async (data: any, mode: string) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.card-desc {
+  color: var(--eify-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  line-height: 1.4;
 }
 
 .card-endpoint {

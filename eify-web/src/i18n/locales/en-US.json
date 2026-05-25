@@ -552,6 +552,7 @@
     "form": {
       "nameRequired": "MCP Server name is required",
       "nameLength": "Length must be between 2 and 100 characters",
+      "descriptionPlaceholder": "Enter server description (optional)",
       "endpointRequired": "Endpoint URL is required",
       "endpointInvalid": "Enter a valid URL (starting with http:// or https://)"
     }

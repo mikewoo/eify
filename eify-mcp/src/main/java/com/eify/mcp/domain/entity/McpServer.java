@@ -15,6 +15,9 @@ public class McpServer extends BaseEntity implements WorkspaceAware {
     @TableField("name")
     private String name;
 
+    @TableField("description")
+    private String description;
+
     @TableField("workspace_id")
     private Long workspaceId;
 

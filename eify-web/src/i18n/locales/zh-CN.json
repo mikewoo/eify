@@ -552,6 +552,7 @@
     "form": {
       "nameRequired": "请输入 MCP Server 名称",
       "nameLength": "长度在 2 到 100 个字符",
+      "descriptionPlaceholder": "请输入服务器描述（可选）",
       "endpointRequired": "请输入端点地址",
       "endpointInvalid": "请输入有效的 URL（以 http:// 或 https:// 开头）"
     }
