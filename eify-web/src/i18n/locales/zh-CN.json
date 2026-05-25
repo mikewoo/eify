@@ -266,6 +266,7 @@
     "existingModels": "已同步 {count} 个模型",
     "noModelsHint": "该供应商尚未同步模型，请先点击「同步模型」按钮",
     "unsyncedHint": "仅显示已同步模型的供应商",
+    "unavailable": "(不可用)",
     "healthStatus": "健康状态",
     "modelCount": "模型数",
     "searchPlaceholder": "选择属性筛选，或输入关键字搜索",

@@ -266,6 +266,7 @@
     "existingModels": "{count} model(s) synced",
     "noModelsHint": "This provider has no synced models. Please click \"Sync Models\" first.",
     "unsyncedHint": "Only showing providers with synced models",
+    "unavailable": "(Unavailable)",
     "healthStatus": "Health Status",
     "modelCount": "Model Count",
     "searchPlaceholder": "Filter by attribute or search by keyword",
