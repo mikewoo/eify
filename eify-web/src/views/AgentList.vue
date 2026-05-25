@@ -1636,6 +1636,13 @@ const quickPrompts = getQuickPrompts()
 /* 表单样式调整 */
 :deep(.el-form-item__label) {
   font-weight: 500;
+  text-align: right;
+  line-height: 32px;
+}
+
+:deep(.el-form-item.is-required .el-form-item__label::before) {
+  display: inline;
+  margin-right: 4px;
 }
 
 .form-tabs {
@@ -1750,10 +1757,11 @@ const quickPrompts = getQuickPrompts()
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: var(--eify-text-primary);
+  color: var(--eify-text-primary, #0f172a);
   padding: 10px 16px;
-  background: var(--eify-bg-surface);
-  border-bottom: 1px solid var(--eify-border-subtle);
+  background: var(--eify-bg-surface, #f3f4f6);
+  border-bottom: 1px solid var(--eify-border-subtle, #e2e8f0);
+  line-height: 1.5;
 }
 
 .tool-item {
@@ -1762,6 +1770,7 @@ const quickPrompts = getQuickPrompts()
   gap: 12px;
   padding: 10px 16px;
   transition: background 0.2s;
+  color: var(--eify-text-primary, #0f172a);
 }
 
 .tool-item + .tool-item {
@@ -1774,27 +1783,36 @@ const quickPrompts = getQuickPrompts()
 
 .tool-item .el-checkbox {
   flex-shrink: 0;
-  min-width: 0;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tool-name {
   font-weight: 500;
-  color: var(--eify-text-primary);
+  color: var(--eify-text-primary, #0f172a);
   white-space: nowrap;
 }
 
 .tool-desc {
   flex: 1;
-  min-width: 0;
-  color: var(--eify-text-tertiary);
+  min-width: 2em;
+  color: var(--eify-text-tertiary, #475569);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .header-sep {
-  color: var(--eify-border-strong);
+  color: var(--eify-border-strong, #cbd5e1);
   font-weight: 300;
+}
+
+.server-name {
+  color: var(--eify-text-primary, #0f172a);
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .server-endpoint {
@@ -1805,7 +1823,7 @@ const quickPrompts = getQuickPrompts()
   margin-left: auto;
   font-weight: 400;
   font-size: 12px;
-  color: var(--eify-text-tertiary);
+  color: var(--eify-text-tertiary, #475569);
 }
 
 .tool-item.tool-disabled {
@@ -1820,14 +1838,15 @@ const quickPrompts = getQuickPrompts()
 .tool-params {
   margin: 0 16px 12px 60px;
   padding: 12px 16px;
-  background: var(--eify-bg-subtle);
-  border: 1px solid var(--eify-border-subtle);
-  border-radius: var(--eify-radius-sm);
+  background: var(--eify-bg-subtle, #f8fafc);
+  border: 1px solid var(--eify-border-subtle, #e2e8f0);
+  border-radius: var(--eify-radius-sm, 6px);
 }
 
 .params-header {
   font-weight: 600;
-  color: var(--eify-text-secondary);
+  font-size: 13px;
+  color: var(--eify-text-secondary, #475569);
   margin-bottom: 8px;
 }
 
@@ -1836,41 +1855,47 @@ const quickPrompts = getQuickPrompts()
   align-items: baseline;
   gap: 8px;
   padding: 4px 0;
+  line-height: 1.6;
 }
 
 .param-name {
   font-weight: 500;
-  color: var(--eify-text-primary);
+  color: var(--eify-text-primary, #0f172a);
   min-width: 80px;
+  flex-shrink: 0;
 }
 
 .param-type {
   display: inline-block;
   padding: 1px 6px;
-  background: var(--eify-bg-surface);
-  border-radius: var(--eify-radius-xs);
-  color: var(--eify-text-secondary);
+  background: var(--eify-bg-surface, #f1f5f9);
+  border-radius: var(--eify-radius-xs, 4px);
+  color: var(--eify-text-secondary, #475569);
   font-family: 'SF Mono', Monaco, monospace;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .param-required {
-  color: var(--eify-error);
+  color: var(--eify-error, #ef4444);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .param-optional {
-  color: var(--eify-text-tertiary);
+  color: var(--eify-text-tertiary, #94a3b8);
+  flex-shrink: 0;
 }
 
 .param-desc-sep {
-  color: var(--eify-text-tertiary);
+  color: var(--eify-text-tertiary, #94a3b8);
   flex-shrink: 0;
 }
 
 .param-desc {
-  color: var(--eify-text-secondary);
+  color: var(--eify-text-secondary, #475569);
   flex: 1;
+  min-width: 2em;
 }
 
 /* ========== RAG 配置 ========== */
