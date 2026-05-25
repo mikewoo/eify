@@ -2,6 +2,7 @@ package com.eify.mcp.controller;
 
 import com.eify.common.result.PageResult;
 import com.eify.common.result.Result;
+import java.util.List;
 import com.eify.mcp.domain.dto.ConnectionTestResult;
 import com.eify.mcp.domain.dto.DebugToolRequest;
 import com.eify.mcp.domain.dto.DebugToolResponse;
@@ -11,6 +12,7 @@ import com.eify.mcp.domain.dto.McpServerUpdateRequest;
 import com.eify.mcp.domain.entity.McpServer;
 import com.eify.mcp.service.McpServerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,6 +50,13 @@ public class McpServerController {
     public Result<McpServerResponse> getById(@PathVariable Long id) {
         McpServerResponse response = mcpServerService.getById(id);
         return Result.success(response);
+    }
+
+    @Operation(summary = "批量获取 Server 及工具列表", description = "一次性返回当前工作空间所有 Server 及其工具（含 online 状态和 inputSchema），用于 Agent 编辑页工具选择。")
+    @GetMapping("/tools")
+    public Result<List<McpServerResponse>> listTools(
+            @Parameter(description = "筛选启用状态：1=仅启用，不传=全部") @RequestParam(required = false) Integer enabled) {
+        return Result.success(mcpServerService.listToolsByWorkspace(enabled));
     }
 
     @Operation(summary = "创建 MCP Server")
