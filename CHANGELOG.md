@@ -8,10 +8,12 @@
 - 后端删除引用检查：Agent/知识库/MCP 服务器/工作流删除前检查是否被活跃对话或实体引用，被引用时拒绝删除并返回对应错误码
 - 新增错误码：`AGENT_IN_USE(3004)`、`KNOWLEDGE_IN_USE(7008)`、`WORKFLOW_IN_USE(6009)`、`MCP_SERVER_IN_USE_BY_WORKFLOW(5006)`
 - Agent 列表接口现在返回 `knowledgeBases` 字段，包含关联知识库的简要信息（已删除的 KB 名称返回 null）
+- 新增 `GET /api/v1/mcp-servers/tools` 批量接口，一次返回所有 MCP Server 及工具（含 `online` 状态和 `inputSchema`），替代前端 N+1 查询
 
 ### 变更
 - 后端 SSE 错误消息现在通过 `MessageUtil` 解析，根据请求的 `Accept-Language` 头返回对应语言的错误信息，替代原有的硬编码中文消息
 - Provider 删除检查从 `PROVIDER_NOT_FOUND` 改为 `PROVIDER_IN_USE(2007)` / `PROVIDER_IN_USE_BY_WORKFLOW(2008)`
+- Agent 编辑页 MCP Tools 标签页增强：展示 Server 在线状态、endpoint、工具数量，支持工具 `inputSchema` 参数预览展开/收起，离线 Server 工具自动禁用
 
 ### 修复
 - 修复当 Agent 关联的 Provider 已被删除时，发送消息返回不友好的 `HTTP error! status: 500` 问题。现在 ChatServiceImpl 在 SseEmitter 创建后捕获 `BusinessException`，通过 SSE 事件发送错误消息，避免异常到达 `GlobalExceptionHandler` 导致 `HttpMediaTypeNotAcceptableException`（`Accept: text/event-stream` 与 JSON 响应体不兼容）

@@ -24,11 +24,17 @@ public class McpServerResponse {
     @Schema(description = "服务器名称")
     private String name;
 
+    @Schema(description = "服务器描述")
+    private String description;
+
     @Schema(description = "MCP Server URL")
     private String endpoint;
 
     @Schema(description = "启用状态：0=禁用，1=启用")
     private Integer enabled;
+
+    @Schema(description = "服务器是否在线（缓存状态或 enabled 推断）")
+    private Boolean online;
 
     @Schema(description = "工具数量（列表接口返回）")
     private Integer toolCount;

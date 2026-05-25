@@ -61,6 +61,17 @@ public class McpClientServiceImpl implements McpClientService {
     // ---- Public API ----
 
     @Override
+    public boolean isClientCached(Long serverId) {
+        ClientEntry entry = clientCache.get(serverId);
+        if (entry == null) return false;
+        if (System.currentTimeMillis() - entry.createdAt() > CLIENT_TTL_MS) {
+            clientCache.remove(serverId);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String callTool(Long serverId, String toolName, Map<String, Object> arguments) {
         try {
             return CompletableFuture.supplyAsync(

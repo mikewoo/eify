@@ -418,30 +418,48 @@
         </el-tab-pane>
 
         <el-tab-pane :label="t('agent.mcpTools')" name="tools">
-          <div v-if="mcpToolOptions.length === 0" class="empty-tools">
+          <div v-if="mcpServers.length === 0" class="empty-tools">
             <el-empty :description="t('agent.noToolsAvailable')" :image-size="80" />
           </div>
           <div v-else class="tools-wrapper">
-            <div class="tools-hint">
-              {{ t('agent.toolsHint') }}
-            </div>
+            <div class="tools-hint">{{ t('agent.toolsHint') }}</div>
             <el-checkbox-group v-model="data.mcpToolIds" :max="10">
-              <div
-                v-for="(tools, serverName) in groupedMcpTools"
-                :key="serverName"
-                class="tool-group"
-              >
-                <div class="tool-group-header">{{ serverName }}</div>
-                <div
-                  v-for="tool in tools"
-                  :key="tool.id"
-                  class="tool-item"
-                >
-                  <el-checkbox :value="tool.id" :label="tool.id">
-                    <span class="tool-name">{{ tool.name }}</span>
-                  </el-checkbox>
-                  <span class="tool-desc" :title="tool.description">{{ tool.description }}</span>
+              <div v-for="server in mcpServers" :key="server.id" class="tool-group">
+                <div class="tool-group-header">
+                  <span class="eify-status-dot" :class="server.online ? 'online' : 'offline'" />
+                  <span class="server-name">{{ server.name }}</span>
+                  <span class="header-sep">│</span>
+                  <span class="eify-tag eify-tag-gray server-endpoint">{{ server.endpoint }}</span>
+                  <span class="header-sep">│</span>
+                  <span class="server-tool-count">{{ server.toolCount }} {{ t('agent.toolsCount') }}</span>
                 </div>
+                <div v-if="server.description" class="tool-group-desc">{{ server.description }}</div>
+                <template v-for="tool in server.tools" :key="tool.id">
+                  <div class="tool-item" :class="{ 'tool-disabled': !server.online }">
+                    <el-checkbox :value="tool.id" :label="tool.id" :disabled="!server.online">
+                      <span class="tool-name">{{ tool.name }}</span>
+                    </el-checkbox>
+                    <span class="tool-desc" :title="tool.description">{{ tool.description }}</span>
+                    <button v-if="tool.inputSchema && hasProperties(tool.inputSchema)"
+                            class="eify-btn eify-btn-text eify-btn-sm tool-expand-btn"
+                            type="button"
+                            @click="toggleExpand(tool.id)">
+                      {{ expandedToolId === tool.id ? t('common.collapse') + ' ▴' : t('agent.expandParams') + ' ▾' }}
+                    </button>
+                  </div>
+                  <div v-if="expandedToolId === tool.id && tool.inputSchema && hasProperties(tool.inputSchema)" class="tool-params">
+                    <div class="params-header">{{ t('agent.paramsHint') }}</div>
+                    <div v-for="(param, key) in tool.inputSchema.properties" :key="key" class="param-row">
+                      <span class="param-name">{{ key }}:</span>
+                      <span class="param-type">{{ param.type || '-' }}</span>
+                      <span :class="isRequired(tool.inputSchema.required, key) ? 'param-required' : 'param-optional'">
+                        ({{ isRequired(tool.inputSchema.required, key) ? t('agent.required') : t('agent.optional') }})
+                      </span>
+                      <span class="param-desc-sep">—</span>
+                      <span class="param-desc">{{ param.description || '-' }}</span>
+                    </div>
+                  </div>
+                </template>
               </div>
             </el-checkbox-group>
           </div>
@@ -703,13 +721,24 @@ interface AgentFormData {
   ragStrategy: string
 }
 
-/** MCP 工具选项（按 Server 分组） */
+/** MCP 工具选项（含 inputSchema） */
 interface McpToolOption {
   id: number
   name: string
   description: string
   serverName: string
   serverId: number
+  inputSchema: Record<string, any> | null
+}
+
+interface McpServerWithTools {
+  id: number
+  name: string
+  endpoint: string
+  enabled: number
+  online: boolean
+  toolCount: number
+  tools: McpToolOption[]
 }
 
 interface ChatMessage {
@@ -810,7 +839,16 @@ const knowledgeSelectOptions = computed(() => {
   return options
 })
 const knowledgeList = ref<KnowledgeBaseResponse[]>([])
-const mcpToolOptions = ref<McpToolOption[]>([])
+const mcpServers = ref<McpServerWithTools[]>([])
+const expandedToolId = ref<number | null>(null)
+
+function toggleExpand(toolId: number) {
+  expandedToolId.value = expandedToolId.value === toolId ? null : toolId
+}
+
+function isRequired(required: string[] | undefined, key: string): boolean {
+  return required?.includes(key) ?? false
+}
 const currentAgent = ref<AgentResponse | null>(null)
 const chatMessages = ref<ChatMessage[]>([])
 const testMessage = ref('')
@@ -938,50 +976,16 @@ const loadKnowledgeList = async () => {
 }
 
 /**
- * 加载 MCP 工具选项（按 Server 分组）
+ * 加载 MCP 工具选项（批量 API，含 Server 信息）
  */
 const loadMcpTools = async () => {
   try {
-    const result = await mcpApi.getList({ pageSize: 100, enabled: 1 })
-    const options: McpToolOption[] = []
-    const servers = (result as any).list || result.records || []
-    for (const server of servers) {
-      if (server.enabled !== 1) continue
-      try {
-        const detail = await mcpApi.getById(server.id)
-        if (detail.tools) {
-          for (const tool of detail.tools) {
-            options.push({
-              id: tool.id,
-              name: tool.name,
-              description: tool.description,
-              serverName: server.name,
-              serverId: server.id
-            })
-          }
-        }
-      } catch {
-        // 跳过无法加载的 Server
-      }
-    }
-    mcpToolOptions.value = options
+    const servers = await mcpApi.getToolsByServer({ enabled: 1 })
+    mcpServers.value = servers
   } catch (error) {
     console.error('Failed to load MCP tools:', error)
   }
 }
-
-/**
- * 按 Server 分组工具选项
- */
-const groupedMcpTools = computed(() => {
-  const groups: Record<string, McpToolOption[]> = {}
-  for (const tool of mcpToolOptions.value) {
-    const key = tool.serverName || `Server #${tool.serverId}`
-    if (!groups[key]) groups[key] = []
-    groups[key].push(tool)
-  }
-  return groups
-})
 
 /**
  * 获取 Agent 列表
@@ -1107,6 +1111,11 @@ const stripUnavailableSuffix = (value: string): string => {
     return value.slice(0, -suffix.length)
   }
   return value
+}
+
+/** 检查 JSON Schema 是否有 properties */
+function hasProperties(schema: Record<string, any> | null): boolean {
+  return !!(schema && schema.properties && Object.keys(schema.properties).length > 0)
 }
 
 const truncateText = (text: string, maxLength: number) => {
@@ -1625,9 +1634,10 @@ const quickPrompts = getQuickPrompts()
 .status-text {
 }
 
-/* 表单样式调整 */
 :deep(.el-form-item__label) {
   font-weight: 500;
+  display: block;
+  text-align: right;
 }
 
 .form-tabs {
@@ -1721,6 +1731,10 @@ const quickPrompts = getQuickPrompts()
   overflow-y: auto;
 }
 
+.tools-wrapper :deep(.el-checkbox-group) {
+  display: block;
+}
+
 .tools-hint {
   color: var(--eify-text-tertiary);
   margin-bottom: 16px;
@@ -1732,24 +1746,49 @@ const quickPrompts = getQuickPrompts()
 
 .tool-group {
   margin-bottom: 16px;
+  border: 1px solid var(--eify-border-default);
+  border-radius: var(--eify-radius-md);
+  overflow: hidden;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .tool-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
-  color: var(--eify-primary);
-  padding: 6px 12px;
-  background: rgba(99, 102, 241, 0.06);
-  border-radius: var(--eify-radius-sm);
-  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--eify-text-primary, #0f172a);
+  padding: 10px 16px;
+  background: var(--eify-bg-surface, #f3f4f6);
+  border-bottom: 1px solid var(--eify-border-subtle, #e2e8f0);
+  line-height: 1.5;
+}
+
+.tool-group-desc {
+  padding: 8px 16px;
+  color: var(--eify-text-secondary, #475569);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--eify-bg-subtle, #f8fafc);
+  border-bottom: 1px solid var(--eify-border-subtle, #e2e8f0);
 }
 
 .tool-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: var(--eify-radius-sm);
+  padding: 10px 16px;
   transition: background 0.2s;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--eify-text-primary, #0f172a);
+}
+
+.tool-item + .tool-item {
+  border-top: 1px solid var(--eify-border-subtle);
 }
 
 .tool-item:hover {
@@ -1758,21 +1797,123 @@ const quickPrompts = getQuickPrompts()
 
 .tool-item .el-checkbox {
   flex-shrink: 0;
-  min-width: 0;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tool-name {
   font-weight: 500;
-  color: var(--eify-text-primary);
+  color: var(--eify-text-primary, #0f172a);
   white-space: nowrap;
 }
 
 .tool-desc {
-  color: var(--eify-text-tertiary);
+  flex: 1;
+  min-width: 2em;
+  color: var(--eify-text-tertiary, #475569);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 300px;
+  line-height: 1.5;
+}
+
+.header-sep {
+  color: var(--eify-border-strong, #cbd5e1);
+  font-weight: 300;
+}
+
+.server-name {
+  color: var(--eify-text-primary, #0f172a);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.server-endpoint {
+  flex-shrink: 0;
+}
+
+.server-tool-count {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--eify-text-tertiary, #475569);
+}
+
+.tool-item.tool-disabled {
+  opacity: 0.5;
+}
+
+.tool-expand-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.tool-params {
+  margin: 0 16px 12px 60px;
+  padding: 12px 16px;
+  background: var(--eify-bg-subtle, #f8fafc);
+  border: 1px solid var(--eify-border-subtle, #e2e8f0);
+  border-radius: var(--eify-radius-sm, 6px);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.params-header {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--eify-text-secondary, #475569);
+  margin-bottom: 8px;
+}
+
+.param-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.param-name {
+  font-weight: 500;
+  color: var(--eify-text-primary, #0f172a);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.param-type {
+  display: inline-block;
+  padding: 1px 6px;
+  background: var(--eify-bg-surface, #f1f5f9);
+  border-radius: var(--eify-radius-xs, 4px);
+  color: var(--eify-text-secondary, #475569);
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.param-required {
+  color: var(--eify-error, #ef4444);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.param-optional {
+  color: var(--eify-text-tertiary, #94a3b8);
+  flex-shrink: 0;
+}
+
+.param-desc-sep {
+  color: var(--eify-text-tertiary, #94a3b8);
+  flex-shrink: 0;
+}
+
+.param-desc {
+  color: var(--eify-text-secondary, #475569);
+  flex: 1;
+  min-width: 2em;
 }
 
 /* ========== RAG 配置 ========== */

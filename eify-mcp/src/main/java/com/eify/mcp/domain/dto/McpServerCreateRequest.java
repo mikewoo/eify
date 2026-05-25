@@ -3,6 +3,7 @@ package com.eify.mcp.domain.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,10 @@ public class McpServerCreateRequest {
     @NotBlank(message = "服务器名称不能为空")
     @Schema(description = "服务器名称", example = "订单查询服务")
     private String name;
+
+    @Size(max = 500, message = "描述长度不能超过500")
+    @Schema(description = "服务器描述", example = "用于查询订单状态和物流信息")
+    private String description;
 
     @NotBlank(message = "Endpoint 不能为空")
     @Schema(description = "MCP Server URL", example = "http://localhost:8080/mcp")

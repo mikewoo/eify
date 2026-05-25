@@ -57,7 +57,8 @@
     "all": "All",
     "total": "Total",
     "refreshing": "Refreshing...",
-    "language": "English"
+    "language": "English",
+    "collapse": "Collapse"
   },
   "sidebar": {
     "chat": "Chat",
@@ -203,6 +204,11 @@
     "ragStrategyHint": "Hybrid retrieval combines semantic similarity and keyword matching, recommended",
     "noToolsAvailable": "No tools available. Please register an MCP Server and test connectivity first.",
     "toolsHint": "After selecting tools, the Agent can invoke them during conversations. Max 10.",
+    "toolsCount": "tools",
+    "expandParams": "Params",
+    "paramsHint": "Parameters",
+    "required": "Required",
+    "optional": "Optional",
     "quickPrompt": "Quick prompts:",
     "testMessagePlaceholder": "Enter test message...",
     "sendMessage": "Send (Ctrl+Enter)",
@@ -546,6 +552,7 @@
     "form": {
       "nameRequired": "MCP Server name is required",
       "nameLength": "Length must be between 2 and 100 characters",
+      "descriptionPlaceholder": "Enter server description (optional)",
       "endpointRequired": "Endpoint URL is required",
       "endpointInvalid": "Enter a valid URL (starting with http:// or https://)"
     }

@@ -9,9 +9,19 @@ import com.eify.mcp.domain.dto.McpServerResponse;
 import com.eify.mcp.domain.dto.McpServerUpdateRequest;
 import com.eify.mcp.domain.entity.McpServer;
 
+import java.util.List;
+
 public interface McpServerService {
 
     PageResult<McpServerResponse> list(Integer page, Integer pageSize);
+
+    /**
+     * 批量查询当前工作空间下所有 Server 及其工具列表（含 online 状态）。
+     *
+     * @param enabled 筛选 enabled 状态（null=全部，1=仅启用）
+     * @return Server + 工具完整信息列表
+     */
+    List<McpServerResponse> listToolsByWorkspace(Integer enabled);
 
     McpServerResponse getById(Long id);
 

@@ -7,12 +7,14 @@ import type { PageResult } from '@/types/api'
 
 export interface McpServerCreateRequest {
   name: string
+  description?: string
   endpoint: string
   enabled: number
 }
 
 export interface McpServerUpdateRequest {
   name?: string
+  description?: string
   endpoint?: string
   enabled?: number
 }
@@ -27,12 +29,37 @@ export interface McpToolResponse {
 export interface McpServerResponse {
   id: number
   name: string
+  description: string | null
   endpoint: string
   enabled: number
   toolCount: number | null
   tools: McpToolResponse[] | null
   createdAt: string
   updatedAt: string
+}
+
+/** 批量获取 Server + 工具完整信息（含 online 状态和 inputSchema） */
+export interface McpServerToolsResponse {
+  id: number
+  name: string
+  description: string | null
+  endpoint: string
+  enabled: number
+  online: boolean
+  toolCount: number
+  tools: McpToolOption[]
+  createdAt: string
+  updatedAt: string
+}
+
+/** 工具选项（含所属 Server 信息和 inputSchema） */
+export interface McpToolOption {
+  id: number
+  name: string
+  description: string
+  serverName: string
+  serverId: number
+  inputSchema: Record<string, any> | null
 }
 
 export interface McpServerListParams {
@@ -78,6 +105,13 @@ export const mcpApi = {
    */
   getById: (id: number): Promise<McpServerResponse> => {
     return get<McpServerResponse>(`/api/v1/mcp-servers/${id}`)
+  },
+
+  /**
+   * 批量获取所有 Server 及其工具（含 online 状态、endpoint、inputSchema）
+   */
+  getToolsByServer: (params?: { enabled?: number }): Promise<McpServerToolsResponse[]> => {
+    return get<McpServerToolsResponse[]>('/api/v1/mcp-servers/tools', { params })
   },
 
   /**

@@ -379,11 +379,12 @@ POST /api/v1/auth/switch-workspace
 | GET | `/api/v1/messages/cursor/time-range` | 按时间范围查询消息（游标分页） |
 | GET | `/api/v1/messages/{id}` | 查询消息详情 |
 
-### MCP Server API（7 个）
+### MCP Server API（8 个）
 
 | 方法 | 路径 | 说明 |
 |:---|:---|:---|
 | GET | `/api/v1/mcp-servers` | 分页查询 |
+| GET | `/api/v1/mcp-servers/tools` | 批量获取 Server 及工具列表（含 online 状态、inputSchema） |
 | GET | `/api/v1/mcp-servers/{id}` | 查询详情（含工具列表） |
 | POST | `/api/v1/mcp-servers` | 创建 MCP 服务器 |
 | PUT | `/api/v1/mcp-servers/{id}` | 更新 MCP 服务器 |
