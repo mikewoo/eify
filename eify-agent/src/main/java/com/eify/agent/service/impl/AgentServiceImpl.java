@@ -642,7 +642,12 @@ public class AgentServiceImpl implements AgentService {
                     .name(provider.getName())
                     .type(provider.getType().toString())
                     .baseUrl(provider.getBaseUrl())
-                    .build());
+                    .build())
+                    .defaultProviderName(provider.getName())
+                    .defaultProviderType(provider.getType().toString())
+                    .defaultProviderAvailable(true);
+        } else {
+            builder.defaultProviderAvailable(false);
         }
 
         return builder.build();
