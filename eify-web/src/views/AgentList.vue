@@ -428,7 +428,9 @@
                 <div class="tool-group-header">
                   <span class="eify-status-dot" :class="server.online ? 'online' : 'offline'" />
                   <span class="server-name">{{ server.name }}</span>
+                  <span class="header-sep">│</span>
                   <span class="eify-tag eify-tag-gray server-endpoint">{{ server.endpoint }}</span>
+                  <span class="header-sep">│</span>
                   <span class="server-tool-count">{{ server.toolCount }} {{ t('agent.toolsCount') }}</span>
                 </div>
                 <template v-for="tool in server.tools" :key="tool.id">
@@ -441,17 +443,18 @@
                             class="eify-btn eify-btn-text eify-btn-sm tool-expand-btn"
                             type="button"
                             @click="toggleExpand(tool.id)">
-                      {{ expandedToolId === tool.id ? t('common.collapse') : t('agent.expandParams') }}
+                      {{ expandedToolId === tool.id ? t('common.collapse') + ' ▴' : t('agent.expandParams') + ' ▾' }}
                     </button>
                   </div>
                   <div v-if="expandedToolId === tool.id && tool.inputSchema && hasProperties(tool.inputSchema)" class="tool-params">
                     <div class="params-header">{{ t('agent.paramsHint') }}</div>
                     <div v-for="(param, key) in tool.inputSchema.properties" :key="key" class="param-row">
-                      <span class="param-name">{{ key }}</span>
+                      <span class="param-name">{{ key }}:</span>
                       <span class="param-type">{{ param.type || '-' }}</span>
                       <span :class="isRequired(tool.inputSchema.required, key) ? 'param-required' : 'param-optional'">
-                        {{ isRequired(tool.inputSchema.required, key) ? t('agent.required') : t('agent.optional') }}
+                        ({{ isRequired(tool.inputSchema.required, key) ? t('agent.required') : t('agent.optional') }})
                       </span>
+                      <span class="param-desc-sep">—</span>
                       <span class="param-desc">{{ param.description || '-' }}</span>
                     </div>
                   </div>
@@ -1789,6 +1792,11 @@ const quickPrompts = getQuickPrompts()
   white-space: nowrap;
 }
 
+.header-sep {
+  color: var(--eify-border-strong);
+  font-weight: 300;
+}
+
 .server-endpoint {
   flex-shrink: 0;
 }
@@ -1853,6 +1861,11 @@ const quickPrompts = getQuickPrompts()
 
 .param-optional {
   color: var(--eify-text-tertiary);
+}
+
+.param-desc-sep {
+  color: var(--eify-text-tertiary);
+  flex-shrink: 0;
 }
 
 .param-desc {
