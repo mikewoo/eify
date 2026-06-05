@@ -27,7 +27,7 @@ public interface AgentKnowledgeMapper extends BaseMapper<AgentKnowledge> {
 
     @Insert("<script>INSERT INTO agent_knowledge (agent_id, knowledge_id, creator_id, created_at, updated_at) VALUES " +
             "<foreach collection='knowledgeIds' item='kbId' separator=','>(#{agentId}, #{kbId}, NULL, NOW(), NOW())</foreach> " +
-            "ON DUPLICATE KEY UPDATE deleted = 0, updated_at = NOW()</script>")
+            "ON CONFLICT (agent_id, knowledge_id) DO UPDATE SET deleted = 0, updated_at = NOW()</script>")
     int upsertKnowledgeIds(@Param("agentId") Long agentId, @Param("knowledgeIds") List<Long> knowledgeIds);
 
     @Update("<script>UPDATE agent_knowledge SET deleted = 1, updated_at = NOW() WHERE agent_id = #{agentId} AND deleted = 0 " +
