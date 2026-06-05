@@ -16,25 +16,25 @@ import javax.sql.DataSource;
  * <p>
  * 单数据源下采用程序化 {@code @PostConstruct} 方式执行 Flyway 迁移，
  * 迁移失败会直接中断启动。
- * 通过 {@code eify.flyway.mysql.enabled=false} 可禁用（如测试环境）。
+ * 通过 {@code eify.flyway.pg.enabled=false} 可禁用（如测试环境）。
  */
 @Slf4j
 @Configuration
-@ConditionalOnProperty(name = "eify.flyway.mysql.enabled", havingValue = "true", matchIfMissing = true)
-public class MySqlFlywayConfig {
+@ConditionalOnProperty(name = "eify.flyway.pg.enabled", havingValue = "true", matchIfMissing = true)
+public class FlywayConfig {
 
     private final DataSource dataSource;
     private final boolean repairOnMigrate;
 
-    public MySqlFlywayConfig(DataSource dataSource,
-                             @Value("${eify.flyway.mysql.repair-on-migrate:false}") boolean repairOnMigrate) {
+    public FlywayConfig(DataSource dataSource,
+                        @Value("${eify.flyway.pg.repair-on-migrate:false}") boolean repairOnMigrate) {
         this.dataSource = dataSource;
         this.repairOnMigrate = repairOnMigrate;
     }
 
     @jakarta.annotation.PostConstruct
     public void migrate() {
-        log.info("[MySqlFlyway] 开始 MySQL Flyway 迁移, repairOnMigrate={}", repairOnMigrate);
+        log.info("[Flyway] 开始 PostgreSQL Flyway 迁移, repairOnMigrate={}", repairOnMigrate);
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/migration")
@@ -45,6 +45,6 @@ public class MySqlFlywayConfig {
             flyway.repair();
         }
         flyway.migrate();
-        log.info("[MySqlFlyway] MySQL Flyway 迁移完成");
+        log.info("[Flyway] PostgreSQL Flyway 迁移完成");
     }
 }

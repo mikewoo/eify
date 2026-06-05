@@ -108,5 +108,5 @@ chat:
 # ========== Flyway 迁移配置（H2 测试环境禁用） ==========
 eify:
   flyway:
-    mysql:
+    pg:
       enabled: false

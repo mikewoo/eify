@@ -20,32 +20,13 @@ server:
 
 spring:
   datasource:
-    druid:
+    hikari:
       # Test 连接池：保持 base 配置（test 流量低）
-      initial-size: 5
-      min-idle: 5
-      max-active: 20
-      max-wait: 60000
-      time-between-eviction-runs-millis: 60000
-      min-evictable-idle-time-millis: 300000
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
-      keep-alive: true
-      # Test 启用 Druid 监控面板（需 basic auth）
-      stat-view-servlet:
-        enabled: true
-        url-pattern: /druid/*
-        reset-enable: false
-        login-username: admin
-        login-password: ${DRUID_PASSWORD:}
-      filter:
-        stat:
-          enabled: true
-          log-slow-sql: true
-          slow-sql-millis: 2000
-      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=1000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 600000
 
   data:
     redis:
@@ -121,5 +102,5 @@ crypto:
 # ========== Flyway 迁移配置 ==========
 eify:
   flyway:
-    mysql:
+    pg:
       repair-on-migrate: true

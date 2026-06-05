@@ -99,5 +99,5 @@ chat:
 # ========== Flyway 迁移配置 ==========
 eify:
   flyway:
-    mysql:
+    pg:
       repair-on-migrate: true
