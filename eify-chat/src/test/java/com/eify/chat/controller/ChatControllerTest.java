@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -41,14 +40,11 @@ class ChatControllerTest {
     @Mock
     MessageService messageService;
 
-    @Mock
-    JdbcTemplate jdbcTemplate;
-
     ChatController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new ChatController(chatService, conversationService, messageService, jdbcTemplate);
+        controller = new ChatController(chatService, conversationService, messageService);
         CurrentContext.set(1L, 1L);
     }
 

@@ -18,7 +18,6 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -39,13 +38,11 @@ public class ChatController {
     private final ChatService chatService;
     private final ConversationService conversationService;
     private final MessageService messageService;
-    private final JdbcTemplate jdbcTemplate;
 
-    public ChatController(ChatService chatService, ConversationService conversationService, MessageService messageService, JdbcTemplate jdbcTemplate) {
+    public ChatController(ChatService chatService, ConversationService conversationService, MessageService messageService) {
         this.chatService = chatService;
         this.conversationService = conversationService;
         this.messageService = messageService;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     /**
@@ -212,33 +209,5 @@ public class ChatController {
         return Result.success(messages);
     }
 
-    /**
-     * 修复数据库 metadata 字段（临时开发用）
-     */
-    @Operation(summary = "修复数据库", description = "临时开发接口，修复 metadata 字段")
-    @PostMapping("/fix-database")
-    public Result<String> fixDatabase() {
-        try {
-            // 检查列是否允许 NULL
-            String checkSql = "SELECT IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS " +
-                             "WHERE TABLE_SCHEMA = 'eify' AND TABLE_NAME = 'ai_chat_message' AND COLUMN_NAME = 'metadata'";
-            String isNullable = jdbcTemplate.queryForObject(checkSql, String.class);
-
-            if ("YES".equals(isNullable)) {
-                return Result.success("数据库已经是正确的结构，无需修复");
-            }
-
-            // 修改字段允许 NULL
-            String fixSql = "ALTER TABLE `ai_chat_message` " +
-                           "MODIFY COLUMN `metadata` JSON NULL COMMENT '元数据：{\"model\":\"gpt-4\",\"latency_ms\":1234}'";
-            jdbcTemplate.execute(fixSql);
-
-            log.info("[ChatController] 数据库修复成功：metadata 字段已允许 NULL");
-            return Result.success("数据库修复成功");
-        } catch (Exception e) {
-            log.error("[ChatController] 数据库修复失败", e);
-            return Result.fail(ErrorCode.SYSTEM_ERROR);
-        }
-    }
 
 }
