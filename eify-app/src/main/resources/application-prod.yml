@@ -15,27 +15,12 @@ server:
 
 spring:
   datasource:
-    druid:
-      # Prod 连接池：最大化
-      initial-size: 10
-      min-idle: 10
-      max-active: 50
-      max-wait: 60000
-      time-between-eviction-runs-millis: 60000
-      min-evictable-idle-time-millis: 300000
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: false
-      test-on-return: false
-      # Prod 关闭监控面板
-      stat-view-servlet:
-        enabled: false
-      filter:
-        stat:
-          enabled: true
-          log-slow-sql: true
-          slow-sql-millis: 1000
-      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=1000
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+      connection-timeout: 60000
+      idle-timeout: 300000
+      connection-test-query: SELECT 1
 
   data:
     redis:
