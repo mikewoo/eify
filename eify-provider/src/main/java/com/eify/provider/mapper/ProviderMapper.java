@@ -18,7 +18,7 @@ public interface ProviderMapper extends BaseMapper<Provider> {
     @Select("SELECT COUNT(*) FROM ai_workflow_node n " +
             "INNER JOIN ai_workflow w ON n.workflow_id = w.id " +
             "WHERE n.type = 'llm' " +
-            "AND JSON_EXTRACT(n.config, '$.providerId') = #{providerId} " +
+            "AND (n.config->>'providerId')::bigint = #{providerId} " +
             "AND n.deleted = 0 " +
             "AND w.deleted = 0")
     int countWorkflowLlmReferences(@Param("providerId") Long providerId);
