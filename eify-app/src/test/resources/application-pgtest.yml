@@ -1,0 +1,81 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: eify
+
+  # @ServiceConnection 会自动注入 Testcontainers PG 容器的连接参数（url/username/password）
+  # 这里不需要手填 datasource，@ServiceConnection 优先覆盖
+
+  sql:
+    init:
+      mode: never   # 不用 schema-h2.sql / data-h2.sql，由 Flyway 建表
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration   # 跑真实 V1__init.sql
+
+  # 禁用 Redis（pgtest 不需要）
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  cache:
+    type: none
+
+# ========== 关闭程序化 MySqlFlywayConfig ==========
+# MySqlFlywayConfig 受 eify.flyway.mysql.enabled 控制（默认 true）。
+# pgtest 下设 false，让 Spring Boot 标准 Flyway 自动配置接管，
+# 避免 @PostConstruct 迁移与自动配置重复执行两次。
+eify:
+  flyway:
+    mysql:
+      enabled: false
+
+# ========== 认证配置（pgtest 环境） ==========
+auth:
+  jwt:
+    secret: test-eify-jwt-secret
+    issuer: eify-test
+    audience: eify-api
+    cookie-secure: false
+
+# ========== 加密配置（pgtest 环境） ==========
+crypto:
+  kek: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+
+# ========== 聊天配置（pgtest 环境） ==========
+chat:
+  context:
+    max-rounds: 5
+  sse-timeout: 60000
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+  type-aliases-package: com.eify.*.domain.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: AUTO
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Micrometer Tracing
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true
+    brave:
+      enabled: true
+    propagation:
+      type: b3
+
+logging:
+  level:
+    com.eify: debug
