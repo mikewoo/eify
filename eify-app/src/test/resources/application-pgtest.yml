@@ -24,13 +24,13 @@ spring:
   cache:
     type: none
 
-# ========== 关闭程序化 MySqlFlywayConfig ==========
-# MySqlFlywayConfig 受 eify.flyway.mysql.enabled 控制（默认 true）。
+# ========== 关闭程序化 FlywayConfig @PostConstruct ==========
+# FlywayConfig 受 eify.flyway.pg.enabled 控制（默认 true）。
 # pgtest 下设 false，让 Spring Boot 标准 Flyway 自动配置接管，
 # 避免 @PostConstruct 迁移与自动配置重复执行两次。
 eify:
   flyway:
-    mysql:
+    pg:
       enabled: false
 
 # ========== 认证配置（pgtest 环境） ==========
