@@ -68,14 +68,27 @@ class PgIntegrationTest {
         assertThat(s).isEqualTo("DOWN");
     }
 
+    /**
+     * 构建 1024 维向量：第一维为 1.0，其余为 0。
+     */
+    private static String unitVector1024() {
+        StringBuilder sb = new StringBuilder("[1.0");
+        for (int i = 1; i < 1024; i++) {
+            sb.append(",0.0");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
     @Test
     void vectorCosineSearchReturnsSimilarity() {
+        String v = unitVector1024();
         jdbcTemplate.update("INSERT INTO document_chunk " +
                 "(knowledge_id, document_id, chunk_index, content, embedding, chunk_hash) " +
-                "VALUES (1, 1, 0, 'hello', '[1,0,0]'::vector, 'hash-tc-1')");
+                "VALUES (1, 1, 0, 'hello', ?::vector, 'hash-tc-1')", v);
         Double sim = jdbcTemplate.queryForObject(
-                "SELECT 1 - (embedding <=> '[1,0,0]'::vector) FROM document_chunk WHERE chunk_hash = 'hash-tc-1'",
-                Double.class);
+                "SELECT 1 - (embedding <=> ?::vector) FROM document_chunk WHERE chunk_hash = 'hash-tc-1'",
+                Double.class, v);
         assertThat(sim).isGreaterThan(0.99);
     }
 }
