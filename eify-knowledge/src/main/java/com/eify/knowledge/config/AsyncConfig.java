@@ -1,6 +1,6 @@
 package com.eify.knowledge.config;
 
-import com.eify.knowledge.config.ContextPropagatingTaskDecorator;
+import com.eify.common.config.ContextPropagatingTaskDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;

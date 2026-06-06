@@ -23,16 +23,33 @@
         </encoder>
     </appender>
 
-    <!-- ======================== 异步文件输出（生产环境优化） ======================== -->
+    <!-- ======================== 生产环境专用日志文件（prod/staging） ======================== -->
+    <springProfile name="prod,staging">
+
     <appender name="FILE_JSON_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <!-- 队列配置 -->
         <queueSize>10000</queueSize>
         <discardingThreshold>0</discardingThreshold>
         <neverBlock>true</neverBlock>
-
-        <!-- 引用同步 appender -->
         <appender-ref ref="FILE_JSON"/>
     </appender>
+
+    <!-- 同步文件输出（被 FILE_JSON_ASYNC 引用） -->
+    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.eify.common.log.layout.StructuredLogLayout">
+                <appVersion>${APP_VERSION}</appVersion>
+            </layout>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    </springProfile>
 
     <!-- ======================== 开发环境专用日志文件 ======================== -->
     <appender name="DEV_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -47,22 +64,6 @@
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>7</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
-
-    <!-- 同步文件输出（被异步引用） -->
-    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${APP_NAME}.log</file>
-        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="com.eify.common.log.layout.StructuredLogLayout">
-                <appVersion>${APP_VERSION}</appVersion>
-            </layout>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>7</maxHistory>
-            <totalSizeCap>5GB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
@@ -108,7 +109,6 @@
         <logger name="com.baomidou.mybatisplus" level="${LOG_LEVEL_PLUS}"/>
         <logger name="brave.Tracer" level="WARN"/>
         <logger name="brave" level="WARN"/>
-        <logger name="com.alibaba.druid" level="INFO"/>
     </springProfile>
 
     <!-- ======================== 生产环境配置（优化版） ======================== -->
@@ -125,7 +125,6 @@
         <logger name="com.baomidou.mybatisplus" level="WARN"/>
         <logger name="brave.Tracer" level="WARN"/>
         <logger name="brave" level="WARN"/>
-        <logger name="com.alibaba.druid" level="WARN"/>
     </springProfile>
 
 </configuration>
