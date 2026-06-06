@@ -17,7 +17,7 @@ import java.util.List;
  * 文档分块数据访问层（PostgreSQL pgvector）
  * <p>
  * 职责：批量写入 + 向量相似度查询。
- * 业务 CRUD 走 MySQL 的 MyBatis-Plus，这里只管向量数据。
+ * 业务 CRUD 走 MyBatis-Plus，这里只管向量数据。
  */
 @Slf4j
 @Repository
