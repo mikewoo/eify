@@ -133,8 +133,8 @@ docker-compose -f deploy/infra/deploy/docker-compose.yml up -d
 ### 本地开发
 
 ```bash
-# 1. 启动依赖服务（MySQL + Redis）
-docker-compose -f deploy/infra/deploy/docker-compose.yml up -d mysql redis
+# 1. 启动依赖服务（PostgreSQL + Redis）
+docker-compose -f deploy/infra/deploy/docker-compose.yml up -d pgvector redis
 
 # 2. 启动后端
 ./start.sh dev
@@ -168,7 +168,7 @@ docker-compose -f deploy/optional/docker-compose-jaeger.yml up -d
 |:---|:---|
 | **后端框架** | Spring Boot 4.0.6 |
 | **ORM** | MyBatis-Plus 3.5.15 |
-| **数据库** | MySQL 8.0 |
+| **数据库** | PostgreSQL 17 + pgvector |
 | **缓存** | Redis 7 |
 | **向量数据库** | PostgreSQL 16 + pgvector |
 | **前端** | Vue 3.5.17 + TypeScript + Vite |

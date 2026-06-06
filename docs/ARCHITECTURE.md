@@ -5,7 +5,7 @@
 - **多工作空间多租户**：JWT 无状态认证 + ThreadLocal 上下文传递，所有业务数据按 `workspace_id` 隔离
 - SSE 长连接支持流式输出
 - Redis 缓存 Agent 配置、对话上下文
-- MySQL 持久化用户、Agent、对话、消息数据
+- PostgreSQL 17 持久化全部业务数据与向量数据
 - Nginx 反向代理，优化 SSE 传输
 
 ### 工作空间多租户架构
@@ -163,9 +163,9 @@ eify-auth/
 | eify-agent | MyBatis-Plus、Redis（Agent 配置缓存） |
 | eify-chat | MyBatis-Plus、Redis（对话上下文）、SSE (SseEmitter) |
 | eify-mcp | MCP SDK (`io.modelcontextprotocol.sdk:mcp:1.1.1`) |
-| eify-knowledge | pgvector、PostgreSQL、PDFBox 2.0.27、Apache POI 5.2.3、OkHttp（嵌入 API 调用）、Caffeine（双存储设计见 [ADR](ADRs/ADR-0004-dual-storage-mysql-pgvector.md)）|
+| eify-knowledge | pgvector、PostgreSQL、PDFBox 2.0.27、Apache POI 5.2.3、OkHttp（嵌入 API 调用）、Caffeine（单库设计见 [ADR](ADRs/ADR-0013-single-postgresql17-database.md)）|
 | eify-workflow | GraalVM Polyglot 24.1.0（JS 引擎）、MyBatis-Plus |
-| eify-app | Spring Boot 4.0.6、JwtAuthFilter（iss/aud 校验 + HttpOnly Cookie）、Flyway（MySQL + pgvector）、所有 8 个业务模块 |
+| eify-app | Spring Boot 4.0.6、JwtAuthFilter（iss/aud 校验 + HttpOnly Cookie）、Flyway（PostgreSQL 17 单库）、所有 8 个业务模块 |
 
 ---
 

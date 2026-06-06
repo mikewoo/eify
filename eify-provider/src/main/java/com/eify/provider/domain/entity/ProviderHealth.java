@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * 对应数据库表：provider_health
  * <p>
  * 注意：此表使用 provider_id 唯一索引，每个供应商只有一条健康记录，
- * 更新时使用 ON DUPLICATE KEY UPDATE 实现原地更新
+ * 更新时使用 ON CONFLICT 实现原地更新
  */
 @Data
 @TableName("provider_health")

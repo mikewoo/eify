@@ -23,3 +23,10 @@ VALUES (2, 1, 'owner');
 -- 默认供应商
 MERGE INTO provider (id, workspace_id, name, type, base_url, auth_config, enabled, creator_id) KEY(id)
 VALUES (1, 1, 'OpenAI', 'OPENAI', 'https://api.openai.com', '{"api_key": "sk-test"}', 1, 1);
+
+-- 同步 IDENTITY 序列：上面用显式 id 插入了种子数据，
+-- H2 PostgreSQL 模式下显式插入不会推进自增序列，需手动重启到安全高位，
+-- 避免应用层自增插入与种子主键冲突（与生产 V1__init.sql 的 setval 等价）
+ALTER TABLE ai_user ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE ai_workspace ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE provider ALTER COLUMN id RESTART WITH 100;

@@ -283,7 +283,7 @@ public class ProviderServiceImpl implements ProviderService {
                 throw new BusinessException(ErrorCode.PROVIDER_IN_USE_BY_WORKFLOW);
             }
         } catch (Exception e) {
-            log.warn("跳过工作流 LLM 节点引用检查（可能是不支持 JSON_EXTRACT 的数据库）: {}", e.getMessage());
+            log.warn("跳过工作流 LLM 节点引用检查（查询失败）: {}", e.getMessage());
         }
 
         modelConfigMapper.delete(new LambdaQueryWrapper<ModelConfig>()

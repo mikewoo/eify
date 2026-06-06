@@ -15,32 +15,12 @@ server:
 
 spring:
   datasource:
-    druid:
-      # Staging连接池：介于 dev(30) 和 prod(50) 之间
-      initial-size: 10
-      min-idle: 10
-      max-active: 40
-      max-wait: 30000
-      time-between-eviction-runs-millis: 60000
-      min-evictable-idle-time-millis: 300000
-      validation-query: SELECT 1
-      test-while-idle: true
-      test-on-borrow: true
-      test-on-return: false
-      keep-alive: true
-      # Staging启用 Druid 监控面板（需 basic auth）
-      stat-view-servlet:
-        enabled: true
-        url-pattern: /druid/*
-        reset-enable: false
-        login-username: admin
-        login-password: ${DRUID_PASSWORD:}
-      filter:
-        stat:
-          enabled: true
-          log-slow-sql: true
-          slow-sql-millis: 2000
-      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=1000
+    hikari:
+      maximum-pool-size: 40
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 300000
+      connection-test-query: SELECT 1
 
   data:
     redis:

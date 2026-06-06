@@ -5,11 +5,11 @@ import enUS from 'element-plus/es/locale/lang/en'
 import zhCN from 'element-plus/es/locale/lang/zh-cn'
 
 export const useLocaleStore = defineStore('locale', () => {
-  const current = ref<string>(localStorage.getItem('eify_lang') || 'zh-CN')
+  const current = ref<'zh-CN' | 'en-US'>((localStorage.getItem('eify_lang') as 'zh-CN' | 'en-US') || 'zh-CN')
 
   const elementLocale = computed(() => current.value === 'en-US' ? enUS : zhCN)
 
-  function setLocale(locale: string) {
+  function setLocale(locale: 'zh-CN' | 'en-US') {
     current.value = locale
     i18n.global.locale.value = locale
     localStorage.setItem('eify_lang', locale)

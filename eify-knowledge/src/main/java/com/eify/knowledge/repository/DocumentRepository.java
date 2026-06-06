@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Update;
 import java.util.List;
 
 /**
- * 文档数据访问层（MySQL）
+ * 文档数据访问层（PostgreSQL）
  */
 @Mapper
 public interface DocumentRepository extends BaseMapper<Document> {

@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
 /**
- * 知识库数据访问层（MySQL）
+ * 知识库数据访问层（PostgreSQL）
  */
 @Mapper
 public interface KnowledgeRepository extends BaseMapper<KnowledgeBase> {

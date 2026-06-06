@@ -44,7 +44,7 @@ mvn spring-boot:run -pl eify-app -Dspring-boot.run.profiles=dev
 ### Docker 部署
 
 ```bash
-# 启动所有服务（MySQL + Redis + pgvector + 应用）
+# 启动所有服务（PostgreSQL 17 + Redis + 应用）
 docker-compose -f deploy/infra/deploy/docker-compose.yml up -d
 
 # 启动日志采集链路（ClickHouse + Vector + Grafana + Prometheus）
@@ -85,7 +85,7 @@ grep 'YOUR_TRACE_ID' ./logs/eify.log | jq
 | 🔴 **日志格式** | 使用统一日志配置，输出纯 JSON 格式（UTC 时区） | 日志格式混乱 | [LOGGING.md](docs/guides/LOGGING.md) |
 | 🔴 **ClickHouse 类型** | Nullable 字段不能与 LowCardinality 嵌套 | 类型错误 | [DATABASE.md](docs/guides/DATABASE.md) |
 | 🔴 **工作空间数据隔离** | Service 层所有查询/更新/删除必须过滤 `workspace_id`，更新前验证归属。使用 `WorkspaceGuard` 工具类消除样板代码 | 跨工作空间数据泄露/篡改 | [AUTH-WORKSPACE.md](docs/guides/AUTH-WORKSPACE.md) |
-| 🔴 **Flyway 迁移幂等** | 所有 DDL 语句必须检查对象是否已存在（ADD COLUMN → INFORMATION_SCHEMA.COLUMNS，ADD INDEX → INFORMATION_SCHEMA.STATISTICS），确保幂等可重入 | 应用启动失败，迁移阻塞 | [DATABASE.md](docs/guides/DATABASE.md) |
+| 🔴 **Flyway 迁移幂等** | 所有 DDL 语句必须使用 PG 原生幂等语法（ADD COLUMN IF NOT EXISTS / CREATE INDEX IF NOT EXISTS / DO $$ ... ADD CONSTRAINT），确保幂等可重入 | 应用启动失败，迁移阻塞 | [DATABASE.md](docs/guides/DATABASE.md) |
 | 🔴 **ADR 命名规范** | 架构决策记录统一放在 `docs/ADRs/`，文件命名 `ADR-{四位递增序号}-{名称}.md`，序号按创建时间递增 | ADR 命名混乱，查找困难 | — |
 | 🔴 **ADR 格式规范** | 所有 ADR 文档必须遵循 `docs/ADRs/ADR-XXXX-Template.md` 模板格式，包含 6 个必填章节：`# Status`、`# Date`、`# Owner`、`# Deciders`、`# Context`、`# Decision`，以及 2 个推荐章节：`## Consequences`、`# Details`。`# Considered Options` 章节列出所有候选方案及其被拒绝原因 | ADR 结构不一致，难以阅读和对比 | `docs/ADRs/ADR-XXXX-Template.md` |
 | 🔴 **安全审查** | 涉及安全敏感代码时，审查前必须阅读 [SECURITY.md](docs/guides/SECURITY.md) 系统风险清单 | 遗漏安全检查 | [SECURITY.md](docs/guides/SECURITY.md) |
@@ -196,7 +196,7 @@ private LocalDateTime updatedAt;
 - 软删除字段 `deleted` 必须有索引
 - 分页查询优先使用游标分页（针对大表）
 - JSON 字段必须添加注释说明结构
-- Flyway 迁移必须幂等：DDL 通过 INFORMATION_SCHEMA 检查后执行，模板详见 [DATABASE.md](docs/guides/DATABASE.md)
+- Flyway 迁移必须幂等：DDL 使用 PG 原生 `IF NOT EXISTS` 语法（ADD COLUMN / CREATE INDEX / DO $$ ... ADD CONSTRAINT），模板详见 [DATABASE.md](docs/guides/DATABASE.md)
 
 ---
 
@@ -252,7 +252,7 @@ cd eify-web && npx vue-tsc --noEmit && cd ..  # 前端类型检查
 
 - [ ] **索引覆盖**：新查询有对应索引，EXPLAIN 确认无全表扫描
 - [ ] **N+1 查询**：禁止循环内逐条查询，使用批量查询或联表查询
-- [ ] **Flyway 幂等**：DDL 使用 `INFORMATION_SCHEMA` 检查模板（ADD COLUMN / ADD INDEX / ADD UNIQUE KEY）
+- [ ] **Flyway 幂等**：DDL 使用 PG 原生幂等语法（ADD COLUMN IF NOT EXISTS / CREATE INDEX IF NOT EXISTS / DO $$ ... ADD CONSTRAINT）
 - [ ] **ClickHouse 类型**：Nullable 不与 LowCardinality 嵌套；按 logType 设置 Nullable 字段
 
 ### 涉及 API 接口时
@@ -328,7 +328,7 @@ cd eify-web && npx vue-tsc --noEmit && cd ..  # 前端类型检查
 | [docs/README.md](docs/README.md) | 项目总览 | 了解项目整体情况 |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构设计 | 开发新功能前了解模块结构 |
 | [API-SPEC.md](docs/API-SPEC.md) | 接口规范 | 设计 API 接口 |
-| [DATABASE.md](docs/guides/DATABASE.md) | 数据库规范 | MySQL 建表模板、索引分页、业务表 DDL、ClickHouse 日志库、游标分页优化 |
+| [DATABASE.md](docs/guides/DATABASE.md) | 数据库规范 | PostgreSQL 建表模板、索引分页、业务表 DDL、ClickHouse 日志库、游标分页优化 |
 | [AUTH-WORKSPACE.md](docs/guides/AUTH-WORKSPACE.md) | 用户认证与工作空间 | 多租户架构、JWT 认证、数据隔离 |
 | [DESIGN.md](DESIGN.md) | 设计系统规范 | 生成前端 UI 时参照，包含颜色、字体、间距、组件、布局等视觉令牌 |
 

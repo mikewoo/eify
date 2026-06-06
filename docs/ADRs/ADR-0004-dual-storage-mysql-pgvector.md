@@ -2,7 +2,11 @@
 `ADR-0004 dual-storage-mysql-pgvector`
 
 # Status
-Accepted
+Superseded
+
+> 本 ADR 已被 [ADR-0013 单 PostgreSQL 17 数据库统一存储](./ADR-0013-single-postgresql17-database.md) 替代（2026-06）。
+> MySQL + pgvector 双存储架构已迁移为单 PostgreSQL 17 实例承载全部业务表与向量表。
+> 详见 [MySQL → PG17 迁移设计](../specs/2026-06-05-mysql-to-pg17-migration-design.md)。
 
 # Date
 2025-Q2

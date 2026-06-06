@@ -7,24 +7,12 @@
 
 spring:
   datasource:
-    druid:
-      # Dev 连接池：适中配置
-      max-active: 30
-      max-wait: 5000
-      time-between-eviction-runs-millis: 30000
-      min-evictable-idle-time-millis: 180000
-      max-evictable-idle-time-millis: 300000
-      test-on-borrow: true
-      keep-alive: true
-      remove-abandoned: true
-      remove-abandoned-timeout-millis: 60000
-      # Dev 启用 Druid 监控面板
-      stat-view-servlet:
-        enabled: true
-        url-pattern: /druid/*
-        reset-enable: false
-        login-username: admin
-        login-password: ${DRUID_PASSWORD:admin}
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 5
+      connection-timeout: 5000
+      idle-timeout: 180000
+      max-lifetime: 300000
 
   data:
     redis:
@@ -39,7 +27,6 @@ logging:
     org.mybatis: INFO
     com.baomidou.mybatisplus: INFO
     org.springframework: INFO
-    com.alibaba.druid: INFO
     brave.Tracer: WARN
     brave: WARN
 
@@ -112,5 +99,5 @@ chat:
 # ========== Flyway 迁移配置 ==========
 eify:
   flyway:
-    mysql:
+    pg:
       repair-on-migrate: true

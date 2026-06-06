@@ -9,14 +9,6 @@ spring:
   application:
     name: eify-knowledge
 
-  # PostgreSQL 数据源（pgvector）
-  # 实际运行时由 PgVectorConfig 读取 spring.datasource-pgvector.* 配置
-  datasource-pgvector:
-    url: ${PGVECTOR_URL:jdbc:postgresql://localhost:5432/eify_vector?stringtype=unspecified}
-    username: ${PGVECTOR_USERNAME:postgres}
-    password: ${PGVECTOR_PASSWORD:}
-    driver-class-name: org.postgresql.Driver
-
   # 文件上传配置
   servlet:
     multipart:

@@ -4,8 +4,6 @@ import com.eify.knowledge.config.VectorTypeHandler;
 import com.eify.knowledge.domain.entity.DocumentChunk;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -19,16 +17,14 @@ import java.util.List;
  * 文档分块数据访问层（PostgreSQL pgvector）
  * <p>
  * 职责：批量写入 + 向量相似度查询。
- * 业务 CRUD 走 MySQL 的 MyBatis-Plus，这里只管向量数据。
+ * 业务 CRUD 走 MyBatis-Plus，这里只管向量数据。
  */
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class ChunkRepository {
 
-    @Lazy
-    @Autowired
-    private JdbcTemplate pgJdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
     private final VectorTypeHandler vectorTypeHandler;
 
     /**
@@ -41,7 +37,7 @@ public class ChunkRepository {
             VALUES (?, ?, ?, ?, ?::vector, ?, ?)
             """;
 
-        pgJdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 DocumentChunk c = chunks.get(i);
@@ -84,7 +80,7 @@ public class ChunkRepository {
 
         String vectorLiteral = vectorTypeHandler.toVectorLiteral(queryVector);
 
-        return pgJdbcTemplate.query(sql,
+        return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new ChunkSearchResult(
                         rs.getLong("id"),
                         rs.getLong("knowledge_id"),
@@ -104,7 +100,7 @@ public class ChunkRepository {
      * 按文档ID删除所有分块（文档重新处理时调用）
      */
     public int deleteByDocumentId(Long documentId) {
-        int count = pgJdbcTemplate.update(
+        int count = jdbcTemplate.update(
                 "DELETE FROM document_chunk WHERE document_id = ?",
                 documentId
         );
@@ -116,7 +112,7 @@ public class ChunkRepository {
      * 按知识库ID删除所有分块（知识库删除时调用）
      */
     public int deleteByKnowledgeId(Long knowledgeId) {
-        int count = pgJdbcTemplate.update(
+        int count = jdbcTemplate.update(
                 "DELETE FROM document_chunk WHERE knowledge_id = ?",
                 knowledgeId
         );
@@ -128,7 +124,7 @@ public class ChunkRepository {
      * 按文档ID统计分块数
      */
     public int countByDocumentId(Long documentId) {
-        Integer count = pgJdbcTemplate.queryForObject(
+        Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM document_chunk WHERE document_id = ?",
                 Integer.class,
                 documentId
@@ -150,7 +146,7 @@ public class ChunkRepository {
             params[i + 1] = hashes.get(i);
         }
 
-        return pgJdbcTemplate.queryForList(sql, String.class, params);
+        return jdbcTemplate.queryForList(sql, String.class, params);
     }
 
     /**
@@ -161,7 +157,7 @@ public class ChunkRepository {
             SELECT id, knowledge_id, document_id, chunk_index, content, chunk_hash, enabled, created_at
             FROM document_chunk WHERE document_id = ? ORDER BY chunk_index ASC
             """;
-        return pgJdbcTemplate.query(sql, (rs, rowNum) -> {
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
             DocumentChunk c = new DocumentChunk();
             c.setId(rs.getLong("id"));
             c.setKnowledgeId(rs.getLong("knowledge_id"));
@@ -185,7 +181,7 @@ public class ChunkRepository {
             WHERE knowledge_id = ? AND enabled = 1 AND content ILIKE ?
             LIMIT ?
             """;
-        return pgJdbcTemplate.query(sql,
+        return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new ChunkSearchResult(
                         rs.getLong("id"),
                         rs.getLong("knowledge_id"),

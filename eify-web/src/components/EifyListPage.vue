@@ -151,8 +151,8 @@ import { useAuthStore } from '@/store/auth'
 import PageLayout from './PageLayout.vue'
 import EifyTable from './EifyTable.vue'
 import EifySearch from './EifySearch.vue'
-import type { SearchCondition, SearchField } from './EifySearch.vue'
-import type { TableColumn } from './EifyTable.vue'
+import type { SearchCondition, SearchField } from '@/types/eify-search'
+import type { TableColumn } from '@/types/eify-table'
 import type { ListStat } from '@/types/api'
 
 const authStore = useAuthStore()

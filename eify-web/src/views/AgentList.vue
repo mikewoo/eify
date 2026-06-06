@@ -452,8 +452,8 @@
                     <div v-for="(param, key) in tool.inputSchema.properties" :key="key" class="param-row">
                       <span class="param-name">{{ key }}:</span>
                       <span class="param-type">{{ param.type || '-' }}</span>
-                      <span :class="isRequired(tool.inputSchema.required, key) ? 'param-required' : 'param-optional'">
-                        ({{ isRequired(tool.inputSchema.required, key) ? t('agent.required') : t('agent.optional') }})
+                      <span :class="isRequired((tool.inputSchema as any)?.required, key) ? 'param-required' : 'param-optional'">
+                        ({{ isRequired((tool.inputSchema as any)?.required, key) ? t('agent.required') : t('agent.optional') }})
                       </span>
                       <span class="param-desc-sep">—</span>
                       <span class="param-desc">{{ param.description || '-' }}</span>
@@ -685,8 +685,8 @@ import {
 import {
   mcpApi
 } from '@/api/mcp'
-import type { TableColumn } from '@/components/EifyTable.vue'
-import type { SearchCondition } from '@/components/EifySearch.vue'
+import type { TableColumn } from '@/types/eify-table'
+import type { SearchCondition } from '@/types/eify-search'
 import type { ListStat } from '@/types/api'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
@@ -734,6 +734,7 @@ interface McpToolOption {
 interface McpServerWithTools {
   id: number
   name: string
+  description?: string | null
   endpoint: string
   enabled: number
   online: boolean
@@ -816,7 +817,7 @@ const providerSelectOptions = computed(() => {
     options.push({
       id: opt.id,
       name: `${opt.originalName}${t('provider.unavailable')}`,
-      type: '' as string,
+      type: '' as any,
       available: false,
       originalName: opt.originalName
     })
@@ -1214,7 +1215,7 @@ const handleEdit = (row: Record<string, any>) => {
   dialogRef.value?.open(formData)
 }
 
-const handleDelete = (row: { id: number; name: string }) => {
+const handleDelete = (row: Record<string, any>) => {
   deleteTarget.value = row
   showDeleteConfirm.value = true
 }
@@ -1273,7 +1274,7 @@ const searchModels = (queryString: string, callback: (data: any[]) => void) => {
   callback(results)
 }
 
-const handleTestChat = (row: { id: number; name: string }) => {
+const handleTestChat = (row: Record<string, any>) => {
   currentAgent.value = row as any
   // 重新计算快速提示
   Object.assign(quickPrompts, getQuickPrompts())
@@ -1482,7 +1483,7 @@ const getQuickPrompts = () => {
   if (!currentAgent.value?.systemPrompt) return []
 
   // 提取一些常见的问题类型
-  const prompts = []
+  const prompts: any[] = []
 
   const localeMsgs = (i18n.global.messages as any).value?.[i18n.global.locale.value]
       || (i18n.global.messages as any).value?.['zh-CN']

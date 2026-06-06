@@ -8,9 +8,8 @@ pipeline {
             description: '部署环境（auto = 根据分支/Tag 自动选择；手动触发 prod 部署时请指定 Tag）'
         )
         string(name: 'TAG_NAME', defaultValue: '', description: 'Git Tag 名称（手动触发生产部署时指定，如 v1.0.0.20260520103045.42）')
-        string(name: 'MYSQL_HOST', defaultValue: '', description: 'MySQL 主机地址（留空使用 ConfigMap 默认值）')
+        string(name: 'PG_HOST', defaultValue: '', description: 'PostgreSQL 17 主机地址（留空使用 ConfigMap 默认值）')
         string(name: 'REDIS_HOST', defaultValue: '', description: 'Redis 主机地址')
-        string(name: 'PGVECTOR_HOST', defaultValue: '', description: 'PostgreSQL 主机地址')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: '跳过测试阶段')
     }
 
@@ -127,30 +126,27 @@ pipeline {
 
                 // 更新 ConfigMap（替换占位符）
                 sh """
-                    sed -i 's/<MYSQL_HOST>/${params.MYSQL_HOST ?: 'localhost'}/g' deploy/k8s/configmap.yaml
-                    sed -i 's/<REDIS_HOST>/${params.REDIS_HOST ?: 'localhost'}/g' deploy/k8s/configmap.yaml
-                    sed -i 's/<PGVECTOR_HOST>/${params.PGVECTOR_HOST ?: 'localhost'}/g' deploy/k8s/configmap.yaml
+                    sed -i 's|<PG_HOST>|${params.PG_HOST ?: 'localhost'}|g' deploy/k8s/configmap.yaml
+                    sed -i 's|<REDIS_HOST>|${params.REDIS_HOST ?: 'localhost'}|g' deploy/k8s/configmap.yaml
                     sed -i 's/SPRING_PROFILES_ACTIVE: "prod"/SPRING_PROFILES_ACTIVE: "${DEPLOY_ENV}"/g' deploy/k8s/configmap.yaml
                 """
                 sh "kubectl apply -f deploy/k8s/configmap.yaml"
 
                 // Secret：使用 Jenkins credentials 动态创建
                 withCredentials([
-                    string(credentialsId: 'mysql-password', variable: 'MYSQL_PASS'),
+                    string(credentialsId: 'pg-password', variable: 'PG_PASS'),
                     string(credentialsId: 'redis-password', variable: 'REDIS_PASS'),
                     string(credentialsId: 'jwt-secret', variable: 'JWT_SECRET'),
                     string(credentialsId: 'crypto-kek', variable: 'CRYPTO_KEK'),
-                    string(credentialsId: 'pgvector-password', variable: 'PGVECTOR_PASS'),
                     string(credentialsId: 'embedding-api-key', variable: 'EMBEDDING_API_KEY')
                 ]) {
                     sh """
                         kubectl create secret generic eify-secret \
-                            --from-literal=MYSQL_USERNAME=root \
-                            --from-literal=MYSQL_PASSWORD=\${MYSQL_PASS} \
+                            --from-literal=PG_USERNAME=postgres \
+                            --from-literal=PG_PASSWORD=\${PG_PASS} \
                             --from-literal=REDIS_PASSWORD=\${REDIS_PASS} \
                             --from-literal=JWT_SECRET=\${JWT_SECRET} \
                             --from-literal=CRYPTO_KEK=\${CRYPTO_KEK} \
-                            --from-literal=PGVECTOR_PASSWORD=\${PGVECTOR_PASS} \
                             --from-literal=EMBEDDING_API_KEY=\${EMBEDDING_API_KEY} \
                             -n ${K8S_NAMESPACE} \
                             --dry-run=client -o yaml | kubectl apply -f -

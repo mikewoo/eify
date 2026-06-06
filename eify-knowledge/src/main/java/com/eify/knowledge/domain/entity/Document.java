@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 文档实体（MySQL）
+ * 文档实体
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

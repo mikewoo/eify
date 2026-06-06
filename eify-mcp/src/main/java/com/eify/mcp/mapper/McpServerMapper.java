@@ -13,7 +13,7 @@ public interface McpServerMapper extends BaseMapper<McpServer> {
     @Select("SELECT COUNT(*) FROM ai_workflow_node n " +
             "INNER JOIN ai_workflow w ON n.workflow_id = w.id " +
             "WHERE n.type = 'tool_call' " +
-            "AND JSON_EXTRACT(n.config, '$.serverId') = #{serverId} " +
+            "AND (n.config->>'serverId')::bigint = #{serverId} " +
             "AND n.deleted = 0 " +
             "AND w.deleted = 0")
     int countWorkflowToolCallReferences(@Param("serverId") Long serverId);

@@ -124,7 +124,7 @@ const { t } = useI18n()
 
 /* ========== 类型定义 ========== */
 
-export interface TableColumn {
+interface TableColumn {
   /** 列属性名 */
   prop: string
   /** 列标题 */
@@ -147,12 +147,12 @@ export interface TableColumn {
   render?: (row: any, column: any, index: number) => any
 }
 
-export interface PaginationParams {
+interface PaginationParams {
   page: number
   size: number
 }
 
-export interface PageResult<T> {
+interface PageResult<T> {
   records: T[]
   total: number
 }
