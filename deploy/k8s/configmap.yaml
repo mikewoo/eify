@@ -13,21 +13,13 @@ data:
   # Default: prod (production)
   SPRING_PROFILES_ACTIVE: "prod"
 
-  # MySQL - 替换为实际数据库地址
-  MYSQL_HOST: "<MYSQL_HOST>"
-  MYSQL_PORT: "3306"
-  MYSQL_DATABASE: "eify"
+  # PostgreSQL 17（主数据库，承载业务表 + 向量表）
+  PG_URL: "jdbc:postgresql://<PG_HOST>:5432/eify?stringtype=unspecified"
 
   # Redis - 替换为实际 Redis 地址
   REDIS_HOST: "<REDIS_HOST>"
   REDIS_PORT: "6379"
   REDIS_DATABASE: "0"
-
-  # PostgreSQL (pgvector) - 替换为实际地址
-  PGVECTOR_HOST: "<PGVECTOR_HOST>"
-  PGVECTOR_PORT: "5432"
-  PGVECTOR_DATABASE: "eify_vector"
-  PGVECTOR_USERNAME: "postgres"
 
   # JVM options - 根据集群资源调整
   JAVA_OPTS: "-Xms512m -Xmx1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"

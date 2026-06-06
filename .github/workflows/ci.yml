@@ -12,14 +12,19 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: pgvector/pgvector:pg17
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: eify
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: eify
         ports:
-          - 3306:3306
-        options: --health-cmd "mysqladmin ping -h localhost" --health-interval 10s --health-timeout 5s --health-retries 5
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -35,9 +40,9 @@ jobs:
       - name: Build & Test
         run: mvn verify -pl eify-app -am -DskipTests=false
         env:
-          MYSQL_URL: jdbc:mysql://localhost:3306/eify?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-          MYSQL_USERNAME: root
-          MYSQL_PASSWORD: root
+          PG_URL: jdbc:postgresql://localhost:5432/eify?stringtype=unspecified
+          PG_USERNAME: postgres
+          PG_PASSWORD: postgres
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
@@ -91,9 +96,9 @@ jobs:
       - name: Build Backend JAR
         run: mvn package -pl eify-app -am -DskipTests
         env:
-          MYSQL_URL: jdbc:mysql://localhost:3306/eify
-          MYSQL_USERNAME: root
-          MYSQL_PASSWORD: root
+          PG_URL: jdbc:postgresql://localhost:5432/eify?stringtype=unspecified
+          PG_USERNAME: postgres
+          PG_PASSWORD: postgres
 
       - name: Setup Node
         uses: actions/setup-node@v4

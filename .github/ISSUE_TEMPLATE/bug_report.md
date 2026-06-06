@@ -32,7 +32,7 @@ If applicable, add screenshots to help explain the problem.
 | **Deployment** | Docker / Local Dev |
 | **Browser** | Chrome / Firefox / Edge |
 | **Version** | 3.x |
-| **Database** | MySQL 8.x |
+| **Database** | PostgreSQL 17 |
 
 ## Logs
 

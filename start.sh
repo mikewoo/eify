@@ -46,19 +46,12 @@ show_usage() {
     echo "环境变量（生产环境必须设置）:"
     echo "  JWT_SECRET          JWT 签名密钥（openssl rand -base64 32）"
     echo "  CRYPTO_KEK          加密密钥（openssl rand -base64 32）"
-    echo "  MYSQL_HOST          数据库主机"
-    echo "  MYSQL_PORT          数据库端口"
-    echo "  MYSQL_DATABASE      数据库名称"
-    echo "  MYSQL_USERNAME      数据库用户名"
-    echo "  MYSQL_PASSWORD      数据库密码"
+    echo "  PG_URL              PostgreSQL 17 JDBC URL"
+    echo "  PG_USERNAME         PostgreSQL 用户名"
+    echo "  PG_PASSWORD         PostgreSQL 密码"
     echo "  REDIS_HOST          Redis 主机"
     echo "  REDIS_PORT          Redis 端口"
     echo "  EMBEDDING_API_KEY   Embedding API 密钥"
-    echo "  PGVECTOR_HOST       pgvector 主机"
-    echo "  PGVECTOR_PORT       pgvector 端口"
-    echo "  PGVECTOR_DATABASE   pgvector 数据库"
-    echo "  PGVECTOR_USERNAME   pgvector 用户名"
-    echo "  PGVECTOR_PASSWORD   pgvector 密码"
     echo ""
     exit 1
 }
@@ -99,8 +92,8 @@ else
     # 生产环境：环境变量必须由 CI/CD 或容器编排系统注入
     log_info "生产环境：使用系统环境变量"
     # 检查必要的环境变量
-    if [ -z "$MYSQL_URL" ]; then
-        log_error "生产环境必须设置 MYSQL_URL 环境变量"
+    if [ -z "$PG_URL" ]; then
+        log_error "生产环境必须设置 PG_URL 环境变量"
         exit 1
     fi
 fi
@@ -150,14 +143,12 @@ if [ "$ENV" = "dev" ]; then
         fi
     }
 
-    MYSQL_HOST="${MYSQL_HOST:-localhost}"
-    MYSQL_PORT="${MYSQL_PORT:-3306}"
+    PG_URL="${PG_URL:-jdbc:postgresql://localhost:5432/eify?stringtype=unspecified}"
     REDIS_HOST="${REDIS_HOST:-localhost}"
     REDIS_PORT="${REDIS_PORT:-6379}"
 
-    check_service "$MYSQL_HOST" "$MYSQL_PORT" "MySQL" "true"
+    check_service "localhost" "5432" "PostgreSQL" "true"
     check_service "$REDIS_HOST" "$REDIS_PORT" "Redis" "true"
-    check_service "${PGVECTOR_HOST:-localhost}" "${PGVECTOR_PORT:-5432}" "PostgreSQL" "false"
     echo ""
 fi
 
