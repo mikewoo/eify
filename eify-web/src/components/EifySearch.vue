@@ -167,12 +167,12 @@ const { t } = useI18n()
 
 /* ========== 类型定义 ========== */
 
-export interface SearchFieldOption {
+interface SearchFieldOption {
   label: string
   value: string | number
 }
 
-export interface SearchField {
+interface SearchField {
   key: string
   label: string
   description?: string
@@ -183,12 +183,12 @@ export interface SearchField {
   enabled?: boolean
 }
 
-export interface SearchOperator {
+interface SearchOperator {
   value: string
   label: string
 }
 
-export interface SearchCondition {
+interface SearchCondition {
   field: string
   fieldLabel: string
   operator: string
@@ -197,7 +197,7 @@ export interface SearchCondition {
   displayValue: string
 }
 
-export interface AdvancedSearchOptions {
+interface AdvancedSearchOptions {
   fields?: SearchField[]
   showShortcut?: boolean
 }

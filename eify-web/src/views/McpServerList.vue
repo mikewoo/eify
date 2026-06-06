@@ -432,8 +432,8 @@ import {
   type DebugToolResponse,
   type McpToolResponse
 } from '@/api/mcp'
-import type { TableColumn } from '@/components/EifyTable.vue'
-import type { SearchCondition } from '@/components/EifySearch.vue'
+import type { TableColumn } from '@/types/eify-table'
+import type { SearchCondition } from '@/types/eify-search'
 import type { ListStat } from '@/types/api'
 
 /* ========== 类型定义 ========== */
@@ -774,7 +774,7 @@ const handleView = async (row: { id: number }) => {
   }
 }
 
-const handleDelete = (row: { id: number; name: string }) => {
+const handleDelete = (row: Record<string, any>) => {
   deleteTarget.value = row
   showDeleteConfirm.value = true
 }

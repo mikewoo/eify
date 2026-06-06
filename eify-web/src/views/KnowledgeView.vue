@@ -296,8 +296,8 @@ import {
   type KnowledgeCreateRequest
 } from '@/api/knowledge'
 import { providerApi, type ProviderResponse, type ModelConfigInfo } from '@/api/provider'
-import type { TableColumn } from '@/components/EifyTable.vue'
-import type { SearchCondition } from '@/components/EifySearch.vue'
+import type { TableColumn } from '@/types/eify-table'
+import type { SearchCondition } from '@/types/eify-search'
 import type { ListStat } from '@/types/api'
 
 const router = useRouter()
@@ -542,7 +542,7 @@ const handleEdit = async (row: Record<string, any>) => {
   dialogRef.value?.open(formData)
 }
 
-const handleDelete = (row: { id: number; name: string }) => {
+const handleDelete = (row: Record<string, any>) => {
   deleteTarget.value = row
   showDeleteConfirm.value = true
 }

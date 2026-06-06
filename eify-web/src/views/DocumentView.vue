@@ -272,7 +272,7 @@ const loadDocuments = async () => {
   loading.value = true
   try {
     const result = await knowledgeApi.getDocuments(knowledgeId.value)
-    documents.value = (result as any).list || result.records || result || []
+    documents.value = ((result as any).list || (result as any).records || result || [])
   } catch (error: any) {
     ElMessage.error(t('document.loadListFailed'))
   } finally {

@@ -147,8 +147,8 @@ import {
   type WorkflowResponse,
   type WorkflowListParams
 } from '@/api/workflow'
-import type { TableColumn } from '@/components/EifyTable.vue'
-import type { SearchCondition } from '@/components/EifySearch.vue'
+import type { TableColumn } from '@/types/eify-table'
+import type { SearchCondition } from '@/types/eify-search'
 
 /* ========== 表格配置 ========== */
 
@@ -296,11 +296,11 @@ const handleAdd = () => {
   router.push('/workflows/create')
 }
 
-const handleEdit = (row: { id: number }) => {
+const handleEdit = (row: Record<string, any>) => {
   router.push(`/workflows/${row.id}/edit`)
 }
 
-const handleDelete = (row: { id: number; name: string }) => {
+const handleDelete = (row: Record<string, any>) => {
   deleteTarget.value = row
   showDeleteConfirm.value = true
 }

@@ -377,8 +377,8 @@ import {
   type ProviderListParams,
   type ConnectionTestResult
 } from '@/api/provider'
-import type { TableColumn } from '@/components/EifyTable.vue'
-import type { SearchCondition } from '@/components/EifySearch.vue'
+import type { TableColumn } from '@/types/eify-table'
+import type { SearchCondition } from '@/types/eify-search'
 import type { ListStat } from '@/types/api'
 
 const { t } = useI18n()
@@ -716,7 +716,7 @@ const handleEdit = async (row: { id: number; name: string; type: string; baseUrl
   } catch { /* ignore */ }
 }
 
-const handleDelete = (row: { id: number; name: string }) => {
+const handleDelete = (row: Record<string, any>) => {
   deleteTarget.value = row
   showDeleteConfirm.value = true
 }
