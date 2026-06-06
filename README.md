@@ -132,8 +132,8 @@ docker-compose -f deploy/infra/deploy/docker-compose.yml up -d
 ### Local Development
 
 ```bash
-# 1. Start dependencies (MySQL + Redis)
-docker-compose -f deploy/infra/deploy/docker-compose.yml up -d mysql redis
+# 1. Start dependencies (PostgreSQL + Redis)
+docker-compose -f deploy/infra/deploy/docker-compose.yml up -d pgvector redis
 
 # 2. Start backend
 ./start.sh dev
@@ -167,9 +167,8 @@ docker-compose -f deploy/optional/docker-compose-jaeger.yml up -d
 |:---|:---|
 | **Backend Framework** | Spring Boot 4.0.6 |
 | **ORM** | MyBatis-Plus 3.5.15 |
-| **Database** | MySQL 8.0 |
+| **Database** | PostgreSQL 17 + pgvector |
 | **Cache** | Redis 7 |
-| **Vector DB** | PostgreSQL 16 + pgvector |
 | **Frontend** | Vue 3.5.17 + TypeScript + Vite |
 | **UI Framework** | Element Plus 2.10.2 |
 | **State Management** | Pinia 2.3.1 |
@@ -204,15 +203,15 @@ eify/
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌──────────────┐
-│   Vue 3     │────▶│  Spring Boot│────▶│   MySQL 8    │
-│   Frontend  │     │  REST API   │     │  Persistence  │
+│   Vue 3     │────▶│  Spring Boot│────▶│ PostgreSQL 17│
+│   Frontend  │     │  REST API   │     │  + pgvector  │
 └─────────────┘     └──────┬──────┘     └──────────────┘
                            │
                ┌───────────┼───────────┐
                │           │           │
                ▼           ▼           ▼
         ┌──────────┐ ┌──────────┐ ┌──────────┐
-        │  Redis   │ │ pgvector │ │ External │
+        │  Redis   │ │ LLM/    │ │ ClickHouse │
         │  Cache   │ │ Vector   │ │ LLM APIs │
         └──────────┘ └──────────┘ └──────────┘
 ```
@@ -231,7 +230,7 @@ eify/
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture & coding conventions |
 | [API-SPEC.md](docs/API-SPEC.md) | API design specification |
 | [AUTH-WORKSPACE.md](docs/guides/AUTH-WORKSPACE.md) | Auth & multi-tenant workspace |
-| [DATABASE.md](docs/guides/DATABASE.md) | Database design (MySQL + ClickHouse) |
+| [DATABASE.md](docs/guides/DATABASE.md) | Database design (PostgreSQL + ClickHouse) |
 | [LOGGING.md](docs/guides/LOGGING.md) | Logging system guide |
 | [WORKFLOW.md](docs/guides/WORKFLOW.md) | Workflow engine design |
 | [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deployment & CI/CD |

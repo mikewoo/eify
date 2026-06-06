@@ -25,7 +25,7 @@ Nginx Ingress (K8s)
                       │
     ┌─────────────────┼─────────────────┐
     ▼                 ▼                  ▼
-MySQL (业务数据)   Redis (缓存)   PostgreSQL + pgvector (向量)
+PostgreSQL 17 (业务+向量)   Redis (缓存)
 ```
 
 应用是模块化单体：`eify-app` 包含 agent / auth / chat / provider / knowledge / workflow / mcp 所有模块。
@@ -59,7 +59,7 @@ Profile 差异（测试 vs 生产）：
 | 维度 | dev | test | staging | prod |
 |:---|:---|:---|:---|:---|
 | DB 连接池 | 30 | 20 | 40 | 50 |
-| Druid 监控 | 开启 | 开启+认证 | 开启+认证 | 关闭 |
+| HikariCP 连接池 | 30 | 20 | 40 | 50 |
 | Flyway repair | 开启 | 开启 | 关闭 | 关闭 |
 | 日志采样 | 100% | 100% | 50% | 1%（SQL）/ 正常（MSG） |
 | 凭据来源 | `.env` 默认值 | K8s Secret | K8s Secret | K8s Secret |
@@ -90,7 +90,7 @@ npx vitest run                    # 单元测试
 ### 全栈开发环境
 
 ```bash
-# 启动（MySQL + Redis + pgvector + 后端 + 前端）
+# 启动（PostgreSQL 17 + Redis + 后端 + 前端）
 docker-compose -f deploy/infra/deploy/docker-compose.yml up -d
 
 # 查看日志
@@ -110,7 +110,7 @@ docker-compose -f deploy/infra/deploy/docker-compose.yml down
 docker-compose -f deploy/infra/deploy/docker-compose-logging.yml up -d
 ```
 
-> 数据库迁移由 Flyway 在应用启动时自动执行，无需手动导入 SQL。MySQL 和 pgvector 各有独立的 Flyway 实例。
+> 数据库迁移由 Flyway 在应用启动时自动执行，无需手动导入 SQL。所有表（业务 + 向量）由单 Flyway 实例管理。
 
 ---
 
@@ -120,7 +120,7 @@ docker-compose -f deploy/infra/deploy/docker-compose-logging.yml up -d
 
 - **平台**：华为云 CCE Turbo（containerd 运行时）
 - **镜像仓库**：华为云 SWR（`swr.cn-south-1.myhuaweicloud.com/eify`）
-- **外部服务**：MySQL / Redis 运行在集群外 VM，通过 ConfigMap 指定地址
+- **外部服务**：PostgreSQL / Redis 运行在集群外 VM，通过 ConfigMap 指定地址
 
 ### 部署清单
 
@@ -144,12 +144,11 @@ kubectl apply -f deploy/k8s/
 
 # 2. 创建 Secret（替换为实际值）
 kubectl create secret generic eify-secret -n eify \
-  --from-literal=MYSQL_USERNAME=root \
-  --from-literal=MYSQL_PASSWORD='...' \
+  --from-literal=PG_USERNAME=postgres \
+  --from-literal=PG_PASSWORD='...' \
   --from-literal=REDIS_PASSWORD='...' \
   --from-literal=JWT_SECRET='...' \
   --from-literal=CRYPTO_KEK='...' \
-  --from-literal=PGVECTOR_PASSWORD='...' \
   --from-literal=EMBEDDING_API_KEY='...'
 
 # 3. 验证
@@ -258,7 +257,7 @@ Git Push (分支或 Tag)
 
 **手动部署**：设置 `ENVIRONMENT` 参数为非 `auto` 值可强制指定部署目标。
 
-**凭据管理**：通过 Jenkins `withCredentials` 注入 SWR 登录凭证和 K8s Secret 值（MySQL/Redis/JWT/CRYPTO/PGVECTOR/Embedding 共 7 项），不在 Jenkinsfile 中硬编码。
+**凭据管理**：通过 Jenkins `withCredentials` 注入 SWR 登录凭证和 K8s Secret 值（PG/Redis/JWT/CRYPTO/Embedding 共 5 项），不在 Jenkinsfile 中硬编码。
 
 > **构建环境**：Jenkins 运行在 Docker VM 上，通过 `docker.sock` 挂载使用宿主机 Docker daemon。若 Jenkins 运行在 containerd 环境（CCE 集群），需改用 Kaniko 构建镜像。
 
@@ -353,8 +352,8 @@ kubectl logs deployment/eify-backend -n eify | grep -i flyway
 |:---|:---|:---|
 | `JWT_SECRET` | JWT 签名密钥（≥32 字节） | prod 必须 |
 | `CRYPTO_KEK` | API Key 加密密钥（AES-256-GCM） | prod 必须 |
-| `MYSQL_HOST` / `MYSQL_PORT` / `MYSQL_PASSWORD` | MySQL 连接 | 是 |
+| `PG_URL` | PostgreSQL 17 JDBC URL | 是 |
+| `PG_USERNAME` / `PG_PASSWORD` | PostgreSQL 认证 | 是 |
 | `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` | Redis 连接 | 是 |
-| `PGVECTOR_HOST` / `PGVECTOR_PORT` / `PGVECTOR_PASSWORD` | PostgreSQL 连接 | 是 |
 | `EMBEDDING_API_KEY` | Embedding API 密钥 | 是 |
 | `CLICKHOUSE_HOST` / `CLICKHOUSE_PASSWORD` | 日志存储 | 否（可选） |

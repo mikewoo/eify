@@ -25,7 +25,7 @@
 | 层级 | 技术选型 |
 |:---|:---|
 | **后端** | Spring Boot 4.0.6 + MyBatis-Plus 3.5.15 |
-| **数据库** | MySQL 8.0 + Redis 7 |
+| **数据库** | PostgreSQL 17 + Redis 7 |
 | **前端** | Vue 3 + TypeScript + Element Plus |
 | **容器化** | Docker + Docker Compose |
 | **监控** | Micrometer Tracing + Brave + ClickHouse + Vector |

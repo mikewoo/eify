@@ -32,7 +32,7 @@
 - 工作流引擎：可视化编排，支持 LLM/API/ToolCall/条件分支/开始/结束节点
 - 多工作空间多租户架构：JWT 认证 + 工作空间级数据隔离
 - 完整日志系统：纯 JSON 格式（UTC）、ClickHouse + Vector 采集、OpenTelemetry 链路追踪
-- Docker 全栈部署：MySQL + Redis + pgvector + ClickHouse + Vector
+- Docker 全栈部署：PostgreSQL 17 + Redis + ClickHouse + Vector
 - CI/CD：GitHub Actions 自动化测试与构建 + Jenkins CD 部署流水线
 
 ---

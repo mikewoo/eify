@@ -14,7 +14,7 @@ cp .env.example .env
 # 编辑 .env 填入本地配置
 
 # 3. 启动依赖服务
-docker-compose -f deploy/infra/deploy/docker-compose.yml up -d mysql redis
+docker-compose -f deploy/infra/deploy/docker-compose.yml up -d pgvector redis
 
 # 4. 启动后端
 mvn spring-boot:run -pl eify-app -Dspring-boot.run.profiles=dev
@@ -72,7 +72,7 @@ mvn test
 mvn test -pl eify-workflow
 ```
 
-CI 通过 GitHub Actions Service Container 提供 MySQL 8.0 测试数据库，CD 部署由 Jenkins 流水线完成。本地测试也可通过 `application-test.yml` 配置连接本地数据库。
+CI 通过 GitHub Actions Service Container 提供 PostgreSQL 17 测试数据库，CD 部署由 Jenkins 流水线完成。本地测试也可通过 `application-test.yml` 配置连接本地数据库。
 
 ## Issue 规范
 
