@@ -5,8 +5,9 @@ spring:
   application:
     name: eify
 
-  # @ServiceConnection 会自动注入 Testcontainers PG 容器的连接参数（url/username/password）
-  # 这里不需要手填 datasource，@ServiceConnection 优先覆盖
+  # @ServiceConnection 自动注入容器连接（url/username/password），但 driver 需显式指定
+  datasource:
+    driver-class-name: org.postgresql.Driver
 
   sql:
     init:
